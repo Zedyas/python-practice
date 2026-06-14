@@ -417,7 +417,15 @@ df = pd.DataFrame(parts)
 print(df.shape)      # (3, 4)
 print(df.columns.tolist())
 print(df.dtypes)
-df.head()</code></pre>
+df.head()
+
+# df.shape   → (3, 4)
+# df.dtypes  → sku, name: object · price: float64 · stock: int64
+# df.head() →
+#        sku        name  price  stock
+# 0  CMP-100  Compressor  489.0     12
+# 1  FAN-220   Fan Motor   75.5      0
+# 2  THR-310  Thermostat   32.0     41</code></pre>
       <p class="note"><strong>Why it matters:</strong> <code>shape</code> / <code>dtypes</code> / <code>head()</code> is the first thing you should do with any unfamiliar data — say that out loud in the interview.</p>
       </div></details>
     </div>
@@ -446,7 +454,14 @@ df = pd.read_csv('data/parts.csv')</code></pre>
       <pre><code>import pandas as pd
 
 df = pd.read_csv('data/parts.csv')
-result = df.loc[(df['price'] &gt; 100) &amp; (df['stock'] &gt; 0), ['sku', 'price']]</code></pre>
+result = df.loc[(df['price'] &gt; 100) &amp; (df['stock'] &gt; 0), ['sku', 'price']]
+
+# result → (original index preserved)
+#        sku  price
+# 0  CMP-100  489.0
+# 4  VAL-500  155.0
+# 6  BRD-720  220.0
+# 7  MTR-830  310.0</code></pre>
       <p class="note"><strong>Gotcha:</strong> use <code>&amp;</code> / <code>|</code> (not <code>and</code> / <code>or</code>) and wrap each condition in parentheses — operator precedence bites otherwise.</p>
       </div></details>
     </div>
@@ -475,7 +490,15 @@ df = pd.read_csv('data/parts.csv')</code></pre>
       <pre><code>import pandas as pd
 
 df = pd.read_csv('data/parts.csv')
-df['margin_pct'] = ((df['price'] - df['cost']) / df['price']).round(2)</code></pre>
+df['margin_pct'] = ((df['price'] - df['cost']) / df['price']).round(2)
+
+# df[['sku', 'margin_pct']].head() →
+#        sku  margin_pct
+# 0  CMP-100        0.37
+# 1  FAN-220        0.44
+# 2  THR-310        0.42
+# 3  FLT-410        0.62
+# 4  VAL-500        0.41</code></pre>
       <p class="note"><strong>Note:</strong> vectorized column math — no loops, no <code>apply</code>. Mention that <code>apply</code> with a Python function would be ~100x slower here.</p>
       </div></details>
     </div>
@@ -505,7 +528,10 @@ df = pd.read_csv('data/parts.csv')</code></pre>
 
 df = pd.read_csv('data/parts.csv')
 counts = df['category'].value_counts()
-share = df['category'].value_counts(normalize=True).mul(100).round(1)</code></pre>
+share = df['category'].value_counts(normalize=True).mul(100).round(1)
+
+# counts →    HVAC 5 · Controls 2 · Consumables 2 · Electronics 1
+# share (%) → HVAC 50.0 · Controls 20.0 · Consumables 20.0 · Electronics 10.0</code></pre>
       <p class="note"><strong>Tip:</strong> <code>value_counts(normalize=True)</code> is the one-liner most people forget; it sorts descending by default.</p>
       </div></details>
     </div>
@@ -537,7 +563,15 @@ df = pd.read_csv('data/parts_sync.csv')
 null_report = df.isna().sum()
 
 df = df.dropna(subset=['sku'])
-df['warehouse'] = df['warehouse'].fillna('UNASSIGNED')</code></pre>
+df['warehouse'] = df['warehouse'].fillna('UNASSIGNED')
+
+# null_report → sku: 1, warehouse: 2  (all other columns 0)
+# after cleanup (row with no sku dropped, warehouse NaNs filled) →
+#        sku   warehouse
+# 0  CMP-100         CHI
+# 2  THR-310  UNASSIGNED
+# 3  FLT-410         SEA
+# 4  VAL-500  UNASSIGNED</code></pre>
       <p class="note"><strong>Why it matters:</strong> dropping vs. filling is a judgment call — drop when the row is unusable without the field (a part with no SKU), fill when a sane default exists. Say which and why.</p>
       </div></details>
     </div>
@@ -571,7 +605,13 @@ summary = (
       .agg(total_stock=('stock', 'sum'),
            avg_price=('price', 'mean'))
       .reset_index()
-)</code></pre>
+)
+
+# summary →
+#   warehouse  total_stock   avg_price
+# 0       CHI           24  220.625000
+# 1       DAL           49  165.666667
+# 2       SEA          355   25.000000</code></pre>
       <p class="note"><strong>Tip:</strong> named aggregation (<code>agg(name=(col, fn))</code>) avoids the multi-level column headache. <code>reset_index()</code> keeps it flat for export.</p>
       </div></details>
     </div>
@@ -609,7 +649,17 @@ daily = (
           .resample('D')
           .size()
           .rename('orders')
-)</code></pre>
+)
+
+# daily → (as of 2026-06-14, so the window is 06-07 onward)
+# created_at
+# 2026-06-08    2
+# 2026-06-09    1
+# 2026-06-10    1
+# 2026-06-11    1
+# 2026-06-12    2
+# 2026-06-13    2
+# Freq: D, Name: orders</code></pre>
       <p class="note"><strong>Gotcha:</strong> comparing tz-aware and tz-naive timestamps raises a <code>TypeError</code> — pass <code>utc=True</code> when parsing and use a tz-aware "now".</p>
       </div></details>
     </div>
@@ -644,7 +694,11 @@ parts = pd.read_csv('data/parts.csv')
 merged = orders.merge(parts, on='sku', how='left', indicator=True)
 
 orphans = merged[merged['_merge'] == 'left_only']
-merged = merged.drop(columns='_merge')</code></pre>
+merged = merged.drop(columns='_merge')
+
+# orphans[['order_id', 'sku']] → the one order whose sku isn't in the catalog
+#   order_id       sku
+# 7   O-1008  NOPE-999</code></pre>
       <p class="note"><strong>Tip:</strong> <code>indicator=True</code> adds a <code>_merge</code> column (<code>both</code> / <code>left_only</code> / <code>right_only</code>) — the fastest way to audit join coverage. Orphan rows usually mean a stale dimension or a bad upstream sync.</p>
       </div></details>
     </div>
@@ -678,7 +732,14 @@ matrix = df.pivot_table(
     columns='priority',
     values='fulfillment_hours',
     aggfunc='mean',
-).round(1)</code></pre>
+).round(1)
+
+# matrix → (CHI/rush is 4.85, which rounds to 4.8 under banker's rounding)
+# priority   rush  standard
+# warehouse
+# CHI         4.8      18.4
+# DAL         7.1      22.0
+# SEA         9.1      23.9</code></pre>
       <p class="note"><strong>Note:</strong> <code>pivot_table</code> aggregates duplicates; plain <code>pivot</code> raises on them. Add <code>fill_value=0</code> if missing combinations should read as zero rather than NaN.</p>
       </div></details>
     </div>
@@ -711,7 +772,18 @@ top3 = (
     df.sort_values('revenue', ascending=False)
       .groupby('category')
       .head(3)
-)</code></pre>
+)
+
+# top3 → rows stay in global revenue-desc order; ≤3 per category (8 rows total)
+#       category      sku  revenue
+# 0         HVAC  CMP-100  84250.0
+# 1         HVAC  MTR-830  62100.0
+# 7  Electronics  BRD-720  45600.0
+# 2         HVAC  VAL-500  33800.0
+# 5     Controls  SNS-610  27400.0
+# 6     Controls  THR-310  19300.0
+# 8  Consumables  FLT-410  12750.0
+# 9  Consumables  GSK-940   9200.0</code></pre>
       <p class="note"><strong>Why it works:</strong> <code>groupby().head(n)</code> keeps the first n rows per group <em>in current order</em>, so sorting first does the trick. Alternative: <code>df.groupby('category').apply(lambda g: g.nlargest(3, 'revenue'))</code> — slower but explicit.</p>
       </div></details>
     </div>
@@ -745,7 +817,13 @@ out = df.copy()
 out['updated_at'] = out['updated_at'].dt.strftime('%Y-%m-%dT%H:%M:%SZ')
 out = out.replace({np.nan: None})
 
-records = out.to_dict(orient='records')</code></pre>
+records = out.to_dict(orient='records')
+
+# records[0] →
+# {'sku': 'CMP-100', 'name': 'Compressor', 'category': 'HVAC',
+#  'price': 489.0, 'updated_at': '2026-06-10T12:00:00Z', 'warehouse': 'CHI'}
+# Blank source cells become None, not NaN: records[1]['warehouse'] is None,
+# and FLT-410's empty category is None — both safe for strict json.dumps.</code></pre>
       <p class="note"><strong>Gotcha:</strong> NaN is valid in pandas but invalid in strict JSON, and <code>Timestamp</code> isn't serializable at all. Converting <em>before</em> <code>to_dict</code> keeps the API layer dumb and safe. (<code>df.to_json(orient='records')</code> handles much of this too — worth mentioning.)</p>
       </div></details>
     </div>
@@ -793,7 +871,10 @@ def validate_parts(df, required=('sku', 'name', 'price')):
 
     return issues
 
-issues = validate_parts(df)</code></pre>
+issues = validate_parts(df)
+
+# issues → ["1 duplicate skus, e.g. ['CMP-100']", '1 rows with negative price']
+# (empty list [] would mean the data passed every check)</code></pre>
       <p class="note"><strong>Why it matters:</strong> returning a list of issues (instead of raising on the first) gives a usable data-quality report — exactly what you'd log before a pipeline publishes output.</p>
       </div></details>
     </div>
@@ -846,7 +927,20 @@ report = demand.merge(
 report['missing_inventory'] = report['_merge'].eq('left_only')
 report['on_hand'] = report['on_hand'].fillna(0)
 report['shortage_qty'] = (report['total_demand'] - report['on_hand']).clip(lower=0)
-report = report.drop(columns='_merge')</code></pre>
+report = report.drop(columns='_merge')
+
+# report → (as of 2026-06-14; demand window = last 30 days)
+#         sku  total_demand  on_hand  missing_inventory  shortage_qty
+# 0   BRD-720             3      1.0              False           2.0
+# 1   CMP-100             2      3.0              False           0.0
+# 2   FAN-220             5     20.0              False           0.0
+# 3   GSK-940            50     75.0              False           0.0
+# 4   MTR-830             4      0.0               True           4.0
+# 5  NOPE-999             1      0.0               True           1.0
+# 6   SNS-610             8     12.0              False           0.0
+# 7   THR-310            12     10.0              False           2.0
+# 8   VAL-500             4      2.0              False           2.0
+# Note MTR-830 / NOPE-999: missing from inventory → flagged, on_hand 0.</code></pre>
       <p class="note"><strong>Interview angle:</strong> this combines time filtering, aggregation, join validation, and data-quality signaling. Call out that missing inventory should be visible, not silently treated as normal zero stock.</p>
       </div></details>
     </div>
@@ -898,7 +992,18 @@ days = pd.date_range(events['day'].min(), events['day'].max(), freq='D', tz='UTC
 warehouses = events['warehouse'].drop_duplicates()
 full_index = pd.MultiIndex.from_product([warehouses, days], names=['warehouse', 'day'])
 daily = daily.set_index(['warehouse', 'day']).reindex(full_index).reset_index()
-daily[['completed_jobs', 'failed_jobs']] = daily[['completed_jobs', 'failed_jobs']].fillna(0).astype(int)</code></pre>
+daily[['completed_jobs', 'failed_jobs']] = daily[['completed_jobs', 'failed_jobs']].fillna(0).astype(int)
+
+# daily.head(8) → reindexing adds no-event days with 0 counts and NaN metrics
+#   warehouse         day        completed_jobs  failed_jobs  avg_minutes  p95_minutes
+# 0       CHI  2026-06-08 00:00+00:00            1            1         18.0         18.0
+# 1       CHI  2026-06-09 00:00+00:00            0            0          NaN          NaN
+# 2       CHI  2026-06-10 00:00+00:00            1            0         42.0         42.0
+# 3       CHI  2026-06-11 00:00+00:00            0            0          NaN          NaN
+# 4       CHI  2026-06-12 00:00+00:00            1            0         35.0         35.0
+# 5       CHI  2026-06-13 00:00+00:00            0            0          NaN          NaN
+# 6       DAL  2026-06-08 00:00+00:00            1            0         25.0         25.0
+# 7       DAL  2026-06-09 00:00+00:00            0            1          NaN          NaN</code></pre>
       <p class="note"><strong>Follow-up:</strong> p95 over tiny samples can be noisy. A strong answer mentions minimum sample sizes and alerting on both failure rate and latency.</p>
       </div></details>
     </div>
