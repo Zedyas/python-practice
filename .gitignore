@@ -1,1 +1,5 @@
 .DS_Store
+
+data-engineer-practice/*
+!data-engineer-practice/das42/
+!data-engineer-practice/das42/**

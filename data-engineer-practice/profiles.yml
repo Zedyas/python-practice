@@ -1,7 +1,0 @@
-sales_mart:
-  target: dev
-  outputs:
-    dev:
-      type: duckdb
-      path: warehouse.duckdb
-      schema: analytics
