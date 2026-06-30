@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 0005 — The grain</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+<script src="../assets/quiz.js"></script>
+</head>
+<body id="top">
+
+<header class="hero">
+  <div class="hero-inner">
+    <p class="eyebrow">Eigenbasis Lab · Lesson 0005 · Transform on-ramp · the load-bearing word</p>
+    <h1 class="title">The <em>grain</em> — what one row means</h1>
+    <p class="lede">Before any star schema, any <code>SUM</code>, any dbt model: name what one row represents. Get the grain wrong and every number downstream is wrong. We'll use healthcare claims, because claims data has a built-in multi-level grain that catches everyone.</p>
+    <div class="crosslinks">
+      <a class="alt" href="0004-store-vocab.html">← Lesson 0004</a>
+      <a class="alt" href="../reference/01-glossary.html#bedrock">Glossary · grain</a>
+      <a class="alt" href="../reference/00-the-spine.html">Spine one-pager</a>
+      <a href="#practice">Jump to practice</a>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+<main>
+
+  <div class="win">
+    <span class="k">The win</span>
+    <p>State the grain of any table as <em>"one row = one ______"</em>; read the claims grain hierarchy and the double-count trap that comes from mixing grains; and connect it to the thing it actually builds — <strong>a fact table is just measures recorded at one declared grain, surrounded by the dimensions that describe it.</strong></p>
+  </div>
+
+  <!-- 1 -->
+  <section class="blk" id="def">
+    <h2><span class="num">01</span>What grain is <span class="spot flow">Bedrock → Transform</span></h2>
+    <p><strong>Definition:</strong> the <em>grain</em> of a table is what a single row represents — its level of detail. You declare it by finishing one sentence:</p>
+    <pre><code>one row = one ______</code></pre>
+    <p>"Member-level" and "claim-level" are the everyday way of saying it, and they're correct — but always pin them to the <em>"one row per ___"</em> form, because that's what removes ambiguity:</p>
+    <ul>
+      <li><strong>Member-level</strong> → "one row per member"</li>
+      <li><strong>Claim-level</strong> → "one row per claim"</li>
+    </ul>
+    <div class="note warn"><span class="tag">Why insist on the phrasing</span>"Claim-level" is <em>ambiguous</em> in real claims data — a claim is a header with service lines underneath it, so "claim-level" could mean one row per <em>claim</em> or one row per <em>line</em>. That ambiguity is exactly where the bugs live. The "one row per ___" form forces you to say which.</div>
+  </section>
+
+  <!-- 2 -->
+  <section class="blk" id="hier">
+    <h2><span class="num">02</span>The claims grain hierarchy <span class="spot flow">Transform</span></h2>
+    <p>A healthcare claim isn't one thing — it's a <strong>header</strong> with <strong>lines</strong> beneath it. So "claims data" actually spans several grains, and each belongs in its own table:</p>
+    <table>
+      <thead>
+        <tr><th>Table</th><th>Grain — "one row per…"</th><th>Unique key</th><th>What lives here</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Member / eligibility</td><td>one <strong>member</strong> (per enrollment span)</td><td><code>member_id</code> (+ span)</td><td>name, DOB, plan, PCP — a <em>dimension</em></td></tr>
+        <tr><td>Claim header</td><td>one <strong>claim</strong></td><td><code>claim_id</code></td><td>submitted/paid date, billing provider, <strong>claim_total</strong></td></tr>
+        <tr><td>Claim line</td><td>one <strong>service line</strong> on a claim</td><td><code>(claim_id, line_no)</code></td><td>one CPT/procedure, units, <strong>line_amount</strong></td></tr>
+        <tr><td>Member-month</td><td>one <strong>member per month</strong></td><td><code>(member_id, month)</code></td><td>a <em>rolled-up</em> summary grain (PMPM metrics)</td></tr>
+      </tbody>
+    </table>
+    <p>So "claim-level" splits into <strong>claim-header grain</strong> (one row per claim) and <strong>claim-line grain</strong> (one row per procedure on the claim). A claim with an office visit + a lab + an x-ray is <strong>1 header row and 3 line rows.</strong></p>
+  </section>
+
+  <!-- 3 -->
+  <section class="blk" id="trap">
+    <h2><span class="num">03</span>The double-count trap <span class="spot">Quality · the #1 grain bug</span></h2>
+    <p>This is the bug that makes grain matter, and it's the thing an interviewer is testing when they ask "what's the grain?". Take claim <strong>C-100</strong>, member M-1, three lines at $150 each → <strong>claim_total $450</strong>.</p>
+    <pre><code><span class="c">-- claim_header: one row per CLAIM        claim_line: one row per SERVICE LINE
+--   C-100  M-1  $450   (1 row)             C-100  line 1  $150
+--                                          C-100  line 2  $150
+--                                          C-100  line 3  $150</span>
+
+<span class="c">-- CORRECT — sum each measure at its own grain</span>
+<span class="k">SELECT</span> <span class="f">sum</span>(line_amount) <span class="k">FROM</span> claim_line   <span class="k">WHERE</span> claim_id=<span class="s">'C-100'</span>;   <span class="c">-- 450</span>
+<span class="k">SELECT</span> <span class="f">sum</span>(claim_total) <span class="k">FROM</span> claim_header <span class="k">WHERE</span> claim_id=<span class="s">'C-100'</span>;   <span class="c">-- 450</span>
+
+<span class="c">-- BUG — header amount stamped onto every line by the join, then summed</span>
+<span class="k">SELECT</span> <span class="f">sum</span>(h.claim_total)
+<span class="k">FROM</span> claim_header h <span class="k">JOIN</span> claim_line l <span class="k">USING</span> (claim_id)
+<span class="k">WHERE</span> h.claim_id=<span class="s">'C-100'</span>;                                <span class="c">-- 1350  ← 450 × 3 lines!</span></code></pre>
+    <p>Joining a header (1 row) to its lines (N rows) is a <em class="term">fan-out</em>: it multiplies any header-level amount by N. That gives you the rule the whole lesson hangs on:</p>
+    <div class="note warn"><span class="tag">The rule</span>A table holds <strong>one grain</strong>, and every measure in it must be true <em>at that grain</em>. <code>claim_total</code> is true at claim grain, not line grain — so it must not live on the line rows. <strong>Mixing grains in one table is the cardinal sin.</strong> When you must combine them, aggregate to a common grain <em>before</em> you sum.</div>
+  </section>
+
+  <!-- 4 -->
+  <section class="blk" id="key">
+    <h2><span class="num">04</span>The grain <em>is</em> the primary key <span class="spot flow">Transform</span></h2>
+    <p>The grain and the unique key are the same statement said two ways. Claim-line grain → the key is <code>(claim_id, line_no)</code>. This gives you a sharp diagnostic:</p>
+    <div class="note"><span class="tag">Diagnostic</span>If you believe a table is claim-grain but two rows share a <code>claim_id</code>, your <em>real</em> grain is finer than you thought. Test it: <code>count(*)</code> vs <code>count(DISTINCT claim_id)</code>. If they differ, <code>claim_id</code> is not the grain — and any join or <code>SUM</code> that assumed it was is already wrong.</div>
+    <p>So "what's the grain?" and "what column(s) make a row unique?" are one question. If you can't answer it, you don't understand the table yet.</p>
+  </section>
+
+  <!-- 5 -->
+  <section class="blk" id="atomic">
+    <h2><span class="num">05</span>Build at the <em>atomic</em> grain <span class="spot flow">Transform</span></h2>
+    <p>The <em class="term">atomic grain</em> is the finest level your source supports — here, the <strong>claim line</strong>. Model your facts there, and aggregate <em>up</em> when you need to (line → claim → member-month).</p>
+    <p>The reason is one-directional: <strong>you can always roll up, never split back down.</strong> Store at line grain and you can still answer claim totals, member totals, PMPM, per-procedure spend. Pre-aggregate to member-month and the procedure detail is gone forever — you've thrown away every question you didn't anticipate.</p>
+    <div class="note"><span class="tag">Interview line</span>"I model facts at the atomic grain — the finest the source gives me — because aggregation is one-way: I can always roll detail up, but I can never recover detail I pre-summed away."</div>
+  </section>
+
+  <!-- 6 -->
+  <section class="blk" id="facts">
+    <h2><span class="num">06</span>Bringing it back to fact tables <span class="spot flow">Transform · the payoff</span></h2>
+    <p>Here's where grain stops being trivia and becomes the backbone of dimensional modeling. <strong>A fact table is nothing but measures recorded at one declared grain, surrounded by the dimensions that describe that grain.</strong> Unpack that sentence:</p>
+
+    <h3>The fact table = the grain, made concrete</h3>
+    <p>Our claim-line fact, <code>fct_claim_line</code>, <em>is</em> the sentence "one row per service line":</p>
+    <pre><code><span class="c">-- fct_claim_line  ·  grain: one row per service line</span>
+claim_id, line_no            <span class="c">-- the grain / primary key</span>
+member_key, provider_key,    <span class="c">-- foreign keys → dimensions</span>
+date_key, plan_key, cpt_key
+line_amount, allowed_amt,    <span class="c">-- the measures (facts)</span>
+paid_amt, units</code></pre>
+    <p>Two kinds of columns, and grain decides both: the <strong>keys</strong> (what identifies and describes a row) and the <strong>measures</strong> (the numbers you aggregate).</p>
+
+    <h3>Dimensions describe the grain</h3>
+    <p>Every foreign key points to a <em class="term">dimension</em> — a table at <strong>one-row-per-entity</strong> grain that gives the row its context: <code>dim_member</code> (one per member), <code>dim_date</code> (one per day), <code>dim_provider</code>, <code>dim_cpt</code> (one per procedure code). A central fact surrounded by these dimension tables is a <em class="term">star schema</em> — and the grain of the fact is the star's defining statement.</p>
+    <div class="note warn"><span class="tag">Grain decides which dims can attach</span>A dimension can join to a fact only if it's meaningful <em>at or above</em> the fact's grain. <code>dim_cpt</code> attaches to <code>fct_claim_line</code> (each line has exactly one procedure) — but it could <em>not</em> attach to a claim-header fact, because a claim has many procedures and "the CPT of a claim" isn't a single value. Push to a finer fact and more dimensions become attachable. That's another reason to model atomic.</div>
+
+    <h3>Measures must be additive at the grain</h3>
+    <p>The double-count trap from §03 is really a statement about measures. A measure is <em class="term">additive</em> if summing it across <em>every</em> dimension is meaningful at the fact's grain:</p>
+    <ul>
+      <li><strong>Additive</strong> — <code>paid_amt</code>, <code>line_amount</code>: sum across member, date, provider, procedure — all valid. The well-behaved case.</li>
+      <li><strong>Semi-additive</strong> — a balance or a <code>member_months</code> count: additive across some dimensions but not time (you sum enrollment <em>across members</em>, but summing a month-end balance <em>across months</em> is nonsense — you average or take period-end).</li>
+      <li><strong>Non-additive</strong> — a ratio or rate (<code>paid_per_visit</code>): never sum it; recompute it from its additive parts at the grain you want.</li>
+    </ul>
+    <p>And <code>claim_total</code> on a line row? <strong>Non-additive at line grain</strong> — which is the §03 bug stated in dimensional-modeling language.</p>
+
+    <h3>The three fact-table shapes — each a grain choice</h3>
+    <p>Kimball's three fact types are really three answers to "what's the grain?":</p>
+    <table>
+      <thead><tr><th>Fact type</th><th>Grain</th><th>Claims example</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Transaction</strong></td><td>one row per <em>event</em></td><td><code>fct_claim_line</code> — one row per service line. Finest, most common.</td></tr>
+        <tr><td><strong>Periodic snapshot</strong></td><td>one row per <em>entity per period</em></td><td><code>fct_member_month</code> — one row per member per month (PMPM, enrollment).</td></tr>
+        <tr><td><strong>Accumulating snapshot</strong></td><td>one row per <em>process instance</em>, updated over its life</td><td><code>fct_claim_lifecycle</code> — one row per claim, with milestone dates (submitted → adjudicated → paid) filled in as it moves.</td></tr>
+      </tbody>
+    </table>
+    <div class="note"><span class="tag">The throughline</span>Kimball's 4-step design is: (1) pick the business process, (2) <strong>declare the grain</strong>, (3) choose the dimensions, (4) choose the facts. Step 2 is load-bearing — steps 3 and 4 are <em>only answerable once the grain is fixed</em>. That's why "what's the grain?" is the first question you ask of any fact table.</div>
+  </section>
+
+  <!-- PRACTICE -->
+  <section class="blk" id="practice">
+    <h2><span class="num">07</span>Practice — say it before you flip</h2>
+
+    <div class="recall">
+      <p class="q">Define grain in the one form that removes ambiguity.</p>
+      <div class="a">"One row = one ______." Finish the sentence and you've declared the grain (e.g. "one row per service line").</div>
+    </div>
+    <div class="recall">
+      <p class="q">A claim has 3 service lines. How many rows at header grain vs line grain?</p>
+      <div class="a">1 row at claim-header grain; 3 rows at claim-line grain. Header = one per claim, line = one per procedure on the claim.</div>
+    </div>
+    <div class="recall">
+      <p class="q">Why does <code>SUM(claim_total)</code> over a header-joined-to-lines query inflate?</p>
+      <div class="a">Fan-out: the join repeats the header's $450 on each of the 3 lines, so the sum becomes 450×3 = 1350. claim_total is non-additive at line grain.</div>
+    </div>
+    <div class="recall">
+      <p class="q">Why model at the atomic grain?</p>
+      <div class="a">Aggregation is one-way — you can roll detail up but never recover detail you pre-summed away. The atomic grain preserves every future question.</div>
+    </div>
+    <div class="recall">
+      <p class="q">In one sentence, what is a fact table?</p>
+      <div class="a">Measures recorded at one declared grain, surrounded by the dimension tables that describe that grain (a star schema).</div>
+    </div>
+
+    <h3>Choose</h3>
+    <div class="mcq" data-explain="count(*) ≠ count(DISTINCT claim_id) means claim_id isn't unique — the real grain is finer (the line).">
+      <p class="q">You expect claim grain, but <code>count(*)</code> = 4 and <code>count(DISTINCT claim_id)</code> = 2. What's true?</p>
+      <button data-correct>The real grain is finer than claim</button>
+      <button>The table is correctly claim-grain</button>
+      <button>claim_id should be the foreign key</button>
+      <button>The measures are all additive</button>
+    </div>
+    <div class="mcq" data-explain="A ratio is non-additive — recompute it from additive parts (paid, visits) at the grain you want; never sum it.">
+      <p class="q">Which measure must never be summed across rows?</p>
+      <button>paid_amount</button>
+      <button>line_amount</button>
+      <button data-correct>paid_per_visit (a ratio)</button>
+      <button>units</button>
+    </div>
+    <div class="mcq" data-explain="dim_cpt attaches to the line fact (one procedure per line); it can't attach to a claim-header fact, where a claim has many procedures.">
+      <p class="q">Why can <code>dim_cpt</code> join to <code>fct_claim_line</code> but not to a claim-header fact?</p>
+      <button>CPT codes aren't a real dimension</button>
+      <button data-correct>A claim has many procedures; a line has exactly one</button>
+      <button>Header facts can't have foreign keys</button>
+      <button>CPT is a measure, not a dimension</button>
+    </div>
+
+    <div class="teacher"><span class="tag">Your teacher</span>Push on it: "is member-month a fact or a dimension?", "what's the grain of a bridge table?", "how does SCD2 change a dimension's grain?" — all fair game before we open the Transform vocab proper.</div>
+  </section>
+
+  <section class="blk" id="next">
+    <h2><span class="num">→</span>What's next (pipeline order)</h2>
+    <p>Source → Ingest → Store ✓ → <strong>Transform</strong> (now on-ramped via the grain). Next stop:</p>
+    <ul>
+      <li><strong>Transform vocab:</strong> materializations (view / table / incremental / ephemeral), star vs snowflake, fact &amp; dimension <em>types</em>, conformed / role-playing / degenerate dimensions — the dbt + Kimball words interviewers push hardest on. Grain is the hook the whole lesson hangs from.</li>
+    </ul>
+    <p>Say "next" for Transform vocab, or keep the floor open.</p>
+  </section>
+
+</main>
+</div>
+
+<footer>
+  <div class="wrap">
+    <p><strong>Lesson 0005 · The grain</strong> — Eigenbasis Lab. Double-count example verified in DuckDB v1.5 on an inline claims fixture (header $450 = 3×$150 lines; fan-out sum = $1350).
+    <a href="0004-store-vocab.html">← 0004</a> · <a href="../reference/01-glossary.html">Glossary</a> · <a href="../reference/00-the-spine.html">Spine</a>.</p>
+  </div>
+</footer>
+
+</body>
+</html>

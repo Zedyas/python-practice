@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 0003 — Bedrock Vocab</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+<script src="../assets/quiz.js"></script>
+</head>
+<body id="top">
+
+<header class="hero">
+  <div class="hero-inner">
+    <p class="eyebrow">Eigenbasis Lab · Lesson 0003 · Vocab series (1/—) · pipeline order</p>
+    <h1 class="title">The <em>Bedrock</em> — six words the whole stack assumes</h1>
+    <p class="lede">We're walking the pipeline in order, and it starts before Ingest — with the foundations every later area quietly takes for granted. Get these six and Store, Transform, and Migration stop feeling arbitrary.</p>
+    <div class="crosslinks">
+      <a class="alt" href="0002-five-words.html">← Lesson 0002</a>
+      <a class="alt" href="../reference/01-glossary.html">Master Glossary</a>
+      <a class="alt" href="../reference/00-the-spine.html">Spine one-pager</a>
+      <a href="#practice">Jump to practice</a>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+<main>
+
+  <div class="win">
+    <span class="k">The win</span>
+    <p>One sentence each for <strong>OLTP vs OLAP, row vs columnar, normalization, ACID, the grain, surrogate key</strong> — plus the single thread that links them: <em>a database built to record the business is the wrong shape to analyze it.</em></p>
+  </div>
+
+  <!-- 1 -->
+  <section class="blk" id="oltp">
+    <h2><span class="num">01</span>OLTP vs OLAP <span class="spot">Source ↔ Store</span></h2>
+    <p><strong>OLTP</strong> (Online <em>Transaction</em> Processing) = the database running the business: many tiny reads/writes — place an order, update a balance. <strong>OLAP</strong> (Online <em>Analytical</em> Processing) = the system answering questions about the business: few huge scans — "revenue by state this quarter."</p>
+    <p>This is the master distinction. Almost every other word here exists because <strong>these two have opposite needs</strong>:</p>
+    <div class="tw"><table>
+      <thead><tr><th></th><th>OLTP (your Postgres source)</th><th>OLAP (your warehouse)</th></tr></thead>
+      <tbody>
+        <tr><td>Optimized for</td><td>fast writes, single-row lookups</td><td>fast scans, big aggregations</td></tr>
+        <tr><td>Layout</td><td>row-oriented</td><td>columnar</td></tr>
+        <tr><td>Shape</td><td>normalized (many thin tables)</td><td>denormalized (few wide tables)</td></tr>
+        <tr><td>Example</td><td>"insert this order"</td><td>"sum revenue by month"</td></tr>
+      </tbody>
+    </table></div>
+    <div class="note"><span class="tag">Why it matters</span>The whole pipeline exists to move data <em>from</em> the OLTP shape (good for recording) <em>to</em> the OLAP shape (good for analyzing). Ingest + Transform are that reshaping.</div>
+  </section>
+
+  <!-- 2 -->
+  <section class="blk" id="rowcol">
+    <h2><span class="num">02</span>Row-oriented vs columnar <span class="spot">Store</span></h2>
+    <p>This is the <em>physical</em> reason OLTP and OLAP differ. It's just <strong>how bytes sit on disk</strong>:</p>
+    <ul>
+      <li><strong>Row-oriented:</strong> all of one row's columns stored together. To read/update a whole record, grab one place. <span class="term">Perfect for OLTP.</span></li>
+      <li><strong>Columnar:</strong> all of one column's values stored together. To <code>sum(revenue)</code> over 100M rows, read <em>only</em> the revenue column — and since neighbouring values are similar, it compresses brutally well. <span class="term">Perfect for OLAP.</span></li>
+    </ul>
+    <pre><code><span class="c">-- "sum revenue" touches ONE column. Columnar reads just that column's
+-- bytes and skips the other 40. Row storage would read every full row.</span>
+<span class="k">SELECT</span> sum(qty * unit_price) <span class="k">FROM</span> orders <span class="k">JOIN</span> products <span class="k">USING</span>(product_id);</code></pre>
+    <p><strong>What breaks if you get it backwards:</strong> run analytics on a row store and every aggregate drags the full table off disk — slow and expensive. This is <em>why</em> warehouses (BigQuery, Snowflake) and Parquet files are columnar.</p>
+  </section>
+
+  <!-- 3 -->
+  <section class="blk" id="norm">
+    <h2><span class="num">03</span>Normalization vs denormalization <span class="spot">Source ↔ Transform</span></h2>
+    <p><strong>Normalized</strong> = each fact stored once, in its own thin table, joined by keys. Your shop is normalized: <code>orders</code> holds <code>customer_id</code>, not the customer's name — the name lives once in <code>customers</code>. Great for OLTP (change Amy's email in one place).</p>
+    <p><strong>Denormalized</strong> = pre-join the pieces into one wide row so analytics needs no joins. Transform's job is to do exactly this:</p>
+    <pre><code><span class="c">-- three normalized tables -> one wide analytic row</span>
+<span class="k">SELECT</span> o.order_id, c.name <span class="k">AS</span> customer, p.name <span class="k">AS</span> product,
+       o.qty, p.unit_price, o.qty*p.unit_price <span class="k">AS</span> line_revenue
+<span class="k">FROM</span> orders o <span class="k">JOIN</span> customers c <span class="k">USING</span>(customer_id)
+                <span class="k">JOIN</span> products  p <span class="k">USING</span>(product_id);
+<span class="c">-- 1000 │ Amy  │ Mug      │ 2 │ 12.00 │ 24.00
+-- 1001 │ Amy  │ Notebook │ 1 │  6.50 │  6.50
+-- 1003 │ Cara │ Mug      │ 4 │ 12.00 │ 48.00   …one row, no joins needed downstream</span></code></pre>
+    <p>Closely related: <strong>schema-on-write</strong> (enforce structure when loading — the warehouse way) vs <strong>schema-on-read</strong> (store raw, structure it at query time — the lake way). <a class="cite" href="../reference/01-glossary.html#bedrock">[Glossary · Bedrock]</a></p>
+  </section>
+
+  <!-- 4 -->
+  <section class="blk" id="acid">
+    <h2><span class="num">04</span>ACID <span class="spot">Source</span></h2>
+    <p><strong>Definition:</strong> the four guarantees an OLTP database makes about a transaction — <strong>A</strong>tomicity (all-or-nothing), <strong>C</strong>onsistency (valid state to valid state), <strong>I</strong>solation (concurrent transactions don't trip over each other), <strong>D</strong>urability (once committed, it survives a crash).</p>
+    <p>The canonical example: a bank transfer debits one account and credits another. <strong>Atomicity</strong> guarantees you can't get the debit without the credit — even if the server dies between them.</p>
+    <p><strong>Why it matters here:</strong> it's why the <em>source</em> can be trusted as ground truth — and why, when you migrate, you're copying out of a system with strong guarantees into an analytics world that trades some of them away for scale (that's the CAP/consistency story, in the <a class="cite" href="../reference/01-glossary.html#bedrock">Architecture vocab lesson</a>).</p>
+  </section>
+
+  <!-- 5 -->
+  <section class="blk" id="grain">
+    <h2><span class="num">05</span>The grain <span class="spot">Transform · the most important word here</span></h2>
+    <p><strong>Definition:</strong> what <em>one row represents</em>. You state it as a sentence — "one row per ___" — before you build any table. For your orders: <strong>one row per order line.</strong></p>
+    <p>Grain governs how you aggregate. Because each <code>orders</code> row is one line, "total paid revenue" sums <code>qty × unit_price</code> at that line grain:</p>
+    <pre><code><span class="k">SELECT</span> sum(o.qty * p.unit_price) <span class="k">AS</span> paid_revenue
+<span class="k">FROM</span> orders o <span class="k">JOIN</span> products p <span class="k">USING</span>(product_id)
+<span class="k">WHERE</span> o.status = 'paid';
+<span class="c">-- paid_revenue = 78.50</span></code></pre>
+    <p><strong>What breaks without it:</strong> mix grains and you double-count. If you joined orders to a table that had <em>two</em> rows per customer (say two addresses), every order would silently count twice and revenue would inflate — the classic <em>join explosion / fan-out</em>. Declaring the grain is what stops it.</p>
+    <div class="note warn"><span class="tag">The interview tell</span>"What's the grain?" is the first question a good designer asks about any fact table. Answer it out loud before designing anything. It returns in <strong>Lesson 0004</strong> as its own deep dive — it's that load-bearing.</div>
+  </section>
+
+  <!-- 6 -->
+  <section class="blk" id="keys">
+    <h2><span class="num">06</span>Surrogate key vs natural key <span class="spot">Transform</span></h2>
+    <p><strong>Natural key</strong> = the real-world business id (email, <code>order_id</code>, <code>customer_id</code> from the source). <strong>Surrogate key</strong> = a meaningless system-generated id (1, 2, 3…) you mint in the warehouse to join dimensions.</p>
+    <pre><code><span class="k">SELECT</span> row_number() <span class="k">OVER</span> (<span class="k">ORDER BY</span> customer_id) <span class="k">AS</span> customer_sk,
+       customer_id <span class="k">AS</span> natural_key, name
+<span class="k">FROM</span> customers;
+<span class="c">-- customer_sk │ natural_key │ name
+--      1       │      1      │ Amy
+--      2       │      2      │ Ben
+--      3       │      3      │ Cara</span></code></pre>
+    <p><strong>Why bother</strong> when the natural key looks fine? Two reasons that matter downstream: (1) source keys can change or be reused — surrogates stay stable; (2) <strong>SCD2 needs them</strong> — when Cara's address changes you get a second history row for the same <code>customer_id</code>, so the natural key is no longer unique; the surrogate key is what stays one-per-row. That's the bridge from this lesson back to SCD2 in <a class="cite" href="0002-five-words.html#scd2">0002</a>.</p>
+  </section>
+
+  <!-- PRACTICE -->
+  <section class="blk" id="practice">
+    <h2><span class="num">07</span>Practice — say it before you flip</h2>
+
+    <div class="recall">
+      <p class="q">OLTP vs OLAP — one line each, and which layout each uses.</p>
+      <div class="a">OLTP = runs the business, many small writes, row-oriented, normalized. OLAP = analyzes the business, big scans, columnar, denormalized.</div>
+    </div>
+    <div class="recall">
+      <p class="q">Why are analytics warehouses columnar?</p>
+      <div class="a">Aggregations touch few columns over many rows; columnar reads only those columns and compresses them hard — far less data off disk than reading whole rows.</div>
+    </div>
+    <div class="recall">
+      <p class="q">State the grain of the shop's orders table, and why grain matters.</p>
+      <div class="a">One row per order line. Grain governs aggregation; mixing grains (a fan-out join) double-counts and inflates every measure.</div>
+    </div>
+    <div class="recall">
+      <p class="q">Why use a surrogate key when the natural key looks fine?</p>
+      <div class="a">Source keys can change/be reused; and SCD2 makes the natural key non-unique (multiple history rows per customer), so the surrogate is what stays one-per-row.</div>
+    </div>
+
+    <h3>Place / choose</h3>
+    <div class="mcq" data-explain="Big scans over few columns = OLAP, and columnar storage is what makes that cheap.">
+      <p class="q">"Sum revenue by region over 200M rows, fast." Which world + layout?</p>
+      <button>OLTP, stored row-oriented</button>
+      <button data-correct>OLAP, stored columnar-wise</button>
+      <button>OLTP, stored columnar-wise</button>
+      <button>OLAP, stored row-oriented..</button>
+    </div>
+    <div class="mcq" data-explain="One row per order line is the grain; respecting it is what keeps the revenue sum correct.">
+      <p class="q">A measure suddenly doubles after adding a join. Most likely cause?</p>
+      <button>The columnar layout broke</button>
+      <button>An ACID guarantee failed</button>
+      <button data-correct>A grain / fan-out mistake</button>
+      <button>The surrogate key changed</button>
+    </div>
+    <div class="mcq" data-explain="Atomicity = all-or-nothing; the debit and credit commit together or not at all.">
+      <p class="q">"Debit and credit must both happen or neither." Which ACID letter?</p>
+      <button>Isolation between the txns</button>
+      <button>Durability after a commit</button>
+      <button data-correct>Atomicity — all or none</button>
+      <button>Consistency of the state</button>
+    </div>
+
+    <div class="teacher"><span class="tag">Your teacher</span>Still fuzzy on any of these? Ask — "show me a fan-out join that double-counts," "row vs columnar, but with actual bytes," "is schema-on-read just a data lake?" I'll go deeper on whichever one's wobbly.</div>
+  </section>
+
+  <section class="blk" id="next">
+    <h2><span class="num">→</span>What's next (pipeline order)</h2>
+    <p>Bedrock down. Continuing along the pipeline:</p>
+    <ul>
+      <li><strong>0004 — The grain, deep:</strong> the one word worth its own lesson — declaring it, spotting fan-outs, fact-table grains. (Or skip if 05 above landed.)</li>
+      <li><strong>Store / Platform vocab:</strong> storage÷compute, lake/warehouse/lakehouse, table formats, <em>partitioning &amp; clustering</em>, bytes scanned — the cost-of-analytics words you flagged.</li>
+    </ul>
+    <p>Say "next" for Store vocab, or name the one you want.</p>
+  </section>
+
+</main>
+</div>
+
+<footer>
+  <div class="wrap">
+    <p><strong>Lesson 0003 · Bedrock Vocab</strong> — Eigenbasis Lab. All SQL verified in DuckDB v1.5 against <code>shop_seed.sql</code>.
+    <a href="0002-five-words.html">← 0002</a> · <a href="../reference/01-glossary.html">Glossary</a> · <a href="../reference/00-the-spine.html">Spine</a>.</p>
+  </div>
+</footer>
+
+</body>
+</html>

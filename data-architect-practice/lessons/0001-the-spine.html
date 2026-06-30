@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 0001 — The Spine</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+<script src="../assets/quiz.js"></script>
+</head>
+<body id="top">
+
+<header class="hero">
+  <div class="hero-inner">
+    <p class="eyebrow">Eigenbasis Lab · Lesson 0001</p>
+    <h1 class="title">The <em>Spine</em> — the modern data stack as one mental scaffold</h1>
+    <p class="lede">Five of your study docs, the migration lab, and a dozen interview prompts all describe the same shape. Learn that shape once and every later topic has a place to hang. This is the diagram you'll redraw from memory in Week 11.</p>
+    <div class="crosslinks">
+      <a class="alt" href="../reference/00-the-spine.html">Reference one-pager →</a>
+      <a class="alt" href="../reference/01-glossary.html">Master Glossary →</a>
+      <a class="alt" href="../Data_Consulting_Concepts_and_Readings.html">Concepts &amp; Readings</a>
+      <a class="alt" href="../Data_Consulting_Study_Itinerary.html">12-Week Itinerary</a>
+      <a href="#practice">Jump to practice</a>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+<main>
+
+  <div class="win">
+    <span class="k">The win</span>
+    <p>By the end you can <strong>draw the reference data-stack diagram from memory</strong> and drop any term from the docs onto exactly one place on it — the test the itinerary sets for Week 11, earned in lesson one.</p>
+  </div>
+
+  <!-- 1 -->
+  <section class="blk" id="axes">
+    <h2><span class="num">01</span>Two axes, not one list</h2>
+    <p>Your materials look like ten separate subjects — modeling, migration, orchestration, governance, BI. They aren't. They're <strong>one pipeline read along two axes</strong>:</p>
+    <ul>
+      <li><strong>The data path</strong> (horizontal) — the journey every byte takes from an app to a dashboard. Five stages, in order.</li>
+      <li><strong>The cross-cutting concerns</strong> (vertical) — things that apply at <em>every</em> stage at once: orchestration, quality, governance, cost. They don't sit in the flow; they wrap it.</li>
+    </ul>
+    <p>This is the <em class="term">data engineering lifecycle</em>: a five-stage flow plus a set of <em class="term">undercurrents</em> that touch all five. It is the canonical framing in your Architecture reading and the one interviewers score you against. <a class="cite" href="../Data_Consulting_Concepts_and_Readings.html#architecture">[Concepts · Part 07]</a></p>
+
+    <div class="ascii">         ┌────────────────────────  THE DATA PATH  (in order)  ───────────────────────┐
+         │                                                                            │
+   SOURCE  ──▶  INGEST / MIGRATE  ──▶   STORE   ──▶   TRANSFORM   ──▶   SERVE
+  (OLTP apps,    (ELT load, CDC,        (lake /        (dbt: staging→      (semantic layer,
+   Postgres)      reconciliation)        warehouse /    marts, grain,       governed BI,
+                                         lakehouse)     SCD2, incremental)  dashboards)
+         │                                                                            │
+         └────────────────────────────────────────────────────────────────────────────┘
+
+  ════════════════════════════════  CROSS-CUTTING (every stage)  ════════════════════════
+    Orchestration   ▸  the conductor — DAGs, idempotency, retries, backfills
+    Quality & Obs.  ▸  trust — 7 quality dimensions, 5 observability pillars, contracts
+    Governance      ▸  access control (RBAC/ABAC), masking, lineage, PII, compliance
+    Cost / FinOps   ▸  bytes scanned; cost treated as a designed constraint, not a surprise
+  ─────────────────────────────────────────  BEDROCK  ───────────────────────────────────
+    Foundations (OLTP↔OLAP · row↔columnar · ACID/CAP · the grain)  ·  Architecture reasoning</div>
+    <div class="note"><span class="tag">Why this matters for the mission</span>An interviewer's "design X" prompt is almost always "walk this diagram for a specific scenario." A reconciliation harness, an SCD2 snapshot, a column mask — each is one labelled spot here. You're not learning ten things; you're learning where each thing lives.</div>
+  </section>
+
+  <!-- 2 -->
+  <section class="blk" id="path">
+    <h2><span class="num">02</span>The five stages — each answers one question</h2>
+    <p>Don't memorize tools. For each stage, hold the <strong>one load-bearing question</strong> it exists to answer. Everything in the docs is an answer to one of these.</p>
+    <div class="tw"><table>
+      <thead><tr><th>Stage</th><th>The one question it answers</th><th>Lives in</th></tr></thead>
+      <tbody>
+        <tr><td><strong>1 · Source</strong></td><td>Where does data originate, and in what shape? (row-oriented OLTP, built for writes, not analytics)</td><td>Foundations A</td></tr>
+        <tr><td><strong>2 · Ingest / Migrate</strong></td><td>How do we move it without losing or corrupting it — and <em>prove</em> we didn't? (ELT vs ETL, CDC, the reconciliation ladder)</td><td>Concepts 02 · your differentiator</td></tr>
+        <tr><td><strong>3 · Store</strong></td><td>Where does it land so analytics is fast and cheap? (storage ÷ compute, warehouse / lake / lakehouse, table formats, partitioning)</td><td>Concepts 01</td></tr>
+        <tr><td><strong>4 · Transform</strong></td><td>How do we turn raw rows into trusted, modeled tables? (dbt staging→marts, declare the <em>grain</em>, star schema, SCD2)</td><td>Concepts 03</td></tr>
+        <tr><td><strong>5 · Serve</strong></td><td>How do consumers get one agreed answer? (semantic/metrics layer, governed dashboards, row-level security)</td><td>Concepts 03 · 06</td></tr>
+      </tbody>
+    </table></div>
+    <p>Notice the order is also the order of your itinerary: SQL/foundations → modeling → dbt → quality → <strong>migration</strong> → orchestration → cloud → semantic/BI. You're walking the spine left to right, deepening one stage at a time. <a class="cite" href="../Data_Consulting_Study_Itinerary.html#seq">[Itinerary · sequencing]</a></p>
+  </section>
+
+  <!-- 3 -->
+  <section class="blk" id="cross">
+    <h2><span class="num">03</span>The undercurrents — why they're drawn <em>across</em>, not in line</h2>
+    <p>These four don't happen at a stage; they happen <strong>to all stages</strong>. That's the whole reason to draw them as bands underneath rather than boxes in the flow. Putting governance "after BI" or quality "in transform only" is the classic junior mistake — it's a band, not a box.</p>
+    <div class="tw"><table>
+      <thead><tr><th>Undercurrent</th><th>The job</th><th>Concrete handle from the docs</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Orchestration</strong></td><td>Run the stages in the right order, on time, recoverably</td><td><em>Idempotency</em> + backfills; asset-centric (Dagster) vs task-centric (Airflow)</td></tr>
+        <tr><td><strong>Quality &amp; Observability</strong></td><td>Catch bad data before it reaches a human</td><td>7 quality dimensions; 5 pillars; dbt tests; a data contract that <em>fails the build</em></td></tr>
+        <tr><td><strong>Governance</strong></td><td>Make access and use legal and safe</td><td>RBAC vs ABAC; column masking; lineage; PII classification; HIPAA/SOX</td></tr>
+        <tr><td><strong>Cost / FinOps</strong></td><td>Keep it affordable as a design choice</td><td><em>Bytes scanned</em> — partition + cluster to scan less</td></tr>
+      </tbody>
+    </table></div>
+    <div class="note warn"><span class="tag">The two jobs of migration</span>When you reach Stage 2, hold this: a migration is <strong>two jobs, and the second is the hard one</strong> — (1) move the data, (2) <em>prove</em> it arrived intact. Job 2 is the reconciliation ladder (count → checksum → row-diff) and it's your stated differentiator. We build it the hard way — rough Python first — in a later lesson. <a class="cite" href="../eigenbasis-migration-lab/Understanding_The_Pieces.html">[Migration Lab · Understanding the Pieces]</a></div>
+  </section>
+
+  <!-- 4 -->
+  <section class="blk" id="practice">
+    <h2><span class="num">04</span>Practice — retrieval, not recognition</h2>
+    <p>Reading the diagram feels like learning; it isn't. Retrieval is. Cover the diagram above, then do these from memory. Flip each card only after you've answered out loud.</p>
+
+    <div class="recall">
+      <p class="q">Name the five stages of the data path, in order.</p>
+      <div class="a">Source → Ingest/Migrate → Store → Transform → Serve. (Generation → Ingestion → Storage → Transformation → Serving.)</div>
+    </div>
+    <div class="recall">
+      <p class="q">Name the four cross-cutting undercurrents and the one-word job of each.</p>
+      <div class="a">Orchestration (sequencing), Quality &amp; Observability (trust), Governance (safety/legality), Cost/FinOps (affordability). Drawn as bands because they touch every stage.</div>
+    </div>
+    <div class="recall">
+      <p class="q">A migration is two jobs. What are they, and which is harder?</p>
+      <div class="a">(1) Move the data; (2) prove it arrived intact via reconciliation. Job 2 — proving correctness — is the hard one and the consulting differentiator.</div>
+    </div>
+
+    <h3>Place the topic</h3>
+    <p>Every prompt below is one spot on the spine. Pick it.</p>
+
+    <div class="mcq" data-explain="SCD Type 2 keeps history in modeled tables — it's a Transform-stage technique (dbt snapshots), Concepts 03.">
+      <p class="q">“Keep full history of a customer's changing address.” Which stage?</p>
+      <button>Source — the operational app</button>
+      <button data-correct>Transform — modeled tables</button>
+      <button>Serve — the BI dashboard</button>
+      <button>Store — the raw landing zone</button>
+    </div>
+
+    <div class="mcq" data-explain="Partitioning to cut bytes scanned is the Cost/FinOps undercurrent expressed at the Store stage — a designed constraint, Concepts 01.">
+      <p class="q">“Make this query scan 90% fewer bytes.” Which band or stage?</p>
+      <button>Quality — add more dbt tests</button>
+      <button>Governance — mask the columns</button>
+      <button data-correct>Cost/FinOps — partition the table</button>
+      <button>Serve — cache the dashboard</button>
+    </div>
+
+    <div class="mcq" data-explain="A failed-build data contract is Quality & Observability — producer-side enforcement that touches every stage, Concepts 04.">
+      <p class="q">“Block the pipeline if a source's schema silently changes.” Which band?</p>
+      <button data-correct>Quality — a data contract</button>
+      <button>Orchestration — add a retry</button>
+      <button>Governance — restrict the role</button>
+      <button>Transform — rewrite the model</button>
+    </div>
+
+    <div class="teacher"><span class="tag">Your teacher</span>Stuck on where something lives, or want a prompt I haven't covered placed on the spine? Ask me right here — that's what I'm for. Try: <em>"Where does CDC sit — Ingest or Orchestration?"</em> (It's a good, genuinely-ambiguous one.)</div>
+  </section>
+
+  <!-- 5 -->
+  <section class="blk" id="source">
+    <h2><span class="num">05</span>Go deeper</h2>
+    <div class="primary"><span class="tag">Primary source — read this one</span>
+      <strong>Reis &amp; Housley, <em>Fundamentals of Data Engineering</em>, Ch. 1–2.</strong> This <em>is</em> the spine — they name it "the data engineering lifecycle" (the five stages) plus "undercurrents" (security, data management, DataOps, orchestration, architecture). Read it once and the whole stack snaps into the shape you just drew. The itinerary already lists it as the Week 11 architecture text. <a class="cite" href="../Data_Consulting_Study_Itinerary.html#w11">[Itinerary · W11 readings]</a></div>
+    <p>Then, when you want the cloud-platform substrate under Stage 3 (storage ÷ compute, lakehouse, table formats), the next stop is <a class="inline" href="../Data_Consulting_Concepts_and_Readings.html#platform">Concepts · Part 01</a>.</p>
+  </section>
+
+  <section class="blk" id="next">
+    <h2><span class="num">→</span>What's next</h2>
+    <p>The scaffold is set. From here we descend into individual stages, building the hard way before meeting the reusable asset. Likely next lessons:</p>
+    <ul>
+      <li><strong>0002 — Foundations bedrock:</strong> OLTP↔OLAP and row↔columnar, the one idea that explains why Stages 1 and 3 look so different.</li>
+      <li><strong>0003 — The grain:</strong> the single most load-bearing word in Transform; declare it wrong and every number downstream lies.</li>
+      <li><strong>Migration ladder (the differentiator):</strong> build reconciliation as a rough Python script, then see why the lab's config-driven harness exists.</li>
+    </ul>
+    <p>Tell me which pulls you, or say "your call" and I'll pick by your zone of proximal development.</p>
+  </section>
+
+</main>
+</div>
+
+<footer>
+  <div class="wrap">
+    <p><strong>Lesson 0001 · The Spine</strong> — Eigenbasis Lab teaching workspace.
+    Reference: <a href="../reference/00-the-spine.html">the spine one-pager</a> ·
+    Index: <a href="../Data_Consulting_Concepts_and_Readings.html">Concepts</a>,
+    <a href="../Data_Consulting_Study_Itinerary.html">Itinerary</a>,
+    <a href="../Data_Consulting_Tools_Guide.html">Tools</a>,
+    <a href="../Data_Consulting_Drills.html">Drills</a>.</p>
+  </div>
+</footer>
+
+</body>
+</html>

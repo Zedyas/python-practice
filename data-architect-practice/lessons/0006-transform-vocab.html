@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 0006 — Transform Vocab</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+<script src="../assets/quiz.js"></script>
+</head>
+<body id="top">
+
+<header class="hero">
+  <div class="hero-inner">
+    <p class="eyebrow">Eigenbasis Lab · Lesson 0006 · Vocab series · pipeline order</p>
+    <h1 class="title">The <em>Transform</em> — dbt + Kimball words</h1>
+    <p class="lede">The stage interviewers push hardest on. Two vocabularies meet here: <strong>dbt's</strong> (how a model gets built — materializations) and <strong>Kimball's</strong> (how the data is shaped — star schema, dimension types, SCD). All of it hangs off the grain from Lesson 0005. Same healthcare-claims data throughout.</p>
+    <div class="crosslinks">
+      <a class="alt" href="0005-the-grain.html">← Lesson 0005</a>
+      <a class="alt" href="../reference/01-glossary.html#transform">Glossary · Transform</a>
+      <a class="alt" href="../reference/00-the-spine.html">Spine one-pager</a>
+      <a href="#practice">Jump to practice</a>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+<main>
+
+  <div class="win">
+    <span class="k">The win</span>
+    <p>One sentence each for <strong>view / table / incremental / ephemeral, star vs snowflake, conformed / role-playing / degenerate dimensions, and SCD 1 / 2 / 3</strong> — plus the throughline: <em>dbt decides how a model is built; Kimball decides how the data is shaped; the grain decides what's legal in both.</em> (Fact types — transaction / periodic / accumulating — were covered in <a href="0005-the-grain.html#facts">0005 §06</a>.)</p>
+  </div>
+
+  <!-- 1 -->
+  <section class="blk" id="mat">
+    <h2><span class="num">01</span>Materializations <span class="spot flow">Transform · the dbt build strategy</span></h2>
+    <p><strong>Definition:</strong> a dbt <em>materialization</em> is the strategy for turning a model's <code>SELECT</code> into something in the warehouse. The SQL stays the same; the materialization decides <em>what gets built and how often</em>. Four to know:</p>
+    <table>
+      <thead><tr><th>Materialization</th><th>What dbt builds</th><th>Claims example</th></tr></thead>
+      <tbody>
+        <tr><td><strong>view</strong></td><td>stores only the SQL; recomputed on every read. No stored data.</td><td><code>stg_claim_line</code> — light renaming/casting over raw. Cheap, always fresh.</td></tr>
+        <tr><td><strong>table</strong></td><td>fully rebuilt and stored each run. Fast to read, full recompute every run.</td><td><code>dim_member</code> — small, rebuilt nightly from source.</td></tr>
+        <tr><td><strong>incremental</strong></td><td>processes only new/changed rows since last run, then appends/merges into the existing table.</td><td><code>fct_claim_line</code> — billions of lines; load only claims with <code>updated_at &gt; </code> last load, merge on <code>(claim_id, line_no)</code>.</td></tr>
+        <tr><td><strong>ephemeral</strong></td><td>not built at all; inlined as a CTE into the models that reference it.</td><td><code>int_claim_dedupe</code> — a reused helper you don't want as its own object.</td></tr>
+      </tbody>
+    </table>
+    <div class="note"><span class="tag">When each</span><strong>view</strong> for light staging where freshness matters and compute is cheap · <strong>table</strong> for small/medium models read often · <strong>incremental</strong> for large append-mostly <em>facts</em> where rebuilding history every run is wasteful · <strong>ephemeral</strong> for small reused logic you don't want cluttering the warehouse. The decision is a cost/freshness trade, not a correctness one — the answer is identical.</div>
+    <div class="note warn"><span class="tag">Interview line</span>"Staging models I leave as views; large facts I make incremental and merge on the grain's key so I never reprocess history; small dimensions are tables. The materialization is a cost lever — same result, fewer bytes rebuilt." Incremental ties straight to the <a href="0002-five-words.html">watermark + idempotency</a> ideas from 0002.</div>
+  </section>
+
+  <!-- 2 -->
+  <section class="blk" id="star">
+    <h2><span class="num">02</span>Star vs snowflake schema <span class="spot flow">Transform · the shape</span></h2>
+    <p><strong>Star schema:</strong> a central <em>fact</em> at a declared grain, surrounded by <em>denormalized</em> dimension tables — each dimension holds its descriptive attributes directly, so a query is one join hop fact→dim.</p>
+    <p><strong>Snowflake schema:</strong> the dimensions are <em>normalized</em> into sub-tables, so attributes sit several hops away (fact → <code>dim_member</code> → <code>dim_plan</code> → plan attributes).</p>
+    <pre><code><span class="c">-- STAR: plan name lives right on the member dimension (one hop)</span>
+fct_claim_line → dim_member(plan='GOLD', plan_tier='premium', …)
+
+<span class="c">-- SNOWFLAKE: member points to a plan dimension (two hops)</span>
+fct_claim_line → dim_member(plan_key) → dim_plan(plan='GOLD', plan_tier='premium')</code></pre>
+    <div class="note"><span class="tag">Which, and why</span>Analytics defaults to <strong>star</strong>: fewer joins, simpler SQL, and columnar storage makes the redundant repeated text essentially free. Snowflaking saves space that's already cheap and adds join hops that aren't — so you only do it for genuinely large or volatile sub-dimensions. <span class="gbreak">"Normalize for writes (OLTP), denormalize for reads (OLAP)" — star is that principle applied.</span></div>
+  </section>
+
+  <!-- 3 -->
+  <section class="blk" id="dims">
+    <h2><span class="num">03</span>Dimension types <span class="spot flow">Transform · Kimball vocabulary</span></h2>
+    <p>Three dimension words interviewers reach for, all illustrated on the claims star:</p>
+    <table>
+      <thead><tr><th>Type</th><th>Definition</th><th>Claims example</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Conformed</strong></td><td>one dimension shared across multiple facts with identical keys &amp; meaning</td><td><code>dim_member</code> &amp; <code>dim_date</code> used by <em>both</em> <code>fct_claim_line</code> and <code>fct_pharmacy_claim</code> → lets you compare medical vs pharmacy spend per member/date</td></tr>
+        <tr><td><strong>Role-playing</strong></td><td>one physical dimension joined multiple times in different <em>roles</em></td><td><code>dim_date</code> joined as <code>service_date</code>, <code>paid_date</code>, <code>submitted_date</code> — same table, three foreign keys</td></tr>
+        <tr><td><strong>Degenerate</strong></td><td>an identifier stored <em>on the fact</em> that you group/filter by but that has no dimension table of its own</td><td><code>claim_id</code>, <code>line_no</code> — they describe the row but carry no attributes worth a table</td></tr>
+      </tbody>
+    </table>
+    <p><strong>Conformed dimensions</strong> are the load-bearing one: they're what make <em class="term">drill-across</em> possible — asking one question of two business processes and lining the answers up by the shared dimension. A claims fact and a pharmacy fact that both conform to <code>dim_member</code> can be compared member-by-member; if each had its own private member table, they couldn't.</p>
+    <pre><code><span class="c">-- ROLE-PLAYING: dim_date joined twice, two roles on the same fact</span>
+<span class="k">SELECT</span> sd.date_key <span class="k">AS</span> service_day, pd.date_key <span class="k">AS</span> paid_day, <span class="f">sum</span>(line_amount)
+<span class="k">FROM</span> fct_claim_line f
+<span class="k">JOIN</span> dim_date sd <span class="k">ON</span> f.service_date = sd.date_key   <span class="c">-- role 1</span>
+<span class="k">JOIN</span> dim_date pd <span class="k">ON</span> f.paid_date    = pd.date_key;  <span class="c">-- role 2  → 2026-03-10 / 2026-03-20 / 300.00</span></code></pre>
+    <div class="note"><span class="tag">Also worth a name</span><strong>Junk dimension</strong> — a small table bundling several low-cardinality flags (<code>is_emergency</code>, <code>is_inpatient</code>, <code>is_outofnetwork</code>) so the fact carries one key instead of a scatter of boolean columns.</div>
+  </section>
+
+  <!-- 4 -->
+  <section class="blk" id="scd">
+    <h2><span class="num">04</span>Slowly changing dimensions (SCD 1 / 2 / 3) <span class="spot flow">Transform · history</span></h2>
+    <p><strong>Definition:</strong> SCD strategies decide what happens to a dimension row when an attribute <em>changes</em> — e.g. a member switches plan BRONZE → GOLD. The choice is whether you keep history, and how much.</p>
+    <ul>
+      <li><strong>Type 1 — overwrite.</strong> Update the value in place; no history. Reports always show the <em>current</em> plan, even for old claims.</li>
+      <li><strong>Type 2 — new row per change.</strong> Add a row with <code>valid_from</code> / <code>valid_to</code> + an <code>is_current</code> flag; the old row is closed off. Full history; you join <em>point-in-time</em>. (The pattern from <a href="0002-five-words.html">0002</a>.)</li>
+      <li><strong>Type 3 — add a column.</strong> Keep <code>prior_plan</code> alongside <code>plan</code> — exactly one previous value, no full timeline.</li>
+    </ul>
+    <p>Why it matters, on real numbers. M-1 was BRONZE through Jan, GOLD from Feb. With a Type-2 dimension you can ask "what plan was the member on <em>when the claim was incurred</em>?" — and the answer splits correctly:</p>
+    <pre><code><span class="c">-- SCD2 POINT-IN-TIME: plan as-of the service date</span>
+<span class="k">SELECT</span> m.plan, <span class="f">sum</span>(f.line_amount)
+<span class="k">FROM</span> fct_claim_line f
+<span class="k">JOIN</span> dim_member m <span class="k">ON</span> f.member_id = m.member_id
+ <span class="k">AND</span> f.service_date &gt;= m.valid_from <span class="k">AND</span> f.service_date &lt; m.valid_to
+<span class="k">GROUP BY</span> m.plan;
+<span class="c">--  BRONZE  300.00     GOLD  300.00      ← history preserved</span>
+
+<span class="c">-- join to the CURRENT row only (is_current) — history is lost</span>
+<span class="c">--  GOLD    600.00                       ← every old claim mislabeled GOLD</span></code></pre>
+    <div class="note warn"><span class="tag">Interview line</span>"If the business ever asks 'what was true at the time' — the plan when the claim was incurred, the address at time of shipment — the dimension has to be SCD2 and you join point-in-time on valid_from/valid_to. Type 1 silently rewrites history; that $600-all-GOLD number is the bug."</div>
+  </section>
+
+  <!-- PRACTICE -->
+  <section class="blk" id="practice">
+    <h2><span class="num">05</span>Practice — say it before you flip</h2>
+
+    <div class="recall">
+      <p class="q">view / table / incremental / ephemeral — one line each.</p>
+      <div class="a">view = stored SQL, recomputed on read · table = fully rebuilt &amp; stored each run · incremental = only new/changed rows merged in · ephemeral = inlined as a CTE, never built.</div>
+    </div>
+    <div class="recall">
+      <p class="q">Why does analytics prefer star over snowflake?</p>
+      <div class="a">Fewer join hops + simpler SQL, and columnar storage makes the denormalized repetition cheap. Normalize for writes (OLTP), denormalize for reads (OLAP).</div>
+    </div>
+    <div class="recall">
+      <p class="q">Conformed vs role-playing vs degenerate?</p>
+      <div class="a">Conformed = one dim shared across facts (enables drill-across) · role-playing = one dim joined in several roles (dim_date as service/paid) · degenerate = an id on the fact with no dim table (claim_id).</div>
+    </div>
+    <div class="recall">
+      <p class="q">When must a dimension be SCD2?</p>
+      <div class="a">Whenever the business asks "what was true at the time" — you need valid_from/valid_to history and a point-in-time join. Type 1 overwrites and mislabels old facts with current values.</div>
+    </div>
+
+    <h3>Choose</h3>
+    <div class="mcq" data-explain="A huge append-mostly fact shouldn't be rebuilt every run — incremental loads only new rows and merges on the grain key.">
+      <p class="q">A 2-billion-row claim-line fact, mostly new claims daily. Best materialization?</p>
+      <button>view</button>
+      <button>table</button>
+      <button data-correct>incremental</button>
+      <button>ephemeral</button>
+    </div>
+    <div class="mcq" data-explain="Comparing two facts member-by-member needs a shared dimension with identical keys — that's a conformed dimension enabling drill-across.">
+      <p class="q">You want to compare medical and pharmacy spend per member. What makes that possible?</p>
+      <button>A snowflaked member dimension</button>
+      <button data-correct>A conformed dim_member across both facts</button>
+      <button>A degenerate dimension</button>
+      <button>An ephemeral model</button>
+    </div>
+    <div class="mcq" data-explain="claim_id has no attributes of its own and lives on the fact — that's the textbook degenerate dimension.">
+      <p class="q"><code>claim_id</code> sits on the fact, has no attribute table, but you group by it. It's a…</p>
+      <button>conformed dimension</button>
+      <button>role-playing dimension</button>
+      <button data-correct>degenerate dimension</button>
+      <button>junk dimension</button>
+    </div>
+
+    <div class="teacher"><span class="tag">Your teacher</span>Fair game to push on: "incremental — append vs merge, when each?", "is a date spine a dimension?", "how does SCD2 interact with the fact's foreign key — do I store member_key or member_id?" Ask before we move to Quality.</div>
+  </section>
+
+  <section class="blk" id="next">
+    <h2><span class="num">→</span>What's next (pipeline order)</h2>
+    <p>Source → Ingest → Store → <strong>Transform ✓</strong>. Remaining vocab stops:</p>
+    <ul>
+      <li><strong>Quality &amp; Observability:</strong> the 7 data-quality dimensions, the 5 pillars of observability, data contracts, generic vs singular tests.</li>
+      <li>then <strong>Governance</strong> (RBAC / ABAC / RLS / masking / lineage / MDM), <strong>Orchestration</strong> (DAG, asset vs task, backfill), <strong>Serve / Architecture</strong>.</li>
+    </ul>
+    <p>Say "next" for Quality, or keep the floor open.</p>
+  </section>
+
+</main>
+</div>
+
+<footer>
+  <div class="wrap">
+    <p><strong>Lesson 0006 · Transform Vocab</strong> — Eigenbasis Lab. Star-join, role-playing-date, and SCD2 point-in-time examples verified in DuckDB v1.5 on an inline claims-star fixture (SCD2 splits $300 BRONZE / $300 GOLD; current-only join = $600 GOLD).
+    <a href="0005-the-grain.html">← 0005</a> · <a href="../reference/01-glossary.html">Glossary</a> · <a href="../reference/00-the-spine.html">Spine</a>.</p>
+  </div>
+</footer>
+
+</body>
+</html>

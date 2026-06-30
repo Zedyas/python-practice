@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reference 00 — The Spine</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+</head>
+<body id="top">
+
+<header class="hero">
+  <div class="hero-inner">
+    <p class="eyebrow">Eigenbasis Lab · Reference 00</p>
+    <h1 class="title">The <em>Spine</em> — one-page map of the data stack</h1>
+    <p class="lede">The compressed essence of <a class="inline" href="../lessons/0001-the-spine.html">Lesson 0001</a>. Five stages in order, four undercurrents across all of them. Print it; redraw it from memory until fluent.</p>
+  </div>
+</header>
+
+<div class="wrap">
+<main>
+
+  <section class="blk">
+    <h2><span class="num">DIAGRAM</span>Draw this from memory</h2>
+    <div class="ascii">   SOURCE  ──▶  INGEST / MIGRATE  ──▶   STORE   ──▶   TRANSFORM   ──▶   SERVE
+  (OLTP apps)    (ELT, CDC,            (lake /        (dbt staging→      (semantic layer,
+                  reconciliation)       warehouse /    marts, grain,      governed BI,
+                                        lakehouse)     SCD2, incr.)       dashboards, RLS)
+
+  ══════════════════════  UNDERCURRENTS — every stage at once  ══════════════════════
+    Orchestration   ▸  DAGs · idempotency · retries · backfills
+    Quality & Obs.  ▸  7 dimensions · 5 pillars · dbt tests · contracts that fail the build
+    Governance      ▸  RBAC/ABAC · masking · lineage · PII · HIPAA/SOX/GDPR
+    Cost / FinOps   ▸  bytes scanned · partition + cluster to scan less
+  ──────────────────────────────────  BEDROCK  ──────────────────────────────────────
+    Foundations: OLTP↔OLAP · row↔columnar · ACID/CAP · the grain   |   Architecture reasoning</div>
+  </section>
+
+  <section class="blk">
+    <h2><span class="num">CRIB</span>One question + one handle per element</h2>
+    <div class="tw"><table>
+      <thead><tr><th>Element</th><th>The question it answers</th><th>Keyword handle</th><th>Doc</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Source</strong></td><td>Where does data originate, in what shape?</td><td>OLTP, row-oriented, write-optimized</td><td>Found. A</td></tr>
+        <tr><td><strong>Ingest / Migrate</strong></td><td>Move it without loss — and prove it?</td><td>ELT · CDC · reconciliation ladder</td><td>Concepts 02</td></tr>
+        <tr><td><strong>Store</strong></td><td>Land it for fast, cheap analytics?</td><td>storage ÷ compute · lakehouse · partition</td><td>Concepts 01</td></tr>
+        <tr><td><strong>Transform</strong></td><td>Raw rows → trusted modeled tables?</td><td>grain · star schema · SCD2 · dbt marts</td><td>Concepts 03</td></tr>
+        <tr><td><strong>Serve</strong></td><td>One agreed answer for consumers?</td><td>semantic layer · governed dashboard · RLS</td><td>Concepts 03/06</td></tr>
+        <tr><td><strong>Orchestration</strong></td><td>Right order, on time, recoverable?</td><td>idempotency · backfill · asset vs task</td><td>Concepts 05</td></tr>
+        <tr><td><strong>Quality</strong></td><td>Catch bad data before a human sees it?</td><td>dimensions · pillars · data contract</td><td>Concepts 04</td></tr>
+        <tr><td><strong>Governance</strong></td><td>Legal and safe access &amp; use?</td><td>RBAC · masking · lineage · PII</td><td>Concepts G</td></tr>
+        <tr><td><strong>Cost / FinOps</strong></td><td>Affordable by design?</td><td>bytes scanned · partition + cluster</td><td>Concepts 01/G</td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  <section class="blk">
+    <h2><span class="num">RULE</span>Three things to never get wrong</h2>
+    <ul>
+      <li><strong>Undercurrents are bands, not boxes.</strong> Quality, governance, orchestration, cost touch <em>every</em> stage. Drawing them in the flow is the junior tell.</li>
+      <li><strong>Migration is two jobs.</strong> Moving data is easy; <em>proving</em> it arrived intact (reconciliation) is the hard, billable one.</li>
+      <li><strong>The grain is sacred.</strong> Declare it at Transform — "one row per ___" — before anything else, or every downstream number lies.</li>
+    </ul>
+  </section>
+
+</main>
+</div>
+
+<footer>
+  <div class="wrap">
+    <p><strong>Reference 00 · The Spine</strong> — Eigenbasis Lab. Taught in
+    <a href="../lessons/0001-the-spine.html">Lesson 0001</a>.</p>
+  </div>
+</footer>
+
+</body>
+</html>

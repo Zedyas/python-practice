@@ -1,0 +1,90 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1160 720" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif">
+  <defs>
+    <linearGradient id="top" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#29b5e8"/><stop offset="1" stop-color="#1271c4"/>
+    </linearGradient>
+    <marker id="a" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#9ab"/>
+    </marker>
+  </defs>
+  <rect width="1160" height="720" fill="#f4f9fd"/>
+  <rect width="1160" height="6" fill="url(#top)"/>
+  <text x="40" y="46" font-size="22" font-weight="700" fill="#15293d">"Design Reddit" &#8212; the schema, table by table</text>
+  <text x="40" y="70" font-size="13" fill="#3f5973">Entities (boxes) and relationships. PK = primary key, FK = foreign key. Junction tables shown in blue.</text>
+
+  <!-- users -->
+  <rect x="60" y="100" width="200" height="120" rx="9" fill="#fff" stroke="#2196d6" stroke-width="1.4"/>
+  <text x="78" y="124" font-size="14" font-weight="700" fill="#1271c4">users</text>
+  <line x1="60" y1="134" x2="260" y2="134" stroke="#d4e4f0"/>
+  <text x="78" y="156" font-size="11.5" fill="#15293d">user_id (PK)</text>
+  <text x="78" y="176" font-size="11.5" fill="#3f5973">username, email</text>
+  <text x="78" y="196" font-size="11.5" fill="#3f5973">password_hash, created_at</text>
+
+  <!-- subreddits -->
+  <rect x="60" y="260" width="200" height="120" rx="9" fill="#fff" stroke="#2196d6" stroke-width="1.4"/>
+  <text x="78" y="284" font-size="14" font-weight="700" fill="#1271c4">subreddits</text>
+  <line x1="60" y1="294" x2="260" y2="294" stroke="#d4e4f0"/>
+  <text x="78" y="316" font-size="11.5" fill="#15293d">subreddit_id (PK)</text>
+  <text x="78" y="336" font-size="11.5" fill="#3f5973">name, description</text>
+  <text x="78" y="356" font-size="11.5" fill="#3f5973">created_by (FK), created_at</text>
+
+  <!-- posts -->
+  <rect x="460" y="100" width="220" height="140" rx="9" fill="#fff" stroke="#2196d6" stroke-width="1.4"/>
+  <text x="478" y="124" font-size="14" font-weight="700" fill="#1271c4">posts</text>
+  <line x1="460" y1="134" x2="680" y2="134" stroke="#d4e4f0"/>
+  <text x="478" y="156" font-size="11.5" fill="#15293d">post_id (PK)</text>
+  <text x="478" y="176" font-size="11.5" fill="#3f5973">user_id (FK)</text>
+  <text x="478" y="196" font-size="11.5" fill="#3f5973">subreddit_id (FK)</text>
+  <text x="478" y="216" font-size="11.5" fill="#3f5973">title, body, created_at</text>
+
+  <!-- comments (self-referencing) -->
+  <rect x="460" y="300" width="220" height="160" rx="9" fill="#e3f3fc" stroke="#2196d6" stroke-width="1.6"/>
+  <text x="478" y="324" font-size="14" font-weight="700" fill="#1271c4">comments</text>
+  <line x1="460" y1="334" x2="680" y2="334" stroke="#b9d9ee"/>
+  <text x="478" y="356" font-size="11.5" fill="#15293d">comment_id (PK)</text>
+  <text x="478" y="376" font-size="11.5" fill="#3f5973">post_id (FK)</text>
+  <text x="478" y="396" font-size="11.5" fill="#3f5973">user_id (FK)</text>
+  <text x="478" y="416" font-size="11.5" fill="#c0392b" font-weight="700">parent_comment_id (FK &#8594; self)</text>
+  <text x="478" y="436" font-size="11.5" fill="#3f5973">body, created_at</text>
+
+  <!-- self loop arrow on comments -->
+  <path d="M680,360 C730,355 730,420 682,418" fill="none" stroke="#c0392b" stroke-width="1.4" marker-end="url(#a)"/>
+  <text x="700" y="392" font-size="10" fill="#c0392b">self-ref</text>
+
+  <!-- votes (junction, polymorphic-ish) -->
+  <rect x="880" y="100" width="230" height="160" rx="9" fill="#e0eefb" stroke="#2196d6" stroke-width="1.6"/>
+  <text x="898" y="124" font-size="14" font-weight="700" fill="#1271c4">votes  (junction)</text>
+  <line x1="880" y1="134" x2="1110" y2="134" stroke="#b9d9ee"/>
+  <text x="898" y="156" font-size="11.5" fill="#15293d">vote_id (PK)</text>
+  <text x="898" y="176" font-size="11.5" fill="#3f5973">user_id (FK)</text>
+  <text x="898" y="196" font-size="11.5" fill="#3f5973">votable_type (post|comment)</text>
+  <text x="898" y="216" font-size="11.5" fill="#3f5973">votable_id, value (+1/-1)</text>
+  <text x="898" y="240" font-size="10.5" fill="#6b8299">unique: (user, votable_type, votable_id)</text>
+
+  <!-- memberships (junction) -->
+  <rect x="880" y="300" width="230" height="140" rx="9" fill="#e0eefb" stroke="#2196d6" stroke-width="1.6"/>
+  <text x="898" y="324" font-size="14" font-weight="700" fill="#1271c4">memberships (junction)</text>
+  <line x1="880" y1="334" x2="1110" y2="334" stroke="#b9d9ee"/>
+  <text x="898" y="356" font-size="11.5" fill="#15293d">user_id (FK)</text>
+  <text x="898" y="376" font-size="11.5" fill="#3f5973">subreddit_id (FK)</text>
+  <text x="898" y="396" font-size="11.5" fill="#3f5973">role, joined_at</text>
+  <text x="898" y="418" font-size="10.5" fill="#6b8299">PK: (user_id, subreddit_id)</text>
+
+  <!-- relationship lines -->
+  <line x1="260" y1="150" x2="456" y2="150" stroke="#9ab" stroke-width="1.3" marker-end="url(#a)"/>
+  <text x="300" y="142" font-size="10" fill="#6b8299">1 user &#8594; many posts</text>
+  <line x1="260" y1="330" x2="456" y2="200" stroke="#9ab" stroke-width="1.3" marker-end="url(#a)"/>
+  <text x="300" y="270" font-size="10" fill="#6b8299">subreddit &#8594; many posts</text>
+  <line x1="570" y1="240" x2="570" y2="296" stroke="#9ab" stroke-width="1.3" marker-end="url(#a)"/>
+  <text x="578" y="272" font-size="10" fill="#6b8299">post &#8594; many comments</text>
+  <line x1="260" y1="180" x2="876" y2="170" stroke="#9ab" stroke-width="1.1" stroke-dasharray="4 3" marker-end="url(#a)"/>
+  <line x1="260" y1="300" x2="876" y2="360" stroke="#9ab" stroke-width="1.1" stroke-dasharray="4 3" marker-end="url(#a)"/>
+
+  <!-- legend / key insight band -->
+  <rect x="60" y="500" width="1050" height="180" rx="11" fill="#102438"/>
+  <text x="84" y="532" font-size="15" font-weight="700" fill="#29b5e8">The three moves that score points</text>
+  <text x="84" y="562" font-size="12.5" fill="#dbeaf5">1 &#183; Sub-comments = a self-referencing FK (parent_comment_id &#8594; comments). One table, nullable parent = top-level.</text>
+  <text x="84" y="588" font-size="12.5" fill="#dbeaf5">     This is the "adjacency list" &#8212; name it, and note recursive CTEs fetch a full thread.</text>
+  <text x="84" y="618" font-size="12.5" fill="#dbeaf5">2 &#183; Votes &amp; memberships are many-to-many &#8594; junction tables with unique constraints (no double-voting / double-joining).</text>
+  <text x="84" y="648" font-size="12.5" fill="#dbeaf5">3 &#183; Posts can be voted AND comments can be voted &#8594; mention the polymorphic tradeoff (one votes table vs two).</text>
+</svg>

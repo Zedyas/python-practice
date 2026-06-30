@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Data Consulting — 12-Week Study Itinerary</title>
+<style>
+  :root{
+    --ink:#10241f;--ink-soft:#3a544d;--paper:#f5f2ea;--paper-2:#ece7da;
+    --rule:#cdc6b4;--accent:#0f7a5a;--accent-2:#c2622d;
+    --code-bg:#10241f;--code-ink:#dfe9e3;--chip:#e3ddcd;
+    --shadow:0 1px 0 rgba(16,36,31,.06),0 8px 28px -18px rgba(16,36,31,.35);
+    --mono:"SF Mono",ui-monospace,"JetBrains Mono",Menlo,Consolas,monospace;
+    --serif:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+    --sans:-apple-system,BlinkMacSystemFont,"Inter","Segoe UI",system-ui,sans-serif;
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--sans);line-height:1.62;font-size:16px;-webkit-font-smoothing:antialiased;}
+  .wrap{max-width:1180px;margin:0 auto;padding:0 24px;}
+  header.hero{border-bottom:2px solid var(--ink);background:radial-gradient(120% 100% at 15% -10%, rgba(15,122,90,.12), transparent 60%),var(--paper);}
+  .hero-inner{padding:54px 0 40px;}
+  .eyebrow{font-family:var(--mono);font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:var(--accent);margin:0 0 14px;}
+  h1.title{font-family:var(--serif);font-weight:600;font-size:clamp(34px,5vw,56px);line-height:1.02;margin:0 0 16px;letter-spacing:-.01em;}
+  h1.title em{font-style:italic;color:var(--accent);}
+  .lede{font-size:18px;color:var(--ink-soft);max-width:72ch;margin:0;}
+  .crosslinks{display:flex;flex-wrap:wrap;gap:10px;margin-top:26px;}
+  .crosslinks a{font-family:var(--mono);font-size:12.5px;text-decoration:none;color:var(--ink);border:1px solid var(--ink);border-radius:999px;padding:7px 15px;transition:all .15s ease;}
+  .crosslinks a:hover{background:var(--ink);color:var(--paper);}
+  .crosslinks a.alt{border-color:var(--accent);color:var(--accent);}
+  .crosslinks a.alt:hover{background:var(--accent);color:#fff;}
+
+  .grid{display:grid;grid-template-columns:240px 1fr;gap:46px;align-items:start;padding:42px 0 90px;}
+  nav.toc{position:sticky;top:18px;font-size:13.5px;}
+  nav.toc .toc-head{font-family:var(--mono);font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--ink-soft);margin:0 0 12px;}
+  nav.toc ol{list-style:none;margin:0;padding:0;}
+  nav.toc li{margin:1px 0;}
+  nav.toc a{display:block;text-decoration:none;color:var(--ink-soft);padding:5px 9px;border-radius:7px;border-left:2px solid transparent;line-height:1.35;}
+  nav.toc a .wk{font-family:var(--mono);font-size:10.5px;color:var(--accent);margin-right:8px;}
+  nav.toc a:hover{background:var(--paper-2);color:var(--ink);}
+  nav.toc a.active{border-left-color:var(--accent);color:var(--ink);background:var(--paper-2);font-weight:600;}
+
+  main{min-width:0;}
+  section.blk{padding:34px 0 30px;border-top:1px solid var(--rule);}
+  section.blk:first-of-type{border-top:none;padding-top:6px;}
+  .blk h2{font-family:var(--serif);font-size:clamp(23px,3vw,31px);font-weight:600;margin:0 0 4px;letter-spacing:-.01em;line-height:1.12;display:flex;gap:14px;align-items:baseline;flex-wrap:wrap;}
+  .blk h2 .num{font-family:var(--mono);font-size:13px;color:var(--accent);font-weight:400;white-space:nowrap;}
+  .blk .sub{color:var(--ink-soft);margin:8px 0 18px;font-size:15.5px;}
+  h3{font-size:17px;font-weight:700;margin:22px 0 7px;}
+  h4{font-family:var(--mono);font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--accent-2);margin:16px 0 5px;}
+  p{margin:0 0 12px;}
+  ul,ol.list{margin:0 0 13px;padding-left:22px;}
+  li{margin:5px 0;}
+  strong{font-weight:700;}
+  em.term{font-style:normal;font-weight:700;color:var(--accent);}
+  a.inline{color:var(--accent);}
+
+  .note{border-left:3px solid var(--accent);background:var(--paper-2);padding:12px 15px;border-radius:0 9px 9px 0;margin:15px 0;font-size:15px;}
+  .note.warn{border-left-color:var(--accent-2);background:rgba(194,98,45,.06);}
+  .note .tag{font-family:var(--mono);font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:var(--accent);display:block;margin-bottom:3px;}
+  .note.warn .tag{color:var(--accent-2);}
+
+  pre{background:var(--code-bg);color:var(--code-ink);border-radius:11px;padding:16px 18px;overflow-x:auto;font-family:var(--mono);font-size:13px;line-height:1.55;margin:13px 0;box-shadow:var(--shadow);}
+  pre .c{color:#7fa99a;} pre .k{color:#e0a868;}
+  code{font-family:var(--mono);font-size:.92em;background:var(--chip);padding:1px 6px;border-radius:5px;color:var(--ink);}
+  pre code{background:none;padding:0;color:inherit;font-size:13px;}
+
+  .tw{overflow-x:auto;margin:15px 0;border:1px solid var(--rule);border-radius:10px;}
+  table{border-collapse:collapse;width:100%;font-size:14px;background:var(--paper);}
+  th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--rule);vertical-align:top;}
+  th{background:var(--ink);color:var(--paper);font-weight:600;font-size:12.5px;}
+  tr:last-child td{border-bottom:none;}
+  tbody tr:nth-child(even){background:var(--paper-2);}
+
+  .ascii{white-space:pre;font-family:var(--mono);font-size:12.5px;line-height:1.45;background:var(--paper-2);border:1px solid var(--rule);border-radius:10px;padding:16px;overflow-x:auto;margin:14px 0;}
+
+  /* week card internals */
+  .wkmeta{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 14px;}
+  .wkmeta .pill{font-family:var(--mono);font-size:11px;border:1px solid var(--rule);background:var(--paper-2);border-radius:6px;padding:3px 9px;color:var(--ink);}
+  .lane{display:grid;grid-template-columns:74px 1fr;gap:0 16px;border-left:2px solid var(--rule);margin:12px 0;padding-left:0;}
+  .lane .lbl{font-family:var(--mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--accent-2);padding:8px 0 8px 14px;border-left:2px solid var(--accent-2);margin-left:-2px;}
+  .lane .ct{padding:6px 0 10px;}
+  .lane .ct ul{margin:0;padding-left:18px;}
+  .lane .ct p{margin:0 0 8px;}
+
+  .readings{margin:12px 0;border:1px solid var(--rule);border-radius:11px;overflow:hidden;}
+  .readings summary{cursor:pointer;list-style:none;padding:11px 15px;background:var(--paper-2);font-family:var(--mono);font-size:12px;letter-spacing:.04em;text-transform:uppercase;color:var(--accent);display:flex;align-items:center;gap:10px;user-select:none;}
+  .readings summary::-webkit-details-marker{display:none;}
+  .readings summary::before{content:"▸";color:var(--accent-2);transition:transform .15s;}
+  .readings[open] summary::before{transform:rotate(90deg);}
+  .readings .body{padding:4px 16px 12px;}
+  .readings ul{margin:8px 0 0;padding-left:18px;}
+  .readings li{margin:6px 0;font-size:14px;}
+  .src{font-family:var(--mono);font-size:11px;color:var(--accent);}
+  .why{color:var(--ink-soft);font-size:13px;}
+  .conlink{font-family:var(--mono);font-size:11px;color:var(--accent-2);}
+
+  /* progress table */
+  .track th,.track td{text-align:center;}
+  .track td:nth-child(2){text-align:left;}
+  .track input[type=checkbox]{width:17px;height:17px;accent-color:var(--accent);cursor:pointer;margin:0;vertical-align:middle;}
+  .trkmeta{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin:0 0 12px;font-size:14px;color:var(--ink-soft);}
+  .trkmeta b{color:var(--ink);}
+  #trkbar{flex:1;min-width:140px;height:8px;background:var(--paper-2);border:1px solid var(--rule);border-radius:99px;overflow:hidden;}
+  #trkbar i{display:block;height:100%;width:0;background:var(--accent);transition:width .2s;}
+  #trkreset{font-family:var(--mono);font-size:11px;color:var(--accent-2);background:none;border:1px solid var(--rule);border-radius:6px;padding:3px 10px;cursor:pointer;}
+  #trkreset:hover{background:var(--paper-2);}
+
+  footer{border-top:2px solid var(--ink);padding:30px 0 60px;color:var(--ink-soft);font-size:13.5px;}
+  footer a{color:var(--accent);}
+
+  @media (max-width:880px){
+    .grid{grid-template-columns:1fr;gap:0;}
+    nav.toc{position:static;margin-bottom:24px;border-bottom:1px solid var(--rule);padding-bottom:16px;}
+    nav.toc ol{column-count:2;column-gap:18px;}
+    .lane{grid-template-columns:1fr;}
+    .lane .lbl{border-left:none;padding-left:0;margin-left:0;}
+  }
+</style>
+</head>
+<body id="top">
+
+<header class="hero">
+  <div class="wrap hero-inner">
+    <p class="eyebrow">Eigenbasis Lab · Reference 03</p>
+    <h1 class="title">12-Week <em>Study Itinerary</em></h1>
+    <p class="lede">A build-the-skill program, not a reading list. Every module runs the same loop — learn the concept, sketch the mental model, do a small practical rep, commit an artifact you could show a client or interviewer. Local-first on a Mac with <code>uv</code>; GCP/BigQuery enters only where a real cloud warehouse is the point.</p>
+    <div class="crosslinks">
+      <a class="alt" href="Data_Consulting_Concepts_and_Readings.html">← Concepts &amp; Readings</a>
+      <a class="alt" href="Data_Consulting_Tools_Guide.html">← Tools Guide</a>
+      <a class="alt" href="Data_Consulting_Drills.html">← Drills &amp; Self-Checks</a>
+      <a href="#setup">Jump to Week 0 setup</a>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+<div class="grid">
+
+  <nav class="toc" aria-label="Contents">
+    <p class="toc-head">Program</p>
+    <ol>
+      <li><a href="#setup"><span class="wk">W0</span>Setup &amp; toolchain</a></li>
+      <li><a href="#method"><span class="wk">—</span>The method</a></li>
+      <li><a href="#dataset"><span class="wk">—</span>The dataset</a></li>
+      <li><a href="#foundations-primer"><span class="wk">W0.5</span>Foundations primer</a></li>
+      <li><a href="#w1"><span class="wk">W1</span>SQL foundations</a></li>
+      <li><a href="#w2"><span class="wk">W2</span>Dimensional modeling</a></li>
+      <li><a href="#w3"><span class="wk">W3</span>dbt fundamentals</a></li>
+      <li><a href="#w4"><span class="wk">W4</span>Advanced dbt / SCD2</a></li>
+      <li><a href="#w5"><span class="wk">W5</span>Data quality</a></li>
+      <li><a href="#w6"><span class="wk">W6</span>Migration &amp; reconciliation</a></li>
+      <li><a href="#w7"><span class="wk">W7</span>Orchestration</a></li>
+      <li><a href="#w8"><span class="wk">W8</span>GCP / BigQuery</a></li>
+      <li><a href="#w9"><span class="wk">W9</span>Semantic layer &amp; BI</a></li>
+      <li><a href="#w10"><span class="wk">W10</span>Automation + capstone</a></li>
+      <li><a href="#w11"><span class="wk">W11</span>Architecture &amp; system design</a></li>
+      <li><a href="#w12"><span class="wk">W12</span>Governance &amp; compliance</a></li>
+      <li><a href="#mvp"><span class="wk">—</span>Minimum path</a></li>
+      <li><a href="#track"><span class="wk">—</span>Progress tracker</a></li>
+    </ol>
+  </nav>
+
+  <main>
+
+  <!-- WEEK 0 -->
+  <section class="blk" id="setup">
+    <h2><span class="num">WEEK 0</span>Setup &amp; the local-first toolchain</h2>
+    <p class="sub">One sitting. macOS only, <code>uv</code> for everything Python, Docker for the services that don't run natively. Full concept-level explanations of each tool live in the <a class="inline" href="Data_Consulting_Tools_Guide.html">Tools Guide →</a></p>
+
+    <div class="tw"><table>
+      <thead><tr><th>Need</th><th>Tool</th><th>Runs</th></tr></thead>
+      <tbody>
+        <tr><td>Python &amp; package manager</td><td><strong>uv</strong> (you have 3.13 &amp; 3.14)</td><td>native</td></tr>
+        <tr><td>Local warehouse / SQL engine</td><td><strong>DuckDB</strong> — your local Snowflake/BigQuery</td><td>native</td></tr>
+        <tr><td>Transformation</td><td><strong>dbt-core</strong> + <strong>dbt-duckdb</strong></td><td>native</td></tr>
+        <tr><td>Columnar interchange / Parquet</td><td><strong>PyArrow</strong></td><td>native</td></tr>
+        <tr><td>Data quality</td><td><strong>Great Expectations</strong> + dbt tests</td><td>native</td></tr>
+        <tr><td>Orchestration</td><td><strong>Dagster</strong> (primary) · Airflow via Docker</td><td>native / Docker</td></tr>
+        <tr><td>Legacy source DB</td><td><strong>Postgres</strong></td><td>Docker</td></tr>
+        <tr><td>Local BI</td><td><strong>Metabase</strong> (or Power BI Desktop — not on Mac; use Metabase)</td><td>Docker</td></tr>
+        <tr><td>Cloud (Week 8 only)</td><td><strong>GCP: BigQuery + GCS</strong> + <strong>dbt-bigquery</strong></td><td>cloud</td></tr>
+        <tr><td>Version control</td><td><strong>Git + GitHub</strong> — every artifact committed</td><td>native</td></tr>
+      </tbody>
+    </table></div>
+
+    <h4>Week 0 commands (Mac · uv · Python 3.13)</h4>
+    <pre><code><span class="c"># 1 — install uv (if not already)</span>
+<span class="k">curl</span> -LsSf https://astral.sh/uv/install.sh | sh
+
+<span class="c"># 2 — create the lab project on Python 3.13 (safer than 3.14 for dbt et al.)</span>
+<span class="k">uv</span> init eigenbasis-lab && cd eigenbasis-lab
+<span class="k">uv</span> venv --python 3.13
+<span class="k">source</span> .venv/bin/activate
+
+<span class="c"># 3 — core stack, all local</span>
+<span class="k">uv</span> pip install duckdb pyarrow dbt-core dbt-duckdb \
+                 great_expectations dagster dagster-webserver \
+                 dagster-dbt jupyter pandas
+
+<span class="c"># 4 — verify</span>
+<span class="k">duckdb</span> -c "SELECT 'duckdb ok';"
+<span class="k">dbt</span> --version
+<span class="k">dagster</span> --version
+
+<span class="c"># 5 — Docker Desktop (Apple Silicon) installed separately, then later:</span>
+<span class="k">docker</span> run -d --name pg -p 5432:5432 -e POSTGRES_PASSWORD=pw postgres:16
+
+<span class="c"># 6 — make this a repo; commit after every module</span>
+<span class="k">git</span> init && gh repo create eigenbasis-lab --private --source=. </code></pre>
+
+    <div class="note warn"><span class="tag">Python 3.14 caveat</span>Data tooling often trails the newest CPython by a release. Build this lab's venv on <strong>3.13</strong>. Keep 3.14 around for general use; if a package refuses to install, the version is almost always why — recreate with <code>uv venv --python 3.13</code>.</div>
+    <div class="note"><span class="tag">No Power BI on Mac</span>Power BI Desktop is Windows-only. Use <strong>Metabase</strong> (Docker, cross-platform) for the BI modules. Tableau Public also runs on Mac if you want a second tool.</div>
+  </section>
+
+  <!-- METHOD -->
+  <section class="blk" id="method">
+    <h2><span class="num">METHOD</span>How to study every module</h2>
+    <p class="sub">The same five-step loop, applied everywhere. If you can't draw it, you don't understand it yet.</p>
+    <ol class="list">
+      <li><strong>Concept pass (30–60 min):</strong> start with the relevant <a class="inline" href="Data_Consulting_Concepts_and_Readings.html#foundations">Foundations</a> group (plain-English + "when to use which"), then read the matching deeper Part of <a class="inline" href="Data_Consulting_Concepts_and_Readings.html">Concepts &amp; Readings</a> + that module's one curated source. Goal: explain it out loud in 2 minutes.</li>
+      <li><strong>Mental-model sketch (10 min):</strong> draw it — a diagram or a 5-bullet what/why/trade-off note.</li>
+      <li><strong>Minimal rep (1–2 hrs):</strong> the smallest hands-on version — one table, one model, one test. Not a big project.</li>
+      <li><strong>Teach-back / interview rep:</strong> answer the module's design prompt out loud (record or write it). This is where it sticks.</li>
+      <li><strong>Commit the artifact:</strong> SQL file, dbt model, markdown writeup, or diagram → into your repo.</li>
+    </ol>
+    <p><strong>Cadence:</strong> ~6–8 focused hours/week → ~12 weeks (Weeks 1–10 build the working capability; Weeks 11–12 are the architect-level and regulated-industry layers). Compress or stretch freely; each module is self-contained.</p>
+  </section>
+
+  <!-- DATASET -->
+  <section class="blk" id="dataset">
+    <h2><span class="num">DATASET</span>Use one dataset throughout</h2>
+    <p class="sub">Continuity beats variety. Reuse one set across every module so the capstone integrates naturally.</p>
+    <ul>
+      <li><strong>TPC-H</strong> (generate in DuckDB: <code>INSTALL tpch; LOAD tpch; CALL dbgen(sf=1);</code>) — clean, relational, perfect for dimensional modeling.</li>
+      <li><strong>A messy retail set</strong> (Olist Brazilian e-commerce, or Northwind) — the realistic mess that makes data-quality and migration reps real.</li>
+      <li><strong>NYC Taxi</strong> Parquet — big enough to feel "analytics scale" for DuckDB/partitioning practice.</li>
+    </ul>
+    <div class="note"><span class="tag">Recommendation</span><strong>TPC-H</strong> for modeling clarity + <strong>Olist/Northwind</strong> for the messy quality &amp; migration reps. Both are free and load straight into DuckDB.</div>
+  </section>
+
+  <!-- FOUNDATIONS PRIMER -->
+  <section class="blk" id="foundations-primer">
+    <h2><span class="num">WEEK 0.5</span>Foundations primer — do this before Week 1</h2>
+    <p class="sub">The fastest way to make every later module click: learn the load-bearing ideas from scratch first.</p>
+    <p>Work through the <a class="inline" href="Data_Consulting_Concepts_and_Readings.html#foundations">Foundations, Explained From Scratch</a> section in Concepts. Every concept is a collapsible card — plain-English definition, an everyday analogy, a tiny example, a "going deeper" layer, and a <strong>"when to use which" decision rule</strong>. Five groups, each pairing with later weeks:</p>
+    <div class="tw"><table>
+      <thead><tr><th>Group</th><th>Covers</th><th>Pairs with</th></tr></thead>
+      <tbody>
+        <tr><td><strong>A · Stored &amp; queried</strong></td><td>OLTP vs OLAP, row vs columnar, normalization, schema-on-read/write</td><td>Weeks 1–2</td></tr>
+        <tr><td><strong>B · Cloud platform</strong></td><td>storage÷compute, MPP, warehouse/lake/lakehouse, table formats, partitioning</td><td>Week 8</td></tr>
+        <tr><td><strong>C · Correctness</strong></td><td>ACID, CAP, PACELC, consistency models, idempotency, delivery guarantees</td><td>Weeks 6–7</td></tr>
+        <tr><td><strong>D · Moving data</strong></td><td>ETL vs ELT, CDC, batch vs streaming</td><td>Weeks 3, 6, 7</td></tr>
+        <tr><td><strong>E · Modeling</strong></td><td>grain, star schema, SCD2, surrogate keys, semantic layer</td><td>Weeks 2, 4, 9</td></tr>
+      </tbody>
+    </table></div>
+    <div class="note"><span class="tag">The test</span>You're done when, for each card, you can say the plain definition in one breath <em>and</em> state when you'd choose it over its alternative. Don't memorize — aim to be able to re-derive it. Re-open the relevant group at the start of each week.</div>
+  </section>
+
+  <!-- ============ WEEKS ============ -->
+
+  <!-- W1 -->
+  <section class="blk" id="w1">
+    <h2><span class="num">WEEK 1</span>SQL &amp; Analytics Foundations</h2>
+    <div class="wkmeta"><span class="pill">DuckDB</span><span class="pill">SQL</span><span class="pill">the bedrock</span></div>
+    <div class="lane"><div class="lbl">Concepts</div><div class="ct"><p>OLTP vs OLAP, row vs columnar, window functions, CTEs, aggregation grain, joins &amp; join explosions. <span class="conlink">→ Concepts Foundations A · Part 7.1</span></p></div></div>
+    <div class="lane"><div class="lbl">Practice</div><div class="ct"><ul>
+      <li>Load TPC-H into DuckDB. Write 10 queries escalating in difficulty: simple aggregates → multi-join → window functions (running totals, <code>rank</code>, <code>lag/lead</code>) → a query where a bad join <em>explodes</em> row counts, then fix it.</li>
+      <li>Read a raw Parquet/CSV file directly in DuckDB (<code>SELECT * FROM 'file.parquet'</code>) — internalize "query files in place."</li>
+    </ul></div></div>
+    <div class="lane"><div class="lbl">Artifact</div><div class="ct"><p><code>week1_sql_drills.sql</code> — committed, each query commented with what it demonstrates.</p></div></div>
+    <div class="lane"><div class="lbl">Interview</div><div class="ct"><p>"Explain grain with a query that violates it." · "Row vs columnar — when each?"</p></div></div>
+    <details class="readings"><summary>Readings — Week 1</summary><div class="body"><ul>
+      <li><span class="src">Mode</span> — the <em>SQL Tutorial</em>, Intermediate + Advanced (window functions). <span class="why">The cleanest free window-function teaching; runnable in-browser.</span></li>
+      <li><span class="src">DuckDB docs</span> — <em>"Querying Parquet/CSV"</em> + the SQL intro. <span class="why">Teaches the "query files in place" pattern you'll lean on all program.</span></li>
+      <li><span class="src">Concepts &amp; Readings</span> — Foundations A + Part 7.1 (OLTP vs OLAP). <span class="why">The from-scratch cards anchor why columnar exists and when to use each.</span></li>
+    </ul></div></details>
+  </section>
+
+  <!-- W2 -->
+  <section class="blk" id="w2">
+    <h2><span class="num">WEEK 2</span>Dimensional Modeling (Kimball)</h2>
+    <div class="wkmeta"><span class="pill">DuckDB</span><span class="pill">SQL</span><span class="pill">modeling</span></div>
+    <div class="lane"><div class="lbl">Concepts</div><div class="ct"><p>Star vs snowflake; fact types (transaction/periodic/accumulating); additive/semi/non-additive measures; conformed/role-playing/degenerate dimensions; surrogate keys; <em class="term">declaring grain</em>. <span class="conlink">→ Concepts Foundations E · Part 3.3</span></p></div></div>
+    <div class="lane"><div class="lbl">Practice</div><div class="ct"><ul>
+      <li>Take TPC-H's normalized schema and redesign it as a <strong>star schema</strong> by hand: declare the grain of a sales fact, identify dimensions (customer, part, supplier, date), build a date dimension, create surrogate keys.</li>
+      <li>Write SQL that populates <code>fct_orders</code>, <code>dim_customer</code>, <code>dim_date</code>.</li>
+      <li><strong>Contrast paradigms (30 min sketch):</strong> on paper, model the same sales domain as a <strong>Data Vault</strong> (hubs/links/satellites) and as <strong>One Big Table</strong>. Write one sentence on when you'd pick each over a Kimball star. <span class="conlink">→ Concepts Part 3 (modeling paradigms)</span></li>
+    </ul></div></div>
+    <div class="lane"><div class="lbl">Artifact</div><div class="ct"><p>A star-schema diagram (draw it) + the build SQL + one sentence: "The grain of <code>fct_orders</code> is one row per ___."</p></div></div>
+    <div class="lane"><div class="lbl">Interview</div><div class="ct"><p>"Design a star schema for e-commerce / healthcare claims. What's your grain?"</p></div></div>
+    <details class="readings"><summary>Readings — Week 2</summary><div class="body"><ul>
+      <li><span class="src">Kimball Group</span> — the free <em>Dimensional Modeling Techniques</em> index (read SCD + "declare the grain" entries). <span class="why">Authoritative; the vocabulary interviewers use.</span></li>
+      <li><span class="src">dbt Labs</span> — blog: <em>"Kimball dimensional modeling in the modern stack."</em> <span class="why">Bridges classic Kimball to how it's done in dbt today.</span></li>
+      <li><span class="src">Book (optional)</span> — <em>The Data Warehouse Toolkit</em>, Ch. 1–3. <span class="why">If one modeling book, this.</span></li>
+    </ul></div></details>
+  </section>
+
+  <!-- W3 -->
+  <section class="blk" id="w3">
+    <h2><span class="num">WEEK 3</span>dbt Fundamentals</h2>
+    <div class="wkmeta"><span class="pill">dbt-duckdb</span><span class="pill">the centerpiece</span></div>
+    <div class="lane"><div class="lbl">Concepts</div><div class="ct"><p>Models, <code>ref()</code>, <code>source()</code>, materializations, project layering (staging → intermediate → marts), naming, <code>dbt build/run/test</code>. <span class="conlink">→ Concepts Foundations D (ETL vs ELT) · Part 3.2, 3.5 (+ "when to use which materialization") · Tools Guide §4</span></p></div></div>
+    <div class="lane"><div class="lbl">Practice</div><div class="ct"><ul>
+      <li><code>dbt init</code> with the duckdb adapter pointed at your TPC-H file.</li>
+      <li>Build the full layering: <code>stg_*</code> (1:1, cleaned/typed) → <code>int_*</code> (joins/logic) → <code>fct_/dim_</code> marts (your Week 2 star schema, now as dbt models).</li>
+      <li><code>dbt docs generate &amp;&amp; dbt docs serve</code> → explore the lineage DAG.</li>
+    </ul></div></div>
+    <div class="lane"><div class="lbl">Artifact</div><div class="ct"><p>A working dbt project with clean staging→marts structure and rendered lineage, committed.</p></div></div>
+    <div class="lane"><div class="lbl">Interview</div><div class="ct"><p>"Walk me through how you'd structure a dbt project." · "view vs table vs incremental — when each?"</p></div></div>
+    <details class="readings"><summary>Readings — Week 3</summary><div class="body"><ul>
+      <li><span class="src">dbt Labs (free)</span> — <em>dbt Fundamentals</em> course, run against DuckDB locally (not their cloud sandbox). <span class="why">The canonical first course.</span></li>
+      <li><span class="src">dbt Labs</span> — <em>"How we structure our dbt projects."</em> <span class="why">The exact staging→marts answer interviewers expect.</span></li>
+      <li><span class="src">dbt-duckdb</span> — the adapter README. <span class="why">Profile setup specifics for local runs.</span></li>
+    </ul></div></details>
+  </section>
+
+  <!-- W4 -->
+  <section class="blk" id="w4">
+    <h2><span class="num">WEEK 4</span>Advanced dbt — Incremental &amp; SCD Type 2</h2>
+    <div class="wkmeta"><span class="pill">dbt-duckdb</span><span class="pill">most-tested advanced topic</span></div>
+    <div class="lane"><div class="lbl">Concepts</div><div class="ct"><p>Incremental models (<code>is_incremental()</code>, <code>unique_key</code>, strategies: merge/append/delete+insert/insert_overwrite), late-arriving data, <strong>snapshots / SCD Type 2</strong>, Jinja/macros. <span class="conlink">→ Concepts Foundations E (SCD2) + C (idempotency) · Part 3.2–3.3</span></p></div></div>
+    <div class="lane"><div class="lbl">Practice</div><div class="ct"><ul>
+      <li>Convert a large fact model to <strong>incremental</strong>; simulate new data arriving; prove only new rows process.</li>
+      <li>Build a <strong>dbt snapshot</strong> on a changing dimension (e.g., customer address) → watch Type 2 history rows with <code>dbt_valid_from</code>/<code>dbt_valid_to</code>.</li>
+      <li>Write one <strong>macro</strong> to DRY up repeated logic.</li>
+    </ul></div></div>
+    <div class="lane"><div class="lbl">Artifact</div><div class="ct"><p>Incremental model + working snapshot + a short note explaining the SCD2 mechanics in your own words.</p></div></div>
+    <div class="lane"><div class="lbl">Interview</div><div class="ct"><p>"Implement SCD Type 2 in dbt — explain the mechanics." · "Handle late-arriving data in an incremental model."</p></div></div>
+    <details class="readings"><summary>Readings — Week 4</summary><div class="body"><ul>
+      <li><span class="src">dbt docs</span> — <em>Incremental models</em>, <em>Snapshots</em>, <em>Materializations</em>. <span class="why">Concise and exact on the most-tested mechanics.</span></li>
+      <li><span class="src">dbt Labs</span> — blog on <em>incremental strategies</em> &amp; late-arriving data. <span class="why">The trade-offs between merge / insert_overwrite.</span></li>
+    </ul></div></details>
+  </section>
+
+  <!-- W5 -->
+  <section class="blk" id="w5">
+    <h2><span class="num">WEEK 5</span>Data Quality, Testing &amp; Observability</h2>
+    <div class="wkmeta"><span class="pill">dbt tests</span><span class="pill">Great Expectations</span><span class="pill">messy data</span></div>
+    <div class="lane"><div class="lbl">Concepts</div><div class="ct"><p>7 quality dimensions, 5 observability pillars, dbt tests (generic + singular), GE (suites/checkpoints), assertion vs anomaly detection, data contracts. <span class="conlink">→ Concepts Part 4 · Tools Guide §5</span></p></div></div>
+    <div class="lane"><div class="lbl">Practice</div><div class="ct"><p>Use the messy Olist/Northwind set here.</p><ul>
+      <li>Add <strong>dbt tests</strong>: <code>unique</code>, <code>not_null</code>, <code>relationships</code>, <code>accepted_values</code>; add <code>dbt_expectations</code>; add one <strong>singular test</strong> (custom SQL).</li>
+      <li>Build a <strong>Great Expectations</strong> suite on a raw source: profile, generate expectations, run a checkpoint, view Data Docs.</li>
+      <li>Add dbt <strong>source freshness</strong> checks.</li>
+      <li><strong>Write one data contract:</strong> a small YAML declaring a source's schema, types, and freshness SLA + an owner; wire a dbt/GE test that <em>fails the build</em> if the contract is violated. This is the producer-side enforcement idea made concrete.</li>
+    </ul></div></div>
+    <div class="lane"><div class="lbl">Artifact</div><div class="ct"><p>A test suite (dbt + GE) catching ≥3 real issues, with a note mapping each to a pillar/dimension.</p></div></div>
+    <div class="lane"><div class="lbl">Interview</div><div class="ct"><p>"Design a data quality framework for critical pipelines." · "5 pillars — a monitoring example for each."</p></div></div>
+    <details class="readings"><summary>Readings — Week 5</summary><div class="body"><ul>
+      <li><span class="src">Monte Carlo</span> — <em>"5 Pillars of Data Observability."</em> <span class="why">From the team that coined the framing.</span></li>
+      <li><span class="src">Great Expectations docs</span> — concepts tour + a profiling tutorial. <span class="why">Hands-on object model for your suite.</span></li>
+      <li><span class="src">dbt docs</span> — <em>Tests</em> + <em>dbt_expectations</em> README. <span class="why">Fastest path to model coverage.</span></li>
+    </ul></div></details>
+  </section>
+
+  <!-- W6 -->
+  <section class="blk" id="w6">
+    <h2><span class="num">WEEK 6</span>Data Migration &amp; Reconciliation</h2>
+    <div class="wkmeta"><span class="pill">Postgres (Docker)</span><span class="pill">DuckDB</span><span class="pill">Python</span><span class="pill">your differentiator</span></div>
+    <div class="lane"><div class="lbl">Concepts</div><div class="ct"><p>Migration patterns (big-bang/phased/parallel-run/strangler), the lifecycle, reconciliation (count → checksum → row-diff), failure classes (truncation/timezone/collation/rounding), CDC mechanisms. <span class="conlink">→ Concepts Foundations C–D (idempotency, delivery, CDC) · Part 2 (all) — incl. the new migration "when to use each" decision tables</span></p></div></div>
+    <div class="lane"><div class="lbl">Practice</div><div class="ct"><p>The marquee project.</p><ul>
+      <li>Stand up <strong>Postgres in Docker</strong> as the "legacy source"; load the messy dataset into it.</li>
+      <li>"Migrate" it to <strong>DuckDB</strong> (or BigQuery, Week 8): initial bulk load, then simulate incremental changes.</li>
+      <li>Build a <strong>reconciliation framework</strong> (Python + SQL): row counts, column checksums/hashes, row-level diff on PK, schema/type validation. Use <strong>PyArrow</strong> schemas to compare types. Deliberately inject a truncation and a timezone bug — prove your framework catches them.</li>
+      <li>Add timestamp-based incremental sync; read about log-based CDC (Debezium) conceptually.</li>
+      <li><strong>Managed ingestion rep (optional, ~1 hr):</strong> stand up <strong>Airbyte</strong> (Docker) and replicate one Postgres table into your warehouse with a few clicks. Contrast it with your hand-written extract — when is buy (Fivetran/Airbyte) better than build? <span class="conlink">→ Concepts Foundations D (ETL vs ELT)</span></li>
+    </ul></div></div>
+    <div class="lane"><div class="lbl">Artifact</div><div class="ct"><p>A reusable <strong>reconciliation toolkit</strong> (parameterized SQL/Python) + a one-page "migration validation methodology." <em>A portfolio piece and an Eigenbasis sales asset.</em></p></div></div>
+    <div class="lane"><div class="lbl">Interview</div><div class="ct"><p>"How do you validate a migration moved data correctly?" · "Walk me through migrating a legacy EDW to the cloud." (whiteboard the lifecycle)</p></div></div>
+    <details class="readings"><summary>Readings — Week 6</summary><div class="body"><ul>
+      <li><span class="src">Datafold</span> — posts on <em>data diffing</em> &amp; <em>validating migrations</em>. <span class="why">Clearest practitioner reconciliation strategy.</span></li>
+      <li><span class="src">Martin Fowler</span> — <em>StranglerFigApplication</em> + <em>ParallelChange</em>. <span class="why">Migration-safety patterns; reframe for data.</span></li>
+      <li><span class="src">Debezium docs</span> — CDC overview + snapshot-vs-streaming FAQ. <span class="why">Log-based CDC vocabulary without running it.</span></li>
+    </ul></div></details>
+  </section>
+
+  <!-- W7 -->
+  <section class="blk" id="w7">
+    <h2><span class="num">WEEK 7</span>Orchestration &amp; Pipeline Design</h2>
+    <div class="wkmeta"><span class="pill">Dagster</span><span class="pill">Airflow (Docker, optional)</span></div>
+    <div class="lane"><div class="lbl">Concepts</div><div class="ct"><p>DAGs, idempotency, retries, backfills, watermarks, batch vs streaming, Airflow (task-centric) vs Dagster (asset-centric). <span class="conlink">→ Concepts Foundations C–D (idempotency, exactly-once, batch vs streaming) · Part 5 (+ Airflow vs Dagster decision note) · Tools Guide §7–9</span></p></div></div>
+    <div class="lane"><div class="lbl">Practice</div><div class="ct"><ul>
+      <li>Wrap your pipeline as Dagster <strong>software-defined assets</strong>: ingest → <code>dbt build</code> (via <code>dagster-dbt</code>) → quality checks. Run <code>dagster dev</code> and watch the asset graph materialize.</li>
+      <li>Make a step <strong>idempotent</strong> and re-runnable; simulate a failure and a <strong>backfill</strong>.</li>
+      <li>(Optional) Stand up <strong>Airflow via Docker compose</strong> and rebuild one simple DAG to feel the task-centric contrast.</li>
+      <li><strong>Streaming micro-demo (optional, ~1 hr):</strong> run <strong>Kafka</strong> (Docker), produce a few events to a topic, and consume them — enough to feel topics/partitions/offsets and event-time. Goal is vocabulary, not a production stream. <span class="conlink">→ Concepts Foundations D (batch vs streaming) · Part 5</span></li>
+    </ul></div></div>
+    <div class="lane"><div class="lbl">Artifact</div><div class="ct"><p>A working orchestrated pipeline (ingest → transform → test) with visible asset lineage.</p></div></div>
+    <div class="lane"><div class="lbl">Interview</div><div class="ct"><p>"Airflow vs Dagster — contrast the models." · "Make a pipeline idempotent and handle backfills."</p></div></div>
+    <details class="readings"><summary>Readings — Week 7</summary><div class="body"><ul>
+      <li><span class="src">Dagster docs</span> — <em>Software-Defined Assets</em> tutorial + <em>dagster-dbt</em> guide. <span class="why">Your hands-on path; integrates your dbt project directly.</span></li>
+      <li><span class="src">Astronomer / Airflow</span> — <em>Core Concepts</em> + idempotency/backfill guides. <span class="why">Incumbent vocabulary for interviews.</span></li>
+      <li><span class="src">Tools Guide §9</span> — Dagster vs Airflow. <span class="why">The senior framing to rehearse.</span></li>
+    </ul></div></details>
+  </section>
+
+  <!-- W8 -->
+  <section class="blk" id="w8">
+    <h2><span class="num">WEEK 8</span>Cloud — Platform Modernization on GCP</h2>
+    <div class="wkmeta"><span class="pill">BigQuery</span><span class="pill">GCS</span><span class="pill">dbt-bigquery</span><span class="pill">the one cloud module</span></div>
+    <div class="lane"><div class="lbl">Concepts</div><div class="ct"><p>Separation of storage &amp; compute, warehouse vs lakehouse vs lake, table formats, partitioning/clustering, cost control, MPP. <span class="conlink">→ Concepts Foundations B (storage÷compute, MPP, warehouse/lake/lakehouse, table formats, partitioning) · Part 1</span></p><p>This is the one module local can't fully teach — you need a real serverless cloud warehouse.</p></div></div>
+    <div class="lane"><div class="lbl">Practice</div><div class="ct"><ul>
+      <li>Create a GCP project (free tier: 10GB storage, 1TB queries/mo). Load your data into <strong>GCS</strong> as Parquet, then into <strong>BigQuery</strong>.</li>
+      <li><strong>Repoint your existing dbt project</strong> from <code>dbt-duckdb</code> to <code>dbt-bigquery</code> — same models, new adapter. Proves portability (and is a strong talking point).</li>
+      <li>Partition &amp; cluster a table; run the same query partitioned vs not and compare <strong>bytes scanned</strong> (= cost). Internalize cost-as-a-constraint.</li>
+      <li>Query raw GCS files as an external table → feel the lakehouse pattern.</li>
+    </ul></div></div>
+    <div class="lane"><div class="lbl">Artifact</div><div class="ct"><p>The same dbt project running on BigQuery + a short cost/perf note (partitioned vs unpartitioned bytes scanned).</p></div></div>
+    <div class="lane"><div class="lbl">Interview</div><div class="ct"><p>"Warehouse vs lakehouse — how do you choose?" · "Reduce warehouse cost without hurting SLAs."</p></div></div>
+    <details class="readings"><summary>Readings — Week 8</summary><div class="body"><ul>
+      <li><span class="src">Google Cloud</span> — <em>"BigQuery explained"</em> blog series (storage, query/slots, partitioning &amp; clustering). <span class="why">Your target's internals, vendor-authored and clear.</span></li>
+      <li><span class="src">dbt-bigquery</span> — adapter setup docs. <span class="why">The profile change that proves portability.</span></li>
+      <li><span class="src">GCP docs</span> — BigQuery <em>cost controls / best practices.</em> <span class="why">Bytes-scanned thinking = the cost answer.</span></li>
+    </ul></div></details>
+  </section>
+
+  <!-- W9 -->
+  <section class="blk" id="w9">
+    <h2><span class="num">WEEK 9</span>Semantic Layer, BI &amp; Reporting Modernization</h2>
+    <div class="wkmeta"><span class="pill">MetricFlow</span><span class="pill">Metabase (Docker)</span></div>
+    <div class="lane"><div class="lbl">Concepts</div><div class="ct"><p>Semantic/metrics layer (why it exists), governed KPIs, metric standardization, live vs extract, RLS, pre-aggregation, BI rationalization. <span class="conlink">→ Concepts Foundations E (semantic layer) · Part 3.6–3.7, Part 6</span></p></div></div>
+    <div class="lane"><div class="lbl">Practice</div><div class="ct"><ul>
+      <li>Define metrics once in the <strong>dbt Semantic Layer (MetricFlow)</strong> locally (or model a governed "metrics" mart). Express revenue once, query by multiple dimensions.</li>
+      <li>Connect <strong>Metabase</strong> (Docker) to DuckDB/BigQuery; build 2–3 governed dashboards off the marts. Implement one <strong>row-level security</strong> scenario.</li>
+      <li>Write a "report rationalization" mini-plan: consolidating N legacy reports into certified dashboards.</li>
+    </ul></div></div>
+    <div class="lane"><div class="lbl">Artifact</div><div class="ct"><p>Metric definitions + a small governed dashboard + a one-page reporting-modernization approach.</p></div></div>
+    <div class="lane"><div class="lbl">Interview</div><div class="ct"><p>"Build a semantic layer so finance and ops agree on revenue." · "Modernize 400 legacy reports — your approach?"</p></div></div>
+    <details class="readings"><summary>Readings — Week 9</summary><div class="body"><ul>
+      <li><span class="src">dbt Semantic Layer / MetricFlow docs</span> — concepts (semantic models, measures, metrics). <span class="why">The object model to define metrics once.</span></li>
+      <li><span class="src">Metabase docs</span> — modeling + permissions (RLS) guides. <span class="why">Hands-on governed dashboards &amp; row-level security.</span></li>
+      <li><span class="src">Microsoft Learn</span> — Power BI <em>star-schema guidance</em> + <em>import vs DirectQuery</em>. <span class="why">Clearest extract-vs-live explanation even though you're on Metabase.</span></li>
+    </ul></div></details>
+  </section>
+
+  <!-- W10 -->
+  <section class="blk" id="w10">
+    <h2><span class="num">WEEK 10</span>Workflow &amp; AI Automation + Capstone</h2>
+    <div class="wkmeta"><span class="pill">Python</span><span class="pill">Dagster/cron</span><span class="pill">integration</span></div>
+    <div class="lane"><div class="lbl">Concepts</div><div class="ct"><p>Python/SQL automation (API integrations, scheduled workflows) and lightweight AI automation (document processing, retrieval) — your Tier-2 offerings. <span class="conlink">→ Concepts Parts 5–6 + your strategy doc</span></p></div></div>
+    <div class="lane"><div class="lbl">Practice</div><div class="ct"><ul>
+      <li>One <strong>Python automation</strong>: pull from an API → land in the warehouse → trigger dbt → post a quality summary. Schedule it (Dagster/cron).</li>
+      <li>One small <strong>AI automation</strong>: a script that uses an LLM to classify/extract from documents into structured rows — minimal and local-friendly.</li>
+    </ul></div></div>
+    <div class="lane"><div class="lbl">Capstone</div><div class="ct"><p>Integrate everything into one narrative: Postgres source → ingest → BigQuery → dbt (staging→marts, incremental + SCD2) → quality (dbt tests + GE) → reconciliation → Dagster orchestration → semantic layer → Metabase dashboard. Write a README that reads like a consulting case study.</p></div></div>
+    <div class="lane"><div class="lbl">Artifact</div><div class="ct"><p>The capstone repo — simultaneously your portfolio, your interview talk-track, and an Eigenbasis capability demo.</p></div></div>
+    <details class="readings"><summary>Readings — Week 10</summary><div class="body"><ul>
+      <li><span class="src">Dagster docs</span> — schedules &amp; sensors. <span class="why">Wire the automation onto a cron/event.</span></li>
+      <li><span class="src">Tools Guide §10</span> — "how they fit together." <span class="why">The capstone wiring diagram.</span></li>
+    </ul></div></details>
+  </section>
+
+  <!-- W11 -->
+  <section class="blk" id="w11">
+    <h2><span class="num">WEEK 11</span>Architecture &amp; System-Design Practice</h2>
+    <div class="wkmeta"><span class="pill">whiteboard</span><span class="pill">design reps</span><span class="pill">the architect signal</span></div>
+    <div class="lane"><div class="lbl">Concepts</div><div class="ct"><p>The cross-cutting reasoning that separates an implementer from an architect: CAP/PACELC/ACID applied to real choices, strong vs eventual consistency, distributed-systems basics (partitioning, replication, skew, shuffle), the <strong>reference modern-data-stack diagram</strong>, and the scored <em class="term">answer-shape</em> (requirements → assumptions → grain → design → trade-offs → failure → cost). <span class="conlink">→ Concepts Foundations C · Part 7 (Architecture) · Part 8 (How interviews are scored)</span></p></div></div>
+    <div class="lane"><div class="lbl">Practice</div><div class="ct"><p>This week is reps, not new tooling — reuse the capstone you've built.</p><ul>
+      <li>Take four prompts and <strong>whiteboard each out loud</strong> with the answer-shape loop, timed to ~20 min: (1) migrate a legacy on-prem EDW to a cloud lakehouse; (2) design the analytics layer for a company moving off spreadsheets; (3) design a data-quality/observability framework for critical pipelines; (4) reduce warehouse cost without hurting SLAs.</li>
+      <li><strong>Draw the reference modern-data-stack diagram from memory</strong> (sources → ingestion → lake/warehouse → dbt → semantic layer → BI; orchestration/observability/governance as cross-cutting). Redraw until fluent.</li>
+      <li>For two prompts, write a one-page design doc: assumptions, the design, the two trade-offs you weighed, the failure modes, and the cost lever.</li>
+      <li>Record yourself answering two prompts; watch it back and tighten.</li>
+    </ul></div></div>
+    <div class="lane"><div class="lbl">Artifact</div><div class="ct"><p>A <strong>design playbook</strong>: the answer-shape checklist, two written worked designs, and a clean hand-drawn MDS diagram. <em>Your interview talk-track and a credibility asset on sales calls.</em></p></div></div>
+    <div class="lane"><div class="lbl">Interview</div><div class="ct"><p>"Migrate a legacy EDW to a cloud lakehouse — walk me through it." · "Warehouse vs lakehouse — how do you choose?" · "Where would this design fail, and how do you recover?"</p></div></div>
+    <details class="readings"><summary>Readings — Week 11</summary><div class="body"><ul>
+      <li><span class="src">Concepts &amp; Readings</span> — Part 7 (Architecture) + Part 8 (answer-shape) + Foundations C. <span class="why">Your primary text; rehearse the loop until automatic.</span></li>
+      <li><span class="src">Book</span> — <em>Designing Data-Intensive Applications</em> (Kleppmann), Ch. 1–6, 9. <span class="why">The reference for the consistency/partitioning/replication trade-offs you'll be pressed on.</span></li>
+      <li><span class="src">Book</span> — <em>Fundamentals of Data Engineering</em> (Reis &amp; Housley), Ch. 3. <span class="why">The architecture-survey framing tailored to this consulting domain.</span></li>
+    </ul></div></details>
+  </section>
+
+  <!-- W12 -->
+  <section class="blk" id="w12">
+    <h2><span class="num">WEEK 12</span>Governance, Security, Compliance &amp; Lineage</h2>
+    <div class="wkmeta"><span class="pill">DuckDB/BigQuery</span><span class="pill">OpenMetadata (Docker)</span><span class="pill">regulated-industry edge</span></div>
+    <div class="lane"><div class="lbl">Concepts</div><div class="ct"><p>Access control (RBAC vs ABAC), row-level security, column masking &amp; tokenization, the compliance regimes your target industries care about (GDPR, HIPAA, SOX, PCI), data catalogs &amp; column-level lineage, master data management (MDM), data contracts, and FinOps (cost as a governed constraint). <span class="conlink">→ Concepts Governance chapter · Part 7.3</span></p></div></div>
+    <div class="lane"><div class="lbl">Practice</div><div class="ct"><p>Use the messy Olist/Northwind set (it has real PII: names, emails, addresses).</p><ul>
+      <li><strong>Classify the PII</strong> in your source: tag every column as public / internal / PII / sensitive-PII. This classification <em>is</em> the governance starting point.</li>
+      <li>Implement <strong>column masking</strong> (a masked view or policy that shows <code>j***@x.com</code> to non-privileged roles) and one <strong>row-level security</strong> rule (a region sees only its rows). Do it in DuckDB views or BigQuery policy tags.</li>
+      <li>Stand up <strong>column-level lineage</strong>: either dbt's exposures + docs DAG, or run <strong>OpenMetadata/DataHub via Docker</strong> and point it at your warehouse. Trace one PII column end to end.</li>
+      <li>Write one <strong>data contract</strong> (schema + freshness + ownership in YAML) and enforce it with a dbt/GE test that fails the build on violation.</li>
+      <li>Write a short <strong>compliance mapping</strong>: pick healthcare (HIPAA) or finance (SOX/PCI) and list what each requires of your pipeline (access logs, retention, masking, right-to-erasure).</li>
+    </ul></div></div>
+    <div class="lane"><div class="lbl">Artifact</div><div class="ct"><p>A <strong>governance mini-framework</strong>: a PII classification table, working masking + RLS, a lineage screenshot, one enforced data contract, and a one-page compliance checklist for a target industry. <em>A direct Eigenbasis sales asset for regulated clients.</em></p></div></div>
+    <div class="lane"><div class="lbl">Interview</div><div class="ct"><p>"How do you handle PII during a migration?" · "Design governance for a regulated (healthcare/finance) client." · "What's a data contract and where do you enforce it?"</p></div></div>
+    <details class="readings"><summary>Readings — Week 12</summary><div class="body"><ul>
+      <li><span class="src">Concepts &amp; Readings</span> — the Governance, Security &amp; Compliance chapter. <span class="why">Your primary text; the worked masking/lineage/contract examples.</span></li>
+      <li><span class="src">DataHub / OpenMetadata docs</span> — the "what is lineage / a data catalog" intros + local quickstart. <span class="why">Hands-on catalog &amp; column lineage.</span></li>
+      <li><span class="src">Chad Sanderson</span> — the <em>Data Contracts</em> essays. <span class="why">The clearest case for producer-side enforcement.</span></li>
+      <li><span class="src">Vendor primers</span> — a plain-English GDPR + HIPAA overview (any cloud's compliance page). <span class="why">Enough to speak to obligations without legal depth.</span></li>
+    </ul></div></details>
+  </section>
+
+  <!-- SEQUENCING -->
+  <section class="blk" id="seq">
+    <h2><span class="num">WHY THIS ORDER</span>Sequencing logic</h2>
+    <div class="ascii">Foundations:   W0.5 Concepts primer ─► W1 SQL ─► W2 Modeling ─► W3 dbt ─► W4 dbt advanced
+Quality/Trust: W5 Data Quality ─► W6 Migration &amp; Reconciliation   ◄─ your differentiator
+Production:    W7 Orchestration ─► W8 GCP / Cloud Platform
+Delivery:      W9 Semantic + BI ─► W10 Automation + Capstone
+Architect:     W11 Architecture &amp; System Design ─► W12 Governance &amp; Compliance   ◄─ the role-level layer</div>
+    <p>SQL → modeling → dbt is the non-negotiable spine; everything hangs off a working dbt project. Migration/reconciliation comes <em>after</em> you can build &amp; test models (you need something to reconcile). Cloud comes <em>after</em> local mastery so you're swapping adapters, not learning two things at once. Weeks 11–12 come <em>last</em> on purpose: the architecture and governance reps are most valuable once you have a concrete capstone to reason about — you design and govern a system you've actually built.</p>
+  </section>
+
+  <!-- MVP -->
+  <section class="blk" id="mvp">
+    <h2><span class="num">SHORT ON TIME</span>The minimum-viable path</h2>
+    <p class="sub">If you can only do four things before going to market, do these — most interview surface, most billable work.</p>
+    <ol class="list">
+      <li><strong>Week 3 — dbt fundamentals</strong> (a working project)</li>
+      <li><strong>Week 4 — incremental + SCD2</strong> (the advanced dbt signal)</li>
+      <li><strong>Week 6 — migration &amp; reconciliation</strong> (your differentiator + a sales asset)</li>
+      <li><strong>Week 8 — the same project on BigQuery</strong> (proves cloud/platform competence)</li>
+    </ol>
+  </section>
+
+  <!-- TRACKER -->
+  <section class="blk" id="track">
+    <h2><span class="num">TRACKER</span>Progress</h2>
+    <p class="sub">Click the boxes — your progress saves in this browser automatically (no account, no server).</p>
+    <div class="trkmeta"><span><b id="trkcount">0</b> / 48 done</span><span id="trkbar"><i></i></span><button id="trkreset" type="button">reset</button></div>
+    <div class="tw"><table class="track">
+      <thead><tr><th>Wk</th><th>Module</th><th>Concept</th><th>Practice</th><th>Artifact</th><th>Interview rep</th></tr></thead>
+      <tbody id="trkbody">
+        <tr><td>1</td><td>SQL &amp; Analytics Foundations</td><td><input type="checkbox" class="trk" data-k="1c" aria-label="Week 1 Concept"></td><td><input type="checkbox" class="trk" data-k="1p" aria-label="Week 1 Practice"></td><td><input type="checkbox" class="trk" data-k="1a" aria-label="Week 1 Artifact"></td><td><input type="checkbox" class="trk" data-k="1i" aria-label="Week 1 Interview rep"></td></tr>
+        <tr><td>2</td><td>Dimensional Modeling</td><td><input type="checkbox" class="trk" data-k="2c" aria-label="Week 2 Concept"></td><td><input type="checkbox" class="trk" data-k="2p" aria-label="Week 2 Practice"></td><td><input type="checkbox" class="trk" data-k="2a" aria-label="Week 2 Artifact"></td><td><input type="checkbox" class="trk" data-k="2i" aria-label="Week 2 Interview rep"></td></tr>
+        <tr><td>3</td><td>dbt Fundamentals</td><td><input type="checkbox" class="trk" data-k="3c" aria-label="Week 3 Concept"></td><td><input type="checkbox" class="trk" data-k="3p" aria-label="Week 3 Practice"></td><td><input type="checkbox" class="trk" data-k="3a" aria-label="Week 3 Artifact"></td><td><input type="checkbox" class="trk" data-k="3i" aria-label="Week 3 Interview rep"></td></tr>
+        <tr><td>4</td><td>Advanced dbt (Incremental/SCD2)</td><td><input type="checkbox" class="trk" data-k="4c" aria-label="Week 4 Concept"></td><td><input type="checkbox" class="trk" data-k="4p" aria-label="Week 4 Practice"></td><td><input type="checkbox" class="trk" data-k="4a" aria-label="Week 4 Artifact"></td><td><input type="checkbox" class="trk" data-k="4i" aria-label="Week 4 Interview rep"></td></tr>
+        <tr><td>5</td><td>Data Quality &amp; Observability</td><td><input type="checkbox" class="trk" data-k="5c" aria-label="Week 5 Concept"></td><td><input type="checkbox" class="trk" data-k="5p" aria-label="Week 5 Practice"></td><td><input type="checkbox" class="trk" data-k="5a" aria-label="Week 5 Artifact"></td><td><input type="checkbox" class="trk" data-k="5i" aria-label="Week 5 Interview rep"></td></tr>
+        <tr><td>6</td><td>Migration &amp; Reconciliation</td><td><input type="checkbox" class="trk" data-k="6c" aria-label="Week 6 Concept"></td><td><input type="checkbox" class="trk" data-k="6p" aria-label="Week 6 Practice"></td><td><input type="checkbox" class="trk" data-k="6a" aria-label="Week 6 Artifact"></td><td><input type="checkbox" class="trk" data-k="6i" aria-label="Week 6 Interview rep"></td></tr>
+        <tr><td>7</td><td>Orchestration</td><td><input type="checkbox" class="trk" data-k="7c" aria-label="Week 7 Concept"></td><td><input type="checkbox" class="trk" data-k="7p" aria-label="Week 7 Practice"></td><td><input type="checkbox" class="trk" data-k="7a" aria-label="Week 7 Artifact"></td><td><input type="checkbox" class="trk" data-k="7i" aria-label="Week 7 Interview rep"></td></tr>
+        <tr><td>8</td><td>GCP / Platform Modernization</td><td><input type="checkbox" class="trk" data-k="8c" aria-label="Week 8 Concept"></td><td><input type="checkbox" class="trk" data-k="8p" aria-label="Week 8 Practice"></td><td><input type="checkbox" class="trk" data-k="8a" aria-label="Week 8 Artifact"></td><td><input type="checkbox" class="trk" data-k="8i" aria-label="Week 8 Interview rep"></td></tr>
+        <tr><td>9</td><td>Semantic Layer &amp; BI</td><td><input type="checkbox" class="trk" data-k="9c" aria-label="Week 9 Concept"></td><td><input type="checkbox" class="trk" data-k="9p" aria-label="Week 9 Practice"></td><td><input type="checkbox" class="trk" data-k="9a" aria-label="Week 9 Artifact"></td><td><input type="checkbox" class="trk" data-k="9i" aria-label="Week 9 Interview rep"></td></tr>
+        <tr><td>10</td><td>Automation + Capstone</td><td><input type="checkbox" class="trk" data-k="10c" aria-label="Week 10 Concept"></td><td><input type="checkbox" class="trk" data-k="10p" aria-label="Week 10 Practice"></td><td><input type="checkbox" class="trk" data-k="10a" aria-label="Week 10 Artifact"></td><td><input type="checkbox" class="trk" data-k="10i" aria-label="Week 10 Interview rep"></td></tr>
+        <tr><td>11</td><td>Architecture &amp; System Design</td><td><input type="checkbox" class="trk" data-k="11c" aria-label="Week 11 Concept"></td><td><input type="checkbox" class="trk" data-k="11p" aria-label="Week 11 Practice"></td><td><input type="checkbox" class="trk" data-k="11a" aria-label="Week 11 Artifact"></td><td><input type="checkbox" class="trk" data-k="11i" aria-label="Week 11 Interview rep"></td></tr>
+        <tr><td>12</td><td>Governance &amp; Compliance</td><td><input type="checkbox" class="trk" data-k="12c" aria-label="Week 12 Concept"></td><td><input type="checkbox" class="trk" data-k="12p" aria-label="Week 12 Practice"></td><td><input type="checkbox" class="trk" data-k="12a" aria-label="Week 12 Artifact"></td><td><input type="checkbox" class="trk" data-k="12i" aria-label="Week 12 Interview rep"></td></tr>
+      </tbody>
+    </table></div>
+  </section>
+
+  </main>
+</div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <p><strong>Eigenbasis Lab · Reference 03 — Study Itinerary.</strong> Companion to <a href="Data_Consulting_Concepts_and_Readings.html">Concepts &amp; Readings</a> and the <a href="Data_Consulting_Tools_Guide.html">Tools Guide</a>.</p>
+  </div>
+</footer>
+
+<script>
+  const links=[...document.querySelectorAll('nav.toc a')];
+  const map=new Map(links.map(a=>[a.getAttribute('href').slice(1),a]));
+  const obs=new IntersectionObserver((es)=>{es.forEach(e=>{if(e.isIntersecting){links.forEach(l=>l.classList.remove('active'));const a=map.get(e.target.id);if(a)a.classList.add('active');}});},{rootMargin:'-15% 0px -75% 0px',threshold:0});
+  document.querySelectorAll('section.blk').forEach(s=>obs.observe(s));
+</script>
+
+<script>
+  // Progress tracker — persists checkmarks in this browser via localStorage.
+  (function(){
+    const KEY = 'eigenbasis-itinerary-tracker-v1';
+    const boxes = [...document.querySelectorAll('input.trk')];
+    const countEl = document.getElementById('trkcount');
+    const bar = document.querySelector('#trkbar i');
+    let saved = {};
+    try { saved = JSON.parse(localStorage.getItem(KEY) || '{}'); } catch(e) {}
+    function refresh(){
+      const n = boxes.filter(b => b.checked).length;
+      if (countEl) countEl.textContent = n;
+      if (bar) bar.style.width = (boxes.length ? (100*n/boxes.length) : 0) + '%';
+    }
+    function persist(){
+      try { localStorage.setItem(KEY, JSON.stringify(saved)); }
+      catch(e){ /* private mode / file:// restrictions — checkboxes still work for the session */ }
+    }
+    boxes.forEach(b => {
+      if (saved[b.dataset.k]) b.checked = true;
+      b.addEventListener('change', () => { saved[b.dataset.k] = b.checked; persist(); refresh(); });
+    });
+    const reset = document.getElementById('trkreset');
+    if (reset) reset.addEventListener('click', () => {
+      if (!confirm('Clear all tracker checkmarks in this browser?')) return;
+      boxes.forEach(b => b.checked = false);
+      saved = {};
+      try { localStorage.removeItem(KEY); } catch(e) {}
+      refresh();
+    });
+    refresh();
+  })();
+</script>
+</body>
+</html>

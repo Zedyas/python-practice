@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 0002 — Five Words on the Spine</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+<script src="../assets/quiz.js"></script>
+</head>
+<body id="top">
+
+<header class="hero">
+  <div class="hero-inner">
+    <p class="eyebrow">Eigenbasis Lab · Lesson 0002</p>
+    <h1 class="title">Five Words on the <em>Spine</em></h1>
+    <p class="lede">CDC, reconciliation, SCD2, idempotency, masking. They feel like five unrelated bits of jargon. They're not — each is one labelled spot on the diagram from <a class="inline" href="0001-the-spine.html">Lesson 0001</a>. Learn them <em>as locations</em> and they stop being scary.</p>
+    <div class="crosslinks">
+      <a class="alt" href="0001-the-spine.html">← Lesson 0001 · The Spine</a>
+      <a class="alt" href="../reference/01-glossary.html">Master Glossary</a>
+      <a class="alt" href="../reference/00-the-spine.html">Spine one-pager</a>
+      <a href="#practice">Jump to practice</a>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+<main>
+
+  <div class="win">
+    <span class="k">The win</span>
+    <p>For each of the five words you'll be able to say three things cold: <strong>(1) a one-sentence definition, (2) where it lives on the spine, (3) what breaks if you skip it.</strong> That triple is exactly what an interviewer is checking.</p>
+  </div>
+
+  <section class="blk" id="how">
+    <h2><span class="num">00</span>How to use this (and "should I read the docs?")</h2>
+    <p>You asked whether you should be reading the docs on each of these. Here's the rule for this whole course: <strong>learn it here first, read the doc second.</strong> A lesson is small enough to fit in working memory; the docs are deep reference you'll drown in if you open them cold. So:</p>
+    <ul>
+      <li><strong>Now:</strong> work this lesson — definition, the tiny example, what breaks. That's enough to <em>use</em> the word correctly.</li>
+      <li><strong>Then, alongside:</strong> open the one linked doc section per term (cited under each) to deepen it. Reading <em>after</em> you have the hook is when docs pay off.</li>
+      <li><strong>Don't</strong> try to read all five doc chapters end-to-end. That's the trap that made these feel basic-but-fuzzy.</li>
+    </ul>
+    <p>Every code block below was run against your <code>shop_seed.sql</code> in DuckDB — three customers, three products, four orders — so you can paste any of them and see the same result.</p>
+  </section>
+
+  <!-- 1 CDC -->
+  <section class="blk" id="cdc">
+    <h2><span class="num">01</span>CDC — Change Data Capture <span class="spot flow">Stage · Ingest</span></h2>
+    <p><strong>Definition:</strong> a way to move <em>only the rows that changed</em> in a source since the last sync, instead of re-copying the whole table every time.</p>
+    <p>Two mechanisms you should be able to name:</p>
+    <ul>
+      <li><strong>Query-based</strong> — keep a <em class="term">watermark</em> (the last value you saw of an ever-increasing column like <code>updated_at</code>) and select rows past it.</li>
+      <li><strong>Log-based</strong> — read the database's write-ahead log directly (tools like Debezium), so you catch deletes too and don't hammer the source. This is the "real" CDC.</li>
+    </ul>
+    <p>Query-based CDC on your <code>orders</code>, using <code>order_date</code> as the watermark — "give me everything after the last load (2026-06-01)":</p>
+    <pre><code><span class="k">SELECT</span> order_id, order_date <span class="k">FROM</span> orders
+<span class="k">WHERE</span> order_date &gt; <span class="k">DATE</span> '2026-06-01';
+<span class="c">-- ┌──────────┬────────────┐
+-- │ order_id │ order_date │
+-- ├──────────┼────────────┤
+-- │ 1002     │ 2026-06-02 │   ← only the 2 new rows move, not all 4
+-- │ 1003     │ 2026-06-02 │
+-- └──────────┴────────────┘</span></code></pre>
+    <p><strong>What breaks without it:</strong> you re-copy the entire source every run. Fine for 4 rows, fatal for 400M — slow, expensive, and it pounds the live production database.</p>
+    <div class="note"><span class="tag">Interview line</span>"CDC moves only what changed. Query-based uses a watermark column; log-based reads the DB's write-ahead log and also captures deletes." <a class="cite" href="../Data_Consulting_Concepts_and_Readings.html#migration">[Concepts 02 · CDC]</a></div>
+  </section>
+
+  <!-- 2 Reconciliation -->
+  <section class="blk" id="recon">
+    <h2><span class="num">02</span>Reconciliation <span class="spot flow">Stage · Ingest (the proving job)</span></h2>
+    <p><strong>Definition:</strong> proving the data that <em>landed</em> matches the data at the <em>source</em>. Moving data is job one; reconciliation is job two — and it's the hard, billable one (your differentiator).</p>
+    <p>You climb a <em class="term">ladder</em>, cheapest check first, only going deeper if a rung disagrees:</p>
+    <div class="tw"><table>
+      <thead><tr><th>Rung</th><th>Check</th><th>Catches</th></tr></thead>
+      <tbody>
+        <tr><td>1</td><td>Row counts match</td><td>whole batches dropped</td></tr>
+        <tr><td>2</td><td>Column aggregates match (<code>sum</code>, <code>min</code>, <code>max</code>, checksum)</td><td>truncation, rounding, type coercion</td></tr>
+        <tr><td>3</td><td>Row-level diff on the primary key</td><td>the exact rows that differ</td></tr>
+      </tbody>
+    </table></div>
+    <pre><code><span class="c">-- Rung 1 + 2 on the source side (run the same on the target, compare)</span>
+<span class="k">SELECT</span> count(*) <span class="k">AS</span> row_count, sum(qty) <span class="k">AS</span> total_qty <span class="k">FROM</span> orders;
+<span class="c">-- row_count = 4 , total_qty = 8   →  target must show 4 and 8, or you have a bug</span></code></pre>
+    <p><strong>What breaks without it:</strong> silent data loss. The pipeline goes green, a dashboard quietly under-reports revenue, and nobody notices until a client does. You'll build this ladder the hard way — rough Python first — in a later lesson.</p>
+    <div class="note"><span class="tag">Interview line</span>"Counts, then aggregates/checksums, then a PK-level row diff — escalate only when a rung disagrees." <a class="cite" href="../eigenbasis-migration-lab/Understanding_The_Pieces.html">[Migration Lab · the seven checks]</a></div>
+  </section>
+
+  <!-- 3 SCD2 -->
+  <section class="blk" id="scd2">
+    <h2><span class="num">03</span>SCD2 — Slowly Changing Dimension, Type 2 <span class="spot">Stage · Transform</span></h2>
+    <p><strong>Definition:</strong> a way to keep <em>history</em> when a descriptive attribute changes. Instead of overwriting the old value, you <strong>close the old row and open a new one</strong>, each stamped with a validity window.</p>
+    <p>Contrast the types: <strong>Type 1</strong> overwrites (history lost). <strong>Type 2</strong> keeps every version. Say Cara (customer 3) moves from TX to CA on June 10:</p>
+    <pre><code><span class="c">-- dim_customer as SCD2: two rows for Cara, each with a validity window</span>
+<span class="k">SELECT</span> * <span class="k">FROM</span> dim_customer_scd2 <span class="k">WHERE</span> customer_id = 3;
+<span class="c">-- ┌─────────────┬───────┬────────────┬────────────┬────────────┐
+-- │ customer_id │ state │ valid_from │  valid_to  │ is_current │
+-- ├─────────────┼───────┼────────────┼────────────┼────────────┤
+-- │ 3           │ TX    │ 2026-01-01 │ 2026-06-10 │ false      │  ← closed
+-- │ 3           │ CA    │ 2026-06-10 │ 9999-12-31 │ true       │  ← open
+-- └─────────────┴───────┴────────────┴────────────┴────────────┘</span></code></pre>
+    <p>Now "what did <strong>TX</strong> customers buy <em>at the time of the order</em>?" is answerable — you join each order to the dimension row whose window contains the order date. dbt does this for you with <em class="term">snapshots</em>.</p>
+    <p><strong>What breaks without it:</strong> overwrite Cara to CA and every historical TX order retroactively becomes a CA order. Your past reports silently rewrite themselves.</p>
+    <div class="note"><span class="tag">Interview line</span>"SCD2 preserves history by closing the old row and inserting a new one with valid_from/valid_to — so point-in-time questions stay correct." <a class="cite" href="../Data_Consulting_Concepts_and_Readings.html#analytics-engineering">[Concepts 03 · SCD2 worked example]</a></div>
+  </section>
+
+  <!-- 4 Idempotency -->
+  <section class="blk" id="idem">
+    <h2><span class="num">04</span>Idempotency <span class="spot">Undercurrent · Orchestration</span></h2>
+    <p><strong>Definition:</strong> running a step <em>twice</em> leaves the system in the same state as running it <em>once</em>. No duplicates, no double-counting — so a retry or a backfill is always safe.</p>
+    <p>The difference is entirely in <em>how</em> you write. A blind <code>INSERT</code> is <strong>not</strong> idempotent — re-run it and rows double. Load on a key (anti-join, or <code>MERGE</code>) and it <strong>is</strong>:</p>
+    <pre><code><span class="c">-- idempotent load: insert only keys not already present</span>
+<span class="k">INSERT INTO</span> tgt
+<span class="k">SELECT</span> * <span class="k">FROM</span> orders o
+<span class="k">WHERE NOT EXISTS</span> (<span class="k">SELECT</span> 1 <span class="k">FROM</span> tgt t <span class="k">WHERE</span> t.order_id = o.order_id);
+
+<span class="c">-- run it once  → tgt has 4 rows
+-- run it AGAIN → tgt STILL has 4 rows   (a blind INSERT would show 8)</span></code></pre>
+    <p><strong>What breaks without it:</strong> a job fails halfway, the orchestrator retries it, and now half your rows are duplicated. Idempotency is what makes retries and backfills survivable — which is why it lives in the Orchestration band.</p>
+    <div class="note"><span class="tag">Interview line</span>"Idempotent = re-running is a no-op. I get it by loading on a unique key (merge / delete+insert), so retries and backfills can't double-count." <a class="cite" href="../Data_Consulting_Concepts_and_Readings.html#orchestration">[Concepts 05 · idempotency]</a></div>
+  </section>
+
+  <!-- 5 Masking -->
+  <section class="blk" id="mask">
+    <h2><span class="num">05</span>Masking <span class="spot">Undercurrent · Governance</span></h2>
+    <p><strong>Definition:</strong> showing a sensitive column in an <em>obscured</em> form to roles that aren't allowed to see the real value — while the true value stays underneath for those who are.</p>
+    <p>Your <code>customers.email</code> is PII. A masked view shows enough to be useful (you can tell two customers apart) but not the actual address:</p>
+    <pre><code><span class="k">SELECT</span> email <span class="k">AS</span> real,
+       regexp_replace(email, '(^.).*(@.*)$', '\1***\2') <span class="k">AS</span> masked
+<span class="k">FROM</span> customers;
+<span class="c">-- ┌────────────┬────────────┐
+-- │    real    │   masked   │
+-- ├────────────┼────────────┤
+-- │ amy@x.com  │ a***@x.com │   ← analysts see this column
+-- │ ben@x.com  │ b***@x.com │
+-- └────────────┴────────────┘</span></code></pre>
+    <p>In production you don't hand-write this per query — a privileged role sees <code>email</code>, everyone else is routed to the masked view (or a column-masking policy). <strong>What breaks without it:</strong> every analyst, contractor, and BI dashboard has raw PII — a direct GDPR/HIPAA violation and a breach waiting to happen.</p>
+    <div class="note"><span class="tag">Interview line</span>"Masking obscures a sensitive value for unprivileged roles while keeping the real value for authorized ones — enforced by a policy, not by trusting each query." <a class="cite" href="../Data_Consulting_Concepts_and_Readings.html#governance">[Concepts G · masking worked example]</a></div>
+  </section>
+
+  <!-- PRACTICE -->
+  <section class="blk" id="practice">
+    <h2><span class="num">06</span>Practice — say it before you flip</h2>
+    <p>Cover the lesson. For each card, answer out loud, <em>then</em> reveal.</p>
+
+    <div class="recall">
+      <p class="q">CDC — one sentence, plus its two mechanisms.</p>
+      <div class="a">Move only the rows that changed since last sync. Mechanisms: query-based (watermark column) and log-based (read the write-ahead log; catches deletes).</div>
+    </div>
+    <div class="recall">
+      <p class="q">The reconciliation ladder — three rungs, cheapest first.</p>
+      <div class="a">1) row counts, 2) column aggregates/checksums, 3) row-level diff on the primary key. Escalate only when a rung disagrees.</div>
+    </div>
+    <div class="recall">
+      <p class="q">Why does SCD Type 2 beat Type 1 for history?</p>
+      <div class="a">Type 1 overwrites, erasing the past; Type 2 closes the old row and opens a new one with valid_from/valid_to, so point-in-time questions stay correct.</div>
+    </div>
+    <div class="recall">
+      <p class="q">What makes an INSERT load idempotent?</p>
+      <div class="a">Loading on a unique key — anti-join / MERGE / delete+insert — so re-running inserts nothing new. A blind INSERT duplicates on every re-run.</div>
+    </div>
+
+    <h3>Place each on the spine</h3>
+    <div class="mcq" data-explain="Idempotency is what makes retries/backfills safe — it lives in the Orchestration undercurrent.">
+      <p class="q">A retried job must not double-count rows. Which part of the spine?</p>
+      <button>Transform — the dbt marts</button>
+      <button data-correct>Orchestration — idempotency</button>
+      <button>Governance — the masking</button>
+      <button>Storage — the partition</button>
+    </div>
+    <div class="mcq" data-explain="Proving the landed data matches the source is reconciliation — the second job of the Ingest/Migrate stage.">
+      <p class="q">"Prove the migrated table matches the source." Which word, which spot?</p>
+      <button>SCD2 — at the Transform</button>
+      <button>Masking — at the Governance</button>
+      <button data-correct>Reconcile — at the Ingest</button>
+      <button>Watermark — at the Storage</button>
+    </div>
+    <div class="mcq" data-explain="Obscuring PII for unprivileged roles is masking — a Governance-undercurrent control.">
+      <p class="q">Analysts must not see raw customer emails. Which control?</p>
+      <button>Reconciliation of the rows</button>
+      <button>Incremental model loading</button>
+      <button data-correct>Masking the PII column</button>
+      <button>Change data capture sync</button>
+    </div>
+
+    <div class="teacher"><span class="tag">Your teacher</span>Any of these still fuzzy? Push back at me — "show me what log-based CDC actually reads," "why valid_to = 9999-12-31?", "what's the difference between masking and tokenization?" I'll go as deep or as slow as you need.</div>
+  </section>
+
+  <section class="blk" id="next">
+    <h2><span class="num">→</span>What's next</h2>
+    <p>You now have the data path <em>and</em> five of its load-bearing mechanisms. Natural next moves:</p>
+    <ul>
+      <li><strong>0003 — The grain:</strong> the one word under SCD2 and every fact table. "One row per ___." Get it wrong and every number lies.</li>
+      <li><strong>Build the reconciliation ladder for real</strong> — rough Python over the shop data, then meet the lab's harness and see why it's config-driven.</li>
+      <li><strong>0004 — OLTP↔OLAP &amp; row↔columnar:</strong> why CDC reads from one kind of database and lands in a very different one.</li>
+    </ul>
+    <p>Say which, or "your call."</p>
+  </section>
+
+</main>
+</div>
+
+<footer>
+  <div class="wrap">
+    <p><strong>Lesson 0002 · Five Words on the Spine</strong> — Eigenbasis Lab. All SQL verified in DuckDB v1.5 against <code>shop_seed.sql</code>.
+    Back to <a href="0001-the-spine.html">Lesson 0001</a> · <a href="../reference/00-the-spine.html">spine one-pager</a>.</p>
+  </div>
+</footer>
+
+</body>
+</html>

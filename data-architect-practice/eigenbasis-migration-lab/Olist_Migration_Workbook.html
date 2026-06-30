@@ -1,0 +1,1382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Olist Migration Lab — Guided Workbook</title>
+<style>
+  :root{
+    --navy:#1F3864; --blue:#2E75B6; --ink:#1a1f2b; --muted:#5b6472;
+    --bg:#f4f6fb; --card:#ffffff; --line:#e1e7f0; --soft:#eef3fb;
+    --green:#1f7a4d; --greenbg:#e7f5ee; --amber:#9a6a00; --amberbg:#fdf3df;
+    --code:#0f2540; --codebg:#0d1b2e;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font:16px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+       color:var(--ink);background:var(--bg);-webkit-font-smoothing:antialiased}
+  .wrap{max-width:920px;margin:0 auto;padding:0 20px 120px}
+  header.hero{background:linear-gradient(135deg,var(--navy),var(--blue));color:#fff;
+       padding:46px 0 38px;margin-bottom:8px}
+  header.hero .wrap{padding-bottom:0}
+  .kicker{letter-spacing:.14em;text-transform:uppercase;font-size:12px;font-weight:700;opacity:.85}
+  h1{font-size:34px;margin:.25em 0 .15em;line-height:1.15}
+  .sub{font-size:17px;opacity:.92;max-width:680px}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;margin-top:22px}
+  .legend span{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.25);
+       border-radius:999px;padding:5px 13px;font-size:12.5px;font-weight:600}
+
+  /* sticky progress */
+  .progress{position:sticky;top:0;z-index:30;background:rgba(244,246,251,.92);
+       backdrop-filter:blur(8px);border-bottom:1px solid var(--line);padding:10px 0}
+  .progress .wrap{display:flex;align-items:center;gap:14px;padding-top:0;padding-bottom:0}
+  .bar{flex:1;height:9px;background:#dde5f1;border-radius:999px;overflow:hidden}
+  .bar > i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--blue),var(--green));
+       transition:width .35s ease}
+  .pct{font-variant-numeric:tabular-nums;font-weight:700;color:var(--navy);font-size:14px;min-width:118px;text-align:right}
+  .reset{font-size:12px;color:var(--muted);background:none;border:1px solid var(--line);
+       border-radius:7px;padding:5px 9px;cursor:pointer}
+  .reset:hover{border-color:var(--blue);color:var(--blue)}
+
+  .phase{margin-top:34px}
+  .phase > h2{font-size:13px;letter-spacing:.1em;text-transform:uppercase;color:var(--blue);
+       border-bottom:2px solid var(--line);padding-bottom:8px;margin-bottom:6px}
+  .phase .why{color:var(--muted);font-size:14.5px;margin:10px 0 4px}
+
+  .task{background:var(--card);border:1px solid var(--line);border-radius:14px;
+       padding:20px 22px;margin:16px 0;box-shadow:0 1px 2px rgba(20,40,80,.04)}
+  .task.done{border-color:#bfe3cf;background:linear-gradient(0deg,var(--greenbg),#fff 60%)}
+  .task .top{display:flex;align-items:flex-start;gap:13px}
+  .check{appearance:none;-webkit-appearance:none;flex:0 0 auto;width:24px;height:24px;margin-top:3px;
+       border:2px solid #c4cede;border-radius:7px;cursor:pointer;position:relative;background:#fff;transition:.15s}
+  .check:hover{border-color:var(--blue)}
+  .check:checked{background:var(--green);border-color:var(--green)}
+  .check:checked::after{content:"";position:absolute;left:7px;top:3px;width:6px;height:11px;
+       border:solid #fff;border-width:0 2.5px 2.5px 0;transform:rotate(45deg)}
+  .task h3{margin:0;font-size:18px;color:var(--navy)}
+  .tag{font-size:11px;font-weight:700;letter-spacing:.04em;padding:3px 8px;border-radius:6px;
+       margin-left:8px;vertical-align:middle;text-transform:uppercase}
+  .tag.skel{background:#e9eefc;color:#33489a}
+  .tag.spec{background:#fbe9ef;color:#9a3357}
+  .goal{margin:12px 0 4px}
+  .goal b{color:var(--navy)}
+
+  details{margin:10px 0 0;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--soft)}
+  details > summary{cursor:pointer;list-style:none;padding:11px 15px;font-weight:650;font-size:14.5px;
+       display:flex;align-items:center;gap:9px;user-select:none}
+  details > summary::-webkit-details-marker{display:none}
+  details > summary::before{content:"›";font-size:20px;line-height:0;color:var(--blue);transition:transform .2s;transform:translateY(1px)}
+  details[open] > summary::before{transform:rotate(90deg) translateX(1px)}
+  details .body{padding:2px 16px 15px 16px;font-size:15px}
+  summary .lvl{margin-left:auto;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+
+  details.nudge{background:#f3f7fd}
+  details.hint{background:#f1f5fc}
+  details.answer{background:#fff8ee;border-color:#f0dcae}
+  details.answer > summary{color:var(--amber)}
+  details.answer > summary::before{color:var(--amber)}
+  .answer-warn{font-size:12.5px;color:var(--amber);background:var(--amberbg);
+       border-radius:7px;padding:7px 10px;margin:0 0 10px}
+
+  .checkpoint{border:1px dashed #b9c8df;border-radius:10px;background:#f7faff;padding:12px 15px;margin:13px 0 2px}
+  .checkpoint .lbl{font-size:11.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--blue)}
+  .checkpoint p{margin:6px 0 0;font-size:14.5px}
+
+  pre{background:var(--codebg);color:#dbe7f5;border-radius:9px;padding:13px 15px;overflow:auto;
+       font:13.5px/1.55 "SF Mono",ui-monospace,Menlo,Consolas,monospace;margin:10px 0}
+  code{font:13px/1.4 "SF Mono",ui-monospace,Menlo,Consolas,monospace;background:#e7edf7;
+       color:var(--code);padding:1.5px 6px;border-radius:5px}
+  pre code{background:none;color:inherit;padding:0}
+  .tok-c{color:#8aa0b6;font-style:italic} /* comment */
+  .tok-k{color:#79b8ff} /* keyword */
+  .tok-s{color:#9ae6b4} /* string */
+  .tok-todo{color:#ffd479;font-weight:700}
+
+  ul.clean{margin:8px 0;padding-left:20px}
+  ul.clean li{margin:4px 0}
+  .pill{display:inline-block;background:var(--soft);border:1px solid var(--line);border-radius:7px;
+       padding:2px 8px;font-size:12.5px;color:var(--navy);margin:2px 4px 2px 0}
+  .note{font-size:13.5px;color:var(--muted);border-left:3px solid var(--blue);padding:4px 0 4px 12px;margin:12px 0}
+  footer.end{margin-top:46px;padding:22px;background:var(--card);border:1px solid var(--line);
+       border-radius:14px;text-align:center;color:var(--muted);font-size:14px}
+  a{color:var(--blue)}
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="wrap">
+    <div class="kicker">Eigenbasis Migration Lab</div>
+    <h1>Guided Workbook</h1>
+    <p class="sub">Same Olist project as the build guide — but you write the answers. Each task gives the goal, a way to check yourself, and escalating hints. The answer key is always last, behind a button, and using it counts as a hint, not a failure.</p>
+    <div class="legend">
+      <span>💡 Nudge — smallest push</span>
+      <span>🔑 Bigger hint — shape of the answer</span>
+      <span>📖 Answer key — only after you try</span>
+      <span>✅ Checkpoint — prove it worked</span>
+    </div>
+  </div>
+</header>
+
+<div class="progress">
+  <div class="wrap">
+    <div class="bar"><i id="barfill"></i></div>
+    <div class="pct" id="pct">0 / 0 done</div>
+    <button class="reset" id="reset">Reset progress</button>
+  </div>
+</div>
+
+<div class="wrap">
+
+  <p class="note">How to use this: this single file is everything — the project, the hints, and the full answers. Work top to bottom. For each task, attempt it first, peek at one hint level if stuck, and open the 📖 answer key only after you've tried. Progress saves in this browser tab automatically. The reconciliation harness is real code you run from a terminal; its complete source is embedded at the bottom under <b>Appendix: Harness Source</b>.</p>
+
+  <!-- ============ PHASE 0 ============ -->
+  <section class="phase">
+    <h2>Phase 0 · Environment</h2>
+    <p class="why">You're standing up the two sides of a migration: a "legacy" source and a modern target, plus a BI tool. The skill being built here is reproducible, isolated environments — the thing clients actually trust you to get right.</p>
+
+    <div class="task" data-id="p0t1">
+      <div class="top">
+        <input type="checkbox" class="check">
+        <div>
+          <h3>0.1 — Create the uv project <span class="tag skel">skeleton</span></h3>
+          <p class="goal"><b>Goal:</b> a Python 3.13 project managed entirely by <code>uv</code>, with the dependencies you'll need across all phases (data libs, dbt adapters, Great Expectations).</p>
+          <p>Fill the gaps. Don't reach for <code>pip</code> — everything goes through <code>uv</code>.</p>
+          <pre><code><span class="tok-c"># in ~/eigenbasis-migration-lab</span>
+uv init --python <span class="tok-todo">__TODO: which version?__</span>
+uv add pandas sqlalchemy duckdb duckdb-engine psycopg2-binary <span class="tok-todo">\
+  __TODO: 4 more — the BI-free essentials: yaml parser, table formatter,</span>
+<span class="tok-todo">       dbt core, the two dbt adapters you need, and great-expectations__</span></code></pre>
+
+          <div class="checkpoint">
+            <div class="lbl">✅ Checkpoint</div>
+            <p><code>uv run python -c "import dbt, duckdb, great_expectations; print('ok')"</code> prints <code>ok</code>, and <code>cat .python-version</code> shows 3.13.</p>
+          </div>
+
+          <details class="nudge"><summary>💡 Nudge<span class="lvl">level 1</span></summary>
+            <div class="body">Your lab target is Python 3.13. For deps, think about every phase: YAML config (harness), markdown tables in reports, dbt itself, the <em>two</em> warehouses you touch (DuckDB + Postgres each need their own dbt adapter), and the quality tool.</div>
+          </details>
+          <details class="hint"><summary>🔑 Bigger hint<span class="lvl">level 2</span></summary>
+            <div class="body">The four-plus you're missing are: <span class="pill">pyyaml</span><span class="pill">tabulate</span><span class="pill">dbt-core</span><span class="pill">dbt-duckdb</span><span class="pill">dbt-postgres</span><span class="pill">great-expectations</span>. The adapters are separate packages from <code>dbt-core</code>.</div>
+          </details>
+          <details class="answer"><summary>📖 Answer key<span class="lvl">reveal</span></summary>
+            <div class="body">
+              <div class="answer-warn">Try it before reading. Seeing the full command teaches less than reconstructing it.</div>
+              <pre><code>uv init --python 3.13
+uv add pandas sqlalchemy duckdb duckdb-engine psycopg2-binary pyyaml \
+       tabulate dbt-core dbt-duckdb dbt-postgres great-expectations</code></pre>
+            </div>
+          </details>
+        </div>
+      </div>
+    </div>
+
+    <div class="task" data-id="p0t2">
+      <div class="top">
+        <input type="checkbox" class="check">
+        <div>
+          <h3>0.2 — Docker services <span class="tag skel">skeleton</span></h3>
+          <p class="goal"><b>Goal:</b> a <code>docker-compose.yml</code> running Postgres 16 (your legacy source) and Metabase (your BI layer), with Postgres data persisted across restarts.</p>
+          <pre><code><span class="tok-k">services:</span>
+  postgres:
+    image: postgres:16
+    environment:
+      <span class="tok-todo"># TODO: user / password / db name — you'll reuse these as env vars</span>
+    ports: [<span class="tok-todo">"__:__"</span>]
+    volumes: [<span class="tok-todo">"__TODO: persist the data dir__"</span>]
+  metabase:
+    image: metabase/metabase:latest
+    ports: [<span class="tok-todo">"__:__"</span>]
+    depends_on: [postgres]
+<span class="tok-todo"># TODO: declare the named volume</span></code></pre>
+          <div class="checkpoint">
+            <div class="lbl">✅ Checkpoint</div>
+            <p><code>docker compose up -d</code> then <code>docker compose ps</code> shows both healthy. Metabase loads at <code>localhost:3000</code>. Stop/start and your Postgres data survives.</p>
+          </div>
+          <details class="nudge"><summary>💡 Nudge<span class="lvl">level 1</span></summary>
+            <div class="body">Postgres listens on 5432, Metabase's web UI on 3000. Persistence = a named volume mounted at <code>/var/lib/postgresql/data</code>. Pick simple creds (e.g. <code>olist/olist/olist</code>) and remember them — Phase 1 reads them from <code>$PG_USER</code>/<code>$PG_PASS</code>.</div>
+          </details>
+          <details class="answer"><summary>📖 Answer key<span class="lvl">reveal</span></summary>
+            <div class="body">
+              <div class="answer-warn">Try it before reading — the checkpoint is easy to hit by reasoning about ports and volumes.</div>
+              <pre><code><span class="tok-k">services:</span>
+  postgres:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: olist
+      POSTGRES_PASSWORD: olist
+      POSTGRES_DB: olist
+    ports: [<span class="tok-s">"5432:5432"</span>]
+    volumes: [<span class="tok-s">"pgdata:/var/lib/postgresql/data"</span>]
+  metabase:
+    image: metabase/metabase:latest
+    ports: [<span class="tok-s">"3000:3000"</span>]
+    depends_on: [postgres]
+volumes:
+  pgdata:</code></pre>
+              <p>Then <code>docker compose up -d</code> and <code>export PG_USER=olist PG_PASS=olist</code> (the harness reads these). The named <code>pgdata</code> volume is what survives restarts.</p>
+            </div>
+          </details>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PHASE 1 ============ -->
+  <section class="phase">
+    <h2>Phase 1 · Platform Modernization</h2>
+    <p class="why">Three zones — raw landing, migrated landing, then transformed marts (Phase 2). The interview-grade skill is being able to <em>explain why</em> the data moves before it's transformed (ELT), not just running the loaders.</p>
+
+    <div class="task" data-id="p1t1">
+      <div class="top">
+        <input type="checkbox" class="check">
+        <div>
+          <h3>1.1 — Load raw CSVs into Postgres <span class="tag skel">skeleton</span></h3>
+          <p class="goal"><b>Goal:</b> load all 9 Olist CSVs verbatim into Postgres. <em>No cleaning</em> — legacy systems are messy and that mess is what you'll later prove you migrated faithfully.</p>
+          <pre><code><span class="tok-c"># scripts/load_source.py</span>
+<span class="tok-k">import</span> pandas <span class="tok-k">as</span> pd, os
+<span class="tok-k">from</span> sqlalchemy <span class="tok-k">import</span> create_engine
+
+eng = create_engine(<span class="tok-todo">__TODO: build the postgres URL from $PG_USER / $PG_PASS__</span>)
+
+files = { <span class="tok-c"># table_name: csv_filename — all 9</span> <span class="tok-todo">__TODO__</span> }
+<span class="tok-k">for</span> table, fname <span class="tok-k">in</span> files.items():
+    df = pd.read_csv(<span class="tok-todo">__</span>)
+    df.to_sql(<span class="tok-todo">__TODO: name? engine? what if it exists? index?__</span>)
+    print(<span class="tok-s">f"loaded {table}: {len(df):,}"</span>)</code></pre>
+          <div class="checkpoint">
+            <div class="lbl">✅ Checkpoint</div>
+            <p>In <code>psql</code>: <code>select count(*) from orders;</code> ≈ 99,441. All 9 tables exist. Re-running the script doesn't duplicate rows.</p>
+          </div>
+          <details class="nudge"><summary>💡 Nudge<span class="lvl">level 1</span></summary>
+            <div class="body">URL format: <code>postgresql+psycopg2://USER:PASS@localhost:5432/olist</code>, with USER/PASS pulled from <code>os.environ</code>. For idempotency, the <code>if_exists</code> argument decides replace vs append vs fail — which one lets you re-run safely?</div>
+          </details>
+          <details class="hint"><summary>🔑 Bigger hint<span class="lvl">level 2</span></summary>
+            <div class="body"><code>df.to_sql(table, eng, if_exists="replace", index=False)</code>. <code>replace</code> makes it idempotent; <code>index=False</code> stops pandas writing its row index as a phantom column. The 9 tables: customers, orders, order_items, products, sellers, payments, reviews, geolocation, category_tr.</div>
+          </details>
+          <details class="answer"><summary>📖 Answer key<span class="lvl">reveal</span></summary>
+            <div class="body">
+              <div class="answer-warn">Reconstruct it before reading — the <code>if_exists</code> and <code>index</code> choices are the lesson.</div>
+              <pre><code><span class="tok-c"># scripts/load_source.py</span>
+<span class="tok-k">import</span> pandas <span class="tok-k">as</span> pd, os
+<span class="tok-k">from</span> sqlalchemy <span class="tok-k">import</span> create_engine
+
+eng = create_engine(<span class="tok-s">f"postgresql+psycopg2://{os.environ['PG_USER']}:"</span>
+                    <span class="tok-s">f"{os.environ['PG_PASS']}@localhost:5432/olist"</span>)
+
+files = {
+    <span class="tok-s">"customers"</span>:   <span class="tok-s">"olist_customers_dataset.csv"</span>,
+    <span class="tok-s">"orders"</span>:      <span class="tok-s">"olist_orders_dataset.csv"</span>,
+    <span class="tok-s">"order_items"</span>: <span class="tok-s">"olist_order_items_dataset.csv"</span>,
+    <span class="tok-s">"products"</span>:    <span class="tok-s">"olist_products_dataset.csv"</span>,
+    <span class="tok-s">"sellers"</span>:     <span class="tok-s">"olist_sellers_dataset.csv"</span>,
+    <span class="tok-s">"payments"</span>:    <span class="tok-s">"olist_order_payments_dataset.csv"</span>,
+    <span class="tok-s">"reviews"</span>:     <span class="tok-s">"olist_order_reviews_dataset.csv"</span>,
+    <span class="tok-s">"geolocation"</span>: <span class="tok-s">"olist_geolocation_dataset.csv"</span>,
+    <span class="tok-s">"category_tr"</span>: <span class="tok-s">"product_category_name_translation.csv"</span>,
+}
+<span class="tok-k">for</span> table, fname <span class="tok-k">in</span> files.items():
+    df = pd.read_csv(<span class="tok-s">f"data/raw/{fname}"</span>)
+    df.to_sql(table, eng, if_exists=<span class="tok-s">"replace"</span>, index=<span class="tok-k">False</span>)
+    print(<span class="tok-s">f"loaded {table}: {len(df):,} rows"</span>)</code></pre>
+              <p><code>if_exists="replace"</code> makes re-runs idempotent; <code>index=False</code> prevents pandas writing a phantom index column.</p>
+            </div>
+          </details>
+        </div>
+      </div>
+    </div>
+
+    <div class="task" data-id="p1t2">
+      <div class="top">
+        <input type="checkbox" class="check">
+        <div>
+          <h3>1.2 — Migrate Postgres → DuckDB (the EL of ELT) <span class="tag spec">from spec</span></h3>
+          <p class="goal"><b>Goal:</b> copy every source table into a DuckDB file as <code>raw_&lt;table&gt;</code>, unmodified. Use DuckDB's Postgres extension to read directly — no intermediate CSV round-trip.</p>
+          <p><b>Spec (write it yourself):</b></p>
+          <ul class="clean">
+            <li>Connect to a new DuckDB file <code>olist_target.duckdb</code>.</li>
+            <li>Install + load the <code>postgres</code> extension, then <code>ATTACH</code> the Postgres DB read-only.</li>
+            <li>For each of the 9 tables, <code>CREATE OR REPLACE TABLE raw_&lt;t&gt; AS SELECT * FROM src.&lt;t&gt;</code>.</li>
+            <li>Print each row count as you go.</li>
+          </ul>
+          <div class="checkpoint">
+            <div class="lbl">✅ Checkpoint</div>
+            <p>In DuckDB: <code>select count(*) from raw_orders;</code> equals the Postgres count exactly. All 9 <code>raw_*</code> tables present. <em>(You'll prove faithfulness rigorously in Phase 3 — this is just the smoke test.)</em></p>
+          </div>
+          <details class="nudge"><summary>💡 Nudge<span class="lvl">level 1</span></summary>
+            <div class="body">DuckDB can query Postgres live: <code>INSTALL postgres; LOAD postgres;</code> then <code>ATTACH '...conn string...' AS src (TYPE postgres, READ_ONLY)</code>. After attaching, <code>src.orders</code> is a normal table to <code>SELECT</code> from.</div>
+          </details>
+          <details class="hint"><summary>🔑 Bigger hint<span class="lvl">level 2</span></summary>
+            <div class="body">The attach connection string is libpq style, space-separated: <code>'host=localhost port=5432 dbname=olist user=... password=...'</code>. Loop over a Python list of the 9 table names and run the <code>create or replace</code> per table, then a <code>select count(*)</code> to print.</div>
+          </details>
+          <details class="answer"><summary>📖 Answer key<span class="lvl">reveal</span></summary>
+            <div class="body">
+              <div class="answer-warn">Two pieces people miss: the <code>ATTACH ... (TYPE postgres, READ_ONLY)</code> options clause, and reading creds from <code>os.environ</code> inside the f-string.</div>
+              <pre><code><span class="tok-c"># scripts/migrate_to_target.py</span>
+<span class="tok-k">import</span> duckdb, os
+con = duckdb.connect(<span class="tok-s">"olist_target.duckdb"</span>)
+con.execute(<span class="tok-s">"install postgres; load postgres;"</span>)
+con.execute(<span class="tok-s">f"attach 'host=localhost port=5432 dbname=olist "</span>
+            <span class="tok-s">f"user={os.environ['PG_USER']} password={os.environ['PG_PASS']}' "</span>
+            <span class="tok-s">f"as src (type postgres, read_only)"</span>)
+<span class="tok-k">for</span> t <span class="tok-k">in</span> [<span class="tok-s">"customers"</span>,<span class="tok-s">"orders"</span>,<span class="tok-s">"order_items"</span>,<span class="tok-s">"products"</span>,<span class="tok-s">"sellers"</span>,
+          <span class="tok-s">"payments"</span>,<span class="tok-s">"reviews"</span>,<span class="tok-s">"geolocation"</span>,<span class="tok-s">"category_tr"</span>]:
+    con.execute(<span class="tok-s">f"create or replace table raw_{t} as select * from src.{t}"</span>)
+    n = con.execute(<span class="tok-s">f"select count(*) from raw_{t}"</span>).fetchone()[0]
+    print(<span class="tok-s">f"migrated raw_{t}: {n:,}"</span>)</code></pre>
+              <p>This is the <b>EL</b> of ELT: raw bytes land in the target untouched as <code>raw_*</code>. All transformation happens afterward, in dbt (Phase 2).</p>
+            </div>
+          </details>
+        </div>
+      </div>
+    </div>
+
+    <div class="task" data-id="p1t3">
+      <div class="top">
+        <input type="checkbox" class="check">
+        <div>
+          <h3>1.3 — Explain it back <span class="tag spec">no code</span></h3>
+          <p class="goal"><b>Goal:</b> the interview rep. In writing (3–4 sentences, out loud counts), answer: <em>why did you load raw data into a landing zone before transforming it? Why is that "ELT" and not "ETL," and why did the modern warehouse era make ELT the default?</em></p>
+          <div class="checkpoint">
+            <div class="lbl">✅ Checkpoint</div>
+            <p>Your answer names: (1) transform happens in-warehouse after load, (2) it preserves an untouched raw copy you can re-transform, (3) cheap, scalable, co-located compute made it viable. If you hit all three without peeking, check the box.</p>
+          </div>
+          <details class="nudge"><summary>💡 Nudge<span class="lvl">level 1</span></summary>
+            <div class="body">Think about what you lose with ETL when a business rule changes after load — and what a raw landing zone lets you do that a pre-transformed pipeline can't.</div>
+          </details>
+          <details class="answer"><summary>📖 Answer key<span class="lvl">reveal</span></summary>
+            <div class="body">
+              <div class="answer-warn">Compare your wording to this, but yours is what you'll say in the room.</div>
+              <p>Load-first means the warehouse holds an untouched raw copy; transforms run on top of it in SQL/dbt, so when a business rule changes you re-run transforms instead of re-extracting from source. That's ELT. It won because warehouse storage/compute became cheap and co-located — pushing transformation <em>into</em> the warehouse beats moving data out to a separate transform tier.</p>
+            </div>
+          </details>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PHASE 2 ============ -->
+  <section class="phase">
+    <h2>Phase 2 · Analytics Engineering (dbt)</h2>
+    <p class="why">The biggest interview surface. Layered project, tests, lineage, and dimensional modeling. Skeletons here fade fast — by the marts you're working from grain specs alone.</p>
+
+    <div class="task" data-id="p2t1">
+      <div class="top">
+        <input type="checkbox" class="check">
+        <div>
+          <h3>2.1 — Declare sources + first tests <span class="tag skel">skeleton</span></h3>
+          <p class="goal"><b>Goal:</b> a <code>_sources.yml</code> that registers your migrated <code>raw_*</code> tables and asserts the primary key on orders is unique + non-null.</p>
+          <pre><code><span class="tok-k">version:</span> 2
+sources:
+  - name: raw
+    schema: main
+    tables:
+      - name: raw_orders
+        columns:
+          - name: order_id
+            data_tests: [<span class="tok-todo">__TODO: which two guard a primary key?__</span>]
+          - name: customer_id
+            data_tests: [<span class="tok-todo">__TODO__</span>]</code></pre>
+          <div class="checkpoint">
+            <div class="lbl">✅ Checkpoint</div>
+            <p><code>uv run dbt test --select source:raw</code> runs and the order_id tests pass (they should — raw is clean here). If one <em>fails</em>, you've found a real data issue — investigate before moving on.</p>
+          </div>
+          <details class="nudge"><summary>💡 Nudge<span class="lvl">level 1</span></summary>
+            <div class="body">A primary key has two properties dbt ships generic tests for. customer_id is a foreign key here — it shouldn't be null, but it can repeat.</div>
+          </details>
+          <details class="answer"><summary>📖 Answer key<span class="lvl">reveal</span></summary>
+            <div class="body">
+              <pre><code><span class="tok-k">version:</span> 2
+sources:
+  - name: raw
+    schema: main
+    tables:
+      - name: raw_orders
+        columns:
+          - name: order_id
+            data_tests: [unique, not_null]
+          - name: customer_id
+            data_tests: [not_null]</code></pre>
+              <p>A primary key gets both <code>unique</code> and <code>not_null</code>; a foreign key like <code>customer_id</code> gets <code>not_null</code> alone (it can legitimately repeat across orders).</p>
+            </div>
+          </details>
+        </div>
+      </div>
+    </div>
+
+    <div class="task" data-id="p2t2">
+      <div class="top">
+        <input type="checkbox" class="check">
+        <div>
+          <h3>2.2 — Staging model: stg_orders <span class="tag skel">skeleton</span></h3>
+          <p class="goal"><b>Goal:</b> a staging model that's 1:1 with the source — rename to clean names, cast timestamps, no business logic. Staging is a <em>contract</em>, not a place for joins.</p>
+          <pre><code><span class="tok-k">with</span> src <span class="tok-k">as</span> (<span class="tok-k">select</span> * <span class="tok-k">from</span> <span class="tok-todo">{{ __TODO: reference the source, not the table name__ }}</span>)
+<span class="tok-k">select</span>
+    order_id,
+    customer_id,
+    order_status,
+    <span class="tok-todo">__TODO: cast order_purchase_timestamp -> purchased_at,</span>
+<span class="tok-todo">          order_delivered_customer_date -> delivered_at,</span>
+<span class="tok-todo">          order_estimated_delivery_date -> estimated_delivery_at__</span>
+<span class="tok-k">from</span> src</code></pre>
+          <div class="checkpoint">
+            <div class="lbl">✅ Checkpoint</div>
+            <p><code>uv run dbt run --select stg_orders</code> builds. <code>uv run dbt run --select stg_orders --full-refresh</code> still works. The model has the renamed, typed columns and the same row count as <code>raw_orders</code>.</p>
+          </div>
+          <details class="nudge"><summary>💡 Nudge<span class="lvl">level 1</span></summary>
+            <div class="body">Never hardcode <code>raw_orders</code> — use <code>{{ source('raw','raw_orders') }}</code> so dbt builds the lineage edge. Cast with <code>cast(col as timestamp) as new_name</code>.</div>
+          </details>
+          <details class="answer"><summary>📖 Answer key<span class="lvl">reveal</span></summary>
+            <div class="body">
+              <pre><code><span class="tok-k">with</span> src <span class="tok-k">as</span> (<span class="tok-k">select</span> * <span class="tok-k">from</span> {{ source(<span class="tok-s">'raw'</span>, <span class="tok-s">'raw_orders'</span>) }})
+<span class="tok-k">select</span>
+    order_id,
+    customer_id,
+    order_status,
+    <span class="tok-k">cast</span>(order_purchase_timestamp <span class="tok-k">as</span> timestamp)        <span class="tok-k">as</span> purchased_at,
+    <span class="tok-k">cast</span>(order_delivered_customer_date <span class="tok-k">as</span> timestamp)   <span class="tok-k">as</span> delivered_at,
+    <span class="tok-k">cast</span>(order_estimated_delivery_date <span class="tok-k">as</span> timestamp)   <span class="tok-k">as</span> estimated_delivery_at
+<span class="tok-k">from</span> src</code></pre>
+              <p>Using <code>source()</code> (not the literal table name) is what builds the lineage edge in the dbt DAG. Staging stays 1:1 with the source — rename + cast only, no joins.</p>
+            </div>
+          </details>
+        </div>
+      </div>
+    </div>
+
+    <div class="task" data-id="p2t3">
+      <div class="top">
+        <input type="checkbox" class="check">
+        <div>
+          <h3>2.3 — Fact model: fct_orders <span class="tag spec">from spec</span></h3>
+          <p class="goal"><b>Goal:</b> a fact table at <b>grain = one row per order</b>, enriched with line-item rollups and a delivery-time measure.</p>
+          <p><b>Spec:</b></p>
+          <ul class="clean">
+            <li>Start from <code>stg_orders</code>.</li>
+            <li>Roll up <code>stg_order_items</code> to order level: item count, sum of price, sum of freight.</li>
+            <li>Left join rollups onto orders (an order can have zero items captured — don't drop it).</li>
+            <li>Add <code>days_to_deliver</code> = days between purchase and delivery.</li>
+            <li><code>coalesce</code> the money/count rollups to 0 so unmatched orders aren't null.</li>
+          </ul>
+          <div class="checkpoint">
+            <div class="lbl">✅ Checkpoint</div>
+            <p>Row count of <code>fct_orders</code> equals <code>stg_orders</code> (grain preserved — the join didn't fan out or drop rows). No null <code>items_total</code>. <code>days_to_deliver</code> is null only where delivery date is null.</p>
+          </div>
+          <details class="nudge"><summary>💡 Nudge<span class="lvl">level 1</span></summary>
+            <div class="body">Two CTEs: <code>orders</code> from <code>ref('stg_orders')</code>, and <code>items</code> that groups <code>ref('stg_order_items')</code> by order_id. Then <code>left join ... using (order_id)</code>. The grain test is the real lesson — if the count changes, your join grain is wrong.</div>
+          </details>
+          <details class="hint"><summary>🔑 Bigger hint<span class="lvl">level 2</span></summary>
+            <div class="body"><code>items</code> CTE: <code>select order_id, count(*) item_count, sum(price) items_total, sum(freight_value) freight_total from {{ ref('stg_order_items') }} group by 1</code>. Delivery measure: <code>date_diff('day', purchased_at, delivered_at)</code> (DuckDB syntax).</div>
+          </details>
+          <details class="answer"><summary>📖 Answer key<span class="lvl">reveal</span></summary>
+            <div class="body">
+              <div class="answer-warn">Watch the <code>coalesce(..., 0)</code> wrappers and <code>left join using (order_id)</code> — that combination preserves grain while filling gaps.</div>
+              <pre><code><span class="tok-k">with</span> orders <span class="tok-k">as</span> (<span class="tok-k">select</span> * <span class="tok-k">from</span> {{ ref(<span class="tok-s">'stg_orders'</span>) }}),
+items <span class="tok-k">as</span> (
+    <span class="tok-k">select</span> order_id, <span class="tok-k">count</span>(*) <span class="tok-k">as</span> item_count,
+           <span class="tok-k">sum</span>(price) <span class="tok-k">as</span> items_total, <span class="tok-k">sum</span>(freight_value) <span class="tok-k">as</span> freight_total
+    <span class="tok-k">from</span> {{ ref(<span class="tok-s">'stg_order_items'</span>) }} <span class="tok-k">group by</span> 1
+)
+<span class="tok-k">select</span>
+    o.order_id,
+    o.customer_id,
+    o.order_status,
+    o.purchased_at,
+    o.delivered_at,
+    date_diff(<span class="tok-s">'day'</span>, o.purchased_at, o.delivered_at) <span class="tok-k">as</span> days_to_deliver,
+    <span class="tok-k">coalesce</span>(i.item_count, 0)   <span class="tok-k">as</span> item_count,
+    <span class="tok-k">coalesce</span>(i.items_total, 0)  <span class="tok-k">as</span> items_total,
+    <span class="tok-k">coalesce</span>(i.freight_total,0) <span class="tok-k">as</span> freight_total
+<span class="tok-k">from</span> orders o <span class="tok-k">left join</span> items i <span class="tok-k">using</span> (order_id)</code></pre>
+              <p>The grain test is the real lesson: <code>fct_orders</code> must have the same row count as <code>stg_orders</code>. The <code>left join</code> (not inner) keeps orders with no captured items; <code>coalesce</code> turns their nulls into 0.</p>
+            </div>
+          </details>
+        </div>
+      </div>
+    </div>
+
+    <div class="task" data-id="p2t4">
+      <div class="top">
+        <input type="checkbox" class="check">
+        <div>
+          <h3>2.4 — Work the dbt skills checklist <span class="tag spec">self-directed</span></h3>
+          <p class="goal"><b>Goal:</b> deliberately exercise each item once — this is the exact surface interviews probe. Treat each as a mini-task; build the smallest thing that uses it.</p>
+          <ul class="clean">
+            <li>A <b>singular test</b> (a <code>.sql</code> in <code>tests/</code> returning failing rows — e.g. orders delivered <em>before</em> they were purchased).</li>
+            <li>A <b>snapshot</b> capturing <code>order_status</code> over time (SCD Type 2).</li>
+            <li><b>relationships</b> + <b>accepted_values</b> generic tests.</li>
+            <li>A <b>macro</b>, a <b>seed</b>, and an <b>incremental</b> materialization.</li>
+            <li><code>dbt docs generate &amp;&amp; dbt docs serve</code> — screenshot the lineage DAG for your portfolio.</li>
+          </ul>
+          <div class="checkpoint">
+            <div class="lbl">✅ Checkpoint</div>
+            <p>Each box below is touched at least once and <code>dbt build</code> runs end to end. You can open the lineage graph and trace <code>raw_orders → stg_orders → fct_orders</code>.</p>
+          </div>
+          <details class="nudge"><summary>💡 Nudge<span class="lvl">level 1</span></summary>
+            <div class="body">Singular test idea: a query that selects orders where <code>delivered_at &lt; purchased_at</code> — if it returns rows, the test fails. Snapshot: dbt's <code>{% snapshot %}</code> block with <code>strategy='check'</code> on <code>order_status</code>.</div>
+          </details>
+          <details class="answer"><summary>📖 Answer key<span class="lvl">reveal</span></summary>
+            <div class="body">
+              <div class="answer-warn">This task is about <em>doing</em> each once, not copying — but here's a concrete starting point for each.</div>
+              <p><b>Singular test</b> — <code>tests/assert_delivery_after_purchase.sql</code> (fails if it returns rows):</p>
+              <pre><code><span class="tok-k">select</span> order_id <span class="tok-k">from</span> {{ ref(<span class="tok-s">'stg_orders'</span>) }}
+<span class="tok-k">where</span> delivered_at &lt; purchased_at</code></pre>
+              <p><b>Snapshot (SCD2)</b> — <code>snapshots/snap_order_status.sql</code>:</p>
+              <pre><code>{% snapshot snap_order_status %}
+{{ config(target_schema=<span class="tok-s">'snapshots'</span>, unique_key=<span class="tok-s">'order_id'</span>,
+          strategy=<span class="tok-s">'check'</span>, check_cols=[<span class="tok-s">'order_status'</span>]) }}
+<span class="tok-k">select</span> order_id, order_status <span class="tok-k">from</span> {{ ref(<span class="tok-s">'stg_orders'</span>) }}
+{% endsnapshot %}</code></pre>
+              <p><b>Generic tests</b> in a <code>.yml</code>: <code>relationships</code> (order_items.order_id → orders.order_id) and <code>accepted_values</code> on <code>order_status</code> (delivered, shipped, canceled, …).</p>
+              <p><b>Incremental</b>: add <code>{{ config(materialized='incremental', unique_key='order_id') }}</code> with an <code>{% if is_incremental() %} where purchased_at > (select max(purchased_at) from {{ this }}) {% endif %}</code> guard. <b>Seed</b>: drop a small CSV in <code>seeds/</code> and <code>dbt seed</code>. <b>Macro</b>: a reusable <code>cents_to_dollars(col)</code> in <code>macros/</code>.</p>
+              <p>Then <code>uv run dbt docs generate &amp;&amp; uv run dbt docs serve</code> and screenshot the DAG.</p>
+            </div>
+          </details>
+        </div>
+      </div>
+    </div>
+
+    <div class="task" data-id="p2t5">
+      <div class="top">
+        <input type="checkbox" class="check">
+        <div>
+          <h3>2.5 — Dimensional modeling, said out loud <span class="tag spec">no code</span></h3>
+          <p class="goal"><b>Goal:</b> for your two facts (<code>fct_orders</code>, <code>fct_order_items</code>), state the grain of each in one sentence, name two dimensions each would join to, and explain what SCD Type 2 buys you over just overwriting a dimension.</p>
+          <div class="checkpoint">
+            <div class="lbl">✅ Checkpoint</div>
+            <p>You can say grain crisply ("one row per order" vs "one row per order line"), name dims (customers, products, sellers, dates), and explain SCD2 = preserves history so a fact joins to the dimension <em>as it was</em> at event time. No peeking needed = check.</p>
+          </div>
+          <details class="nudge"><summary>💡 Nudge<span class="lvl">level 1</span></summary>
+            <div class="body">Grain = "what does one row represent?" If you can't say it in one sentence, the model isn't done. SCD2: imagine a customer moves cities — do last year's orders belong to the old city or the new one?</div>
+          </details>
+          <details class="answer"><summary>📖 Answer key<span class="lvl">reveal</span></summary>
+            <div class="body"><code>fct_orders</code>: one row per order → joins to dim_customers, date. <code>fct_order_items</code>: one row per line → joins to dim_products, dim_sellers. SCD2 keeps versioned dimension rows so a historical fact reflects the attribute value at the time of the event, not today's.</div>
+          </details>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PHASE 3 ============ -->
+  <section class="phase">
+    <h2>Phase 3 · Migration Validation</h2>
+    <p class="why">Your differentiator. The harness already works — here you learn to <em>wield</em> it: configure checks against real Olist, then break the target and watch each layer fire.</p>
+
+    <div class="task" data-id="p3t1">
+      <div class="top">
+        <input type="checkbox" class="check">
+        <div>
+          <h3>3.1 — Write the checks config <span class="tag spec">from spec</span></h3>
+          <p class="goal"><b>Goal:</b> a <code>checks.yml</code> validating the Postgres→DuckDB migration across the seven layers. Start from <code>checks.example.yml</code> but decide each check yourself before comparing.</p>
+          <p><b>Spec — one check per layer, minimum:</b></p>
+          <ul class="clean">
+            <li><b>Completeness:</b> row_count on orders and order_items.</li>
+            <li><b>Financial:</b> aggregate <code>sum</code> of price and freight_value, tolerance <code>0.0</code>.</li>
+            <li><b>Cardinality:</b> distinct_count of customer_id.</li>
+            <li><b>Drift:</b> grouped_count by order_status.</li>
+            <li><b>Content:</b> hash_total over [order_id, customer_id, order_status].</li>
+            <li><b>Referential:</b> orphan check, order_items → orders.</li>
+            <li><b>Quality:</b> null_rate of order_delivered_customer_date.</li>
+          </ul>
+          <div class="checkpoint">
+            <div class="lbl">✅ Checkpoint</div>
+            <p><code>uv run reconcile run --config checks.yml --out ../reports</code> runs and <em>all checks PASS</em> against your faithful migration. (If something fails now, your Phase 1 migration wasn't clean — good catch.)</p>
+          </div>
+          <details class="nudge"><summary>💡 Nudge<span class="lvl">level 1</span></summary>
+            <div class="body">Connections use <code>${ENV_VAR}</code> interpolation so creds stay out of git. Source = <code>postgresql+psycopg2://${PG_USER}:${PG_PASS}@localhost:5432/olist</code>; target = <code>duckdb:///./olist_target.duckdb</code>. Why must the financial tolerance be exactly 0?</div>
+          </details>
+          <details class="hint"><summary>🔑 Bigger hint<span class="lvl">level 2</span></summary>
+            <div class="body">Each check is a YAML dict with <code>name</code>, <code>type</code>, and type-specific keys. Money requires <code>tolerance: 0.0</code> — a one-cent drift across a migration is a real defect, not noise. The referential check needs <code>child_table</code>/<code>child_key</code>/<code>parent_table</code>/<code>parent_key</code>.</div>
+          </details>
+          <details class="answer"><summary>📖 Answer key<span class="lvl">reveal</span></summary>
+            <div class="body">
+              <div class="answer-warn">Connections use <code>${ENV_VAR}</code> so creds stay out of git. Money checks use <code>tolerance: 0.0</code> — a one-cent migration drift is a real defect.</div>
+              <pre><code><span class="tok-k">name:</span> olist_orders_reconciliation
+source_url: postgresql+psycopg2://${PG_USER}:${PG_PASS}@localhost:5432/olist
+target_url: duckdb:///./olist_target.duckdb
+
+checks:
+  - name: orders_row_count
+    type: row_count
+    source_table: orders
+    target_table: raw_orders
+  - name: order_items_row_count
+    type: row_count
+    source_table: order_items
+    target_table: raw_order_items
+  - name: order_items_price_sum
+    type: aggregate
+    agg: sum
+    column: price
+    source_table: order_items
+    target_table: raw_order_items
+    tolerance: 0.0
+  - name: order_items_freight_sum
+    type: aggregate
+    agg: sum
+    column: freight_value
+    source_table: order_items
+    target_table: raw_order_items
+    tolerance: 0.0
+  - name: distinct_customers
+    type: distinct_count
+    column: customer_id
+    source_table: orders
+    target_table: raw_orders
+  - name: orders_by_status
+    type: grouped_count
+    group_by: order_status
+    source_table: orders
+    target_table: raw_orders
+  - name: orders_content_hash
+    type: hash_total
+    columns: [order_id, customer_id, order_status]
+    source_table: orders
+    target_table: raw_orders
+  - name: order_items_orphans
+    type: referential
+    child_table: raw_order_items
+    child_key: order_id
+    parent_table: raw_orders
+    parent_key: order_id
+  - name: delivered_date_null_rate
+    type: null_rate
+    column: order_delivered_customer_date
+    source_table: orders
+    target_table: raw_orders
+    tolerance: 0.0</code></pre>
+              <p>Note the source tables are the plain Postgres names (<code>orders</code>) while the target carries the <code>raw_</code> prefix from your migration step — the harness compares across that rename cleanly.</p>
+            </div>
+          </details>
+        </div>
+      </div>
+    </div>
+
+    <div class="task" data-id="p3t2">
+      <div class="top">
+        <input type="checkbox" class="check">
+        <div>
+          <h3>3.2 — Break it, then catch it <span class="tag spec">from spec</span></h3>
+          <p class="goal"><b>Goal:</b> the core learning rep <em>and</em> your best interview demo. Corrupt the target deliberately, predict which checks will fail, then run the harness and confirm.</p>
+          <p><b>Do this in order:</b></p>
+          <ul class="clean">
+            <li>In <code>olist_target.duckdb</code>: delete all <code>raw_orders</code> rows where status = <code>'shipped'</code>.</li>
+            <li>Then nudge <code>price</code> up 1% on ~50 orders' worth of <code>raw_order_items</code>.</li>
+            <li><b>Before running:</b> write down which of your 7 checks you expect to FAIL and why.</li>
+            <li>Run the harness. Compare reality to your prediction.</li>
+          </ul>
+          <div class="checkpoint">
+            <div class="lbl">✅ Checkpoint</div>
+            <p>row_count, orders_by_status (drift names the <code>shipped</code> bucket), price_sum, and content_hash all flip to FAIL. The others may still pass. Your written prediction matched the report. The <code>reports/*.md</code> file is your audit artifact.</p>
+          </div>
+          <details class="nudge"><summary>💡 Nudge<span class="lvl">level 1</span></summary>
+            <div class="body">Deleting shipped rows hits: total count, the status grouped-count, and (since those orders had items) anything summing across them. The 1% price bump is sneakier — which check catches a value change that <em>doesn't</em> change row counts? That's the one that earns the fee.</div>
+          </details>
+          <details class="hint"><summary>🔑 Bigger hint<span class="lvl">level 2</span></summary>
+            <div class="body">SQL to break it: <code>delete from raw_orders where order_status='shipped';</code> and <code>update raw_order_items set price = price*1.01 where order_id in (select order_id from raw_orders limit 50);</code>. The price bump shows up in <code>price_sum</code> (financial) and, if you'd hashed price, <code>content_hash</code> — counts alone would miss it entirely. That's the argument for layered validation.</div>
+          </details>
+          <details class="answer"><summary>📖 Answer key<span class="lvl">reveal</span></summary>
+            <div class="body">
+              <div class="answer-warn">The teaching point: a migration can pass row counts and still be corrupt. Layered checks each expose what the others let through.</div>
+              <p><b>Break the target</b> (run in DuckDB against <code>olist_target.duckdb</code>):</p>
+              <pre><code><span class="tok-c">-- 1. drop rows: hits count, status drift, and sums over those orders</span>
+<span class="tok-k">delete from</span> raw_orders <span class="tok-k">where</span> order_status = <span class="tok-s">'shipped'</span>;
+
+<span class="tok-c">-- 2. silent value drift: changes values WITHOUT changing row counts</span>
+<span class="tok-k">update</span> raw_order_items <span class="tok-k">set</span> price = price * 1.01
+<span class="tok-k">where</span> order_id <span class="tok-k">in</span> (<span class="tok-k">select</span> order_id <span class="tok-k">from</span> raw_orders <span class="tok-k">limit</span> 50);</code></pre>
+              <p><b>Expected result after rerunning the harness:</b></p>
+              <ul class="clean">
+                <li><code>orders_row_count</code> → <b>FAIL</b> (rows missing)</li>
+                <li><code>orders_by_status</code> → <b>FAIL</b>, drift breakdown names the <code>shipped</code> bucket with the exact delta</li>
+                <li><code>order_items_price_sum</code> → <b>FAIL</b> (the 1% bump)</li>
+                <li><code>orders_content_hash</code> → <b>FAIL</b> if any hashed column changed</li>
+                <li>others may still PASS</li>
+              </ul>
+              <p>The 1% price bump is the one that matters: it changes no row counts, so only the <b>financial sum</b> (and a content hash over price) catches it. That single fact is the whole argument for layered validation — and the line that sells the engagement. A worked example of this exact report is the <code>sample_reconciliation.md</code> the harness produced earlier; the appendix below shows the engine that generates it.</p>
+            </div>
+          </details>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ PHASE 4 ============ -->
+  <section class="phase">
+    <h2>Phase 4 · Reporting</h2>
+    <p class="why">Close the loop — the marts feed BI, and the harness output feeds a quality monitor. Portfolio screenshots come from here.</p>
+
+    <div class="task" data-id="p4t1">
+      <div class="top">
+        <input type="checkbox" class="check">
+        <div>
+          <h3>4.1 — Wire Metabase to the marts <span class="tag spec">self-directed</span></h3>
+          <p class="goal"><b>Goal:</b> point Metabase (<code>localhost:3000</code>) at your warehouse and build an executive orders dashboard: monthly order volume, average order value, and a delivery-SLA metric (% delivered before the estimate).</p>
+          <div class="checkpoint">
+            <div class="lbl">✅ Checkpoint</div>
+            <p>A dashboard with ≥3 cards reading from <code>fct_orders</code>. AOV reconciles with a manual <code>select avg(items_total) from fct_orders</code>. Screenshot saved for the Eigenbasis portfolio.</p>
+          </div>
+          <details class="nudge"><summary>💡 Nudge<span class="lvl">level 1</span></summary>
+            <div class="body">Metabase connects to Postgres natively; for DuckDB you may point it at the Postgres marts instead, or expose DuckDB via a small connector. SLA metric = <code>delivered_at &lt;= estimated_delivery_at</code> as a rate.</div>
+          </details>
+          <details class="answer"><summary>📖 Answer key<span class="lvl">reveal</span></summary>
+            <div class="body">
+              <p>Two dashboards to build: (1) <b>executive orders</b> — monthly volume from <code>fct_orders</code>, AOV (<code>avg(items_total)</code>), and delivery SLA = share of orders where <code>delivered_at &lt;= estimated_delivery_at</code>. (2) <b>data-quality monitor</b> — read the harness's JSON output (<code>reports/*.json</code>) into a card showing pass/fail counts over time. The second one is the story clients love: "we monitor our own migration quality continuously," not just at cutover.</p>
+              <p>Metabase connects to Postgres natively; the simplest path is to point it at the Postgres marts, or expose the DuckDB marts through a small connector.</p>
+            </div>
+          </details>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ APPENDIX ============ -->
+  <section class="phase" id="appendix">
+    <h2>Appendix · Harness Source</h2>
+    <p class="why">The reconciliation harness is real Python you run from a terminal, so it lives as files on disk in the <code>harness/</code> package. The complete source is reproduced here read-only so this workbook is a single complete reference. To run it: <code>cd harness &amp;&amp; uv sync &amp;&amp; PYTHONPATH=. uv run python -m tests.test_harness</code>.</p>
+
+    <div class="task" data-id="appendix-engine.py">
+      <div class="top">
+        <input type="checkbox" class="check" title="mark as reviewed">
+        <div style="min-width:0;flex:1">
+          <h3>engine.py</h3>
+          <p class="goal">The check engine — 7 check types, config-driven. This is the IP.</p>
+          <details><summary>View source<span class="lvl">260 lines</span></summary>
+            <div class="body"><pre style="max-height:520px"><code>&quot;&quot;&quot;
+Eigenbasis Reconciliation Harness — core engine.
+
+A parameterized migration-validation harness. You point it at a SOURCE and a
+TARGET connection and hand it a list of checks (defined in YAML). It runs every
+check against both sides, compares results, and emits a pass/fail audit report.
+
+Design goals:
+  - Source/target agnostic: any SQLAlchemy-compatible DB (Postgres, DuckDB,
+    Snowflake, BigQuery via connectors). The harness only speaks SQL + DataFrames.
+  - Checks are *data*, not code. New validations are YAML entries, not new
+    functions. This is what makes it a sellable methodology artifact rather than
+    a one-off script.
+  - Deterministic, auditable output: every check produces a structured result
+    row with source value, target value, delta, tolerance, and pass/fail.
+
+This is the IP. The dbt project and the warehouse are commodity; this is the
+differentiator. Keep it clean.
+&quot;&quot;&quot;
+
+from __future__ import annotations
+
+import math
+from dataclasses import dataclass, field
+from datetime import datetime, timezone
+from enum import Enum
+from typing import Any
+
+import pandas as pd
+from sqlalchemy import create_engine, text
+from sqlalchemy.engine import Engine
+
+
+class CheckType(str, Enum):
+    ROW_COUNT = &quot;row_count&quot;           # count(*) on both sides
+    AGGREGATE = &quot;aggregate&quot;           # sum/avg/min/max of a column, optionally grouped
+    DISTINCT_COUNT = &quot;distinct_count&quot; # count(distinct col)
+    HASH_TOTAL = &quot;hash_total&quot;         # checksum across rows (order-independent)
+    GROUPED_COUNT = &quot;grouped_count&quot;   # count(*) grouped by key — finds row-level drift
+    REFERENTIAL = &quot;referential&quot;       # orphan check: child keys with no parent
+    NULL_RATE = &quot;null_rate&quot;           # fraction of NULLs in a column
+
+
+class Status(str, Enum):
+    PASS = &quot;PASS&quot;
+    FAIL = &quot;FAIL&quot;
+    ERROR = &quot;ERROR&quot;
+
+
+@dataclass
+class CheckResult:
+    name: str
+    check_type: CheckType
+    status: Status
+    source_value: Any = None
+    target_value: Any = None
+    delta: float | None = None
+    tolerance: float = 0.0
+    detail: str = &quot;&quot;
+    breakdown: pd.DataFrame | None = field(default=None, repr=False)
+
+    def to_row(self) -&gt; dict:
+        return {
+            &quot;check&quot;: self.name,
+            &quot;type&quot;: self.check_type.value,
+            &quot;status&quot;: self.status.value,
+            &quot;source&quot;: self.source_value,
+            &quot;target&quot;: self.target_value,
+            &quot;delta&quot;: self.delta,
+            &quot;tolerance&quot;: self.tolerance,
+            &quot;detail&quot;: self.detail,
+        }
+
+
+class ReconciliationEngine:
+    def __init__(self, source_url: str, target_url: str):
+        self.source: Engine = create_engine(source_url)
+        self.target: Engine = create_engine(target_url)
+        self.results: list[CheckResult] = []
+
+    # ---- low-level helpers -------------------------------------------------
+
+    def _scalar(self, engine: Engine, sql: str) -&gt; Any:
+        with engine.connect() as conn:
+            return conn.execute(text(sql)).scalar()
+
+    def _frame(self, engine: Engine, sql: str) -&gt; pd.DataFrame:
+        with engine.connect() as conn:
+            return pd.read_sql(text(sql), conn)
+
+    @staticmethod
+    def _within_tolerance(src: float, tgt: float, tol: float) -&gt; bool:
+        if src is None or tgt is None:
+            return src == tgt
+        if tol == 0:
+            return src == tgt
+        # tol is a fraction: |delta| / max(|src|,1) &lt;= tol
+        denom = max(abs(src), 1.0)
+        return abs(src - tgt) / denom &lt;= tol
+
+    # ---- check implementations --------------------------------------------
+
+    def _run_row_count(self, c: dict) -&gt; CheckResult:
+        s_sql = f&quot;select count(*) from {c[&#x27;source_table&#x27;]}&quot;
+        t_sql = f&quot;select count(*) from {c[&#x27;target_table&#x27;]}&quot;
+        if c.get(&quot;where&quot;):
+            s_sql += f&quot; where {c[&#x27;where&#x27;]}&quot;
+            t_sql += f&quot; where {c[&#x27;where&#x27;]}&quot;
+        s, t = self._scalar(self.source, s_sql), self._scalar(self.target, t_sql)
+        ok = s == t
+        return CheckResult(
+            name=c[&quot;name&quot;], check_type=CheckType.ROW_COUNT,
+            status=Status.PASS if ok else Status.FAIL,
+            source_value=s, target_value=t, delta=(t - s) if s is not None else None,
+            detail=&quot;exact row count match required&quot;,
+        )
+
+    def _run_aggregate(self, c: dict) -&gt; CheckResult:
+        agg, col = c[&quot;agg&quot;], c[&quot;column&quot;]
+        tol = float(c.get(&quot;tolerance&quot;, 0.0))
+        s = self._scalar(self.source, f&quot;select {agg}({col}) from {c[&#x27;source_table&#x27;]}&quot;)
+        t = self._scalar(self.target, f&quot;select {agg}({col}) from {c[&#x27;target_table&#x27;]}&quot;)
+        s = float(s) if s is not None else None
+        t = float(t) if t is not None else None
+        ok = self._within_tolerance(s, t, tol)
+        return CheckResult(
+            name=c[&quot;name&quot;], check_type=CheckType.AGGREGATE,
+            status=Status.PASS if ok else Status.FAIL,
+            source_value=s, target_value=t,
+            delta=(t - s) if (s is not None and t is not None) else None,
+            tolerance=tol, detail=f&quot;{agg}({col})&quot;,
+        )
+
+    def _run_distinct_count(self, c: dict) -&gt; CheckResult:
+        col = c[&quot;column&quot;]
+        s = self._scalar(self.source, f&quot;select count(distinct {col}) from {c[&#x27;source_table&#x27;]}&quot;)
+        t = self._scalar(self.target, f&quot;select count(distinct {col}) from {c[&#x27;target_table&#x27;]}&quot;)
+        ok = s == t
+        return CheckResult(
+            name=c[&quot;name&quot;], check_type=CheckType.DISTINCT_COUNT,
+            status=Status.PASS if ok else Status.FAIL,
+            source_value=s, target_value=t, delta=(t - s),
+            detail=f&quot;distinct {col}&quot;,
+        )
+
+    def _run_null_rate(self, c: dict) -&gt; CheckResult:
+        col = c[&quot;column&quot;]
+        tol = float(c.get(&quot;tolerance&quot;, 0.0))
+        def rate(engine, tbl):
+            n = self._scalar(engine, f&quot;select count(*) from {tbl}&quot;)
+            nulls = self._scalar(engine, f&quot;select count(*) from {tbl} where {col} is null&quot;)
+            return (nulls / n) if n else 0.0
+        s, t = rate(self.source, c[&quot;source_table&quot;]), rate(self.target, c[&quot;target_table&quot;])
+        ok = self._within_tolerance(s, t, tol)
+        return CheckResult(
+            name=c[&quot;name&quot;], check_type=CheckType.NULL_RATE,
+            status=Status.PASS if ok else Status.FAIL,
+            source_value=round(s, 6), target_value=round(t, 6),
+            delta=round(t - s, 6), tolerance=tol, detail=f&quot;null rate of {col}&quot;,
+        )
+
+    def _run_grouped_count(self, c: dict) -&gt; CheckResult:
+        &quot;&quot;&quot;Counts grouped by key. Surfaces WHICH groups drifted, not just that
+        totals differ. This is the check that earns the consulting fee.&quot;&quot;&quot;
+        key = c[&quot;group_by&quot;]
+        s = self._frame(self.source,
+                        f&quot;select {key} as k, count(*) as n from {c[&#x27;source_table&#x27;]} group by {key}&quot;)
+        t = self._frame(self.target,
+                        f&quot;select {key} as k, count(*) as n from {c[&#x27;target_table&#x27;]} group by {key}&quot;)
+        merged = s.merge(t, on=&quot;k&quot;, how=&quot;outer&quot;, suffixes=(&quot;_src&quot;, &quot;_tgt&quot;)).fillna(0)
+        merged[&quot;delta&quot;] = merged[&quot;n_tgt&quot;] - merged[&quot;n_src&quot;]
+        drift = merged[merged[&quot;delta&quot;] != 0].sort_values(&quot;delta&quot;, key=abs, ascending=False)
+        ok = drift.empty
+        return CheckResult(
+            name=c[&quot;name&quot;], check_type=CheckType.GROUPED_COUNT,
+            status=Status.PASS if ok else Status.FAIL,
+            source_value=int(s[&quot;n&quot;].sum()), target_value=int(t[&quot;n&quot;].sum()),
+            delta=int(merged[&quot;delta&quot;].sum()),
+            detail=f&quot;{len(drift)} group(s) drifted on {key}&quot;,
+            breakdown=drift if not ok else None,
+        )
+
+    def _run_referential(self, c: dict) -&gt; CheckResult:
+        &quot;&quot;&quot;Orphan check on the TARGET: child rows whose FK has no parent.
+        Run after migration to prove integrity survived the move.&quot;&quot;&quot;
+        sql = (f&quot;select count(*) from {c[&#x27;child_table&#x27;]} ch &quot;
+               f&quot;left join {c[&#x27;parent_table&#x27;]} p on ch.{c[&#x27;child_key&#x27;]} = p.{c[&#x27;parent_key&#x27;]} &quot;
+               f&quot;where p.{c[&#x27;parent_key&#x27;]} is null and ch.{c[&#x27;child_key&#x27;]} is not null&quot;)
+        orphans = self._scalar(self.target, sql)
+        ok = orphans == 0
+        return CheckResult(
+            name=c[&quot;name&quot;], check_type=CheckType.REFERENTIAL,
+            status=Status.PASS if ok else Status.FAIL,
+            source_value=0, target_value=orphans, delta=orphans,
+            detail=f&quot;orphans in {c[&#x27;child_table&#x27;]}.{c[&#x27;child_key&#x27;]} → {c[&#x27;parent_table&#x27;]}&quot;,
+        )
+
+    def _run_hash_total(self, c: dict) -&gt; CheckResult:
+        &quot;&quot;&quot;Order-independent row checksum. Each side hashes the concatenated key
+        columns per row, casts to a big int, and sums. Equal sums =&gt; same row
+        contents regardless of ordering. Dialect-specific hashing handled here.&quot;&quot;&quot;
+        cols = &quot; || &#x27;|&#x27; || &quot;.join(f&quot;cast({col} as varchar)&quot; for col in c[&quot;columns&quot;])
+        def total(engine, tbl, dialect):
+            if dialect == &quot;duckdb&quot;:
+                sql = f&quot;select sum(hash({cols})::hugeint % 1000000007) from {tbl}&quot;
+            elif dialect == &quot;postgresql&quot;:
+                sql = (f&quot;select sum((&#x27;x&#x27; || substr(md5({cols}),1,15))::bit(60)::bigint &quot;
+                       f&quot;% 1000000007) from {tbl}&quot;)
+            else:
+                sql = f&quot;select sum(abs(hashtext({cols})) % 1000000007) from {tbl}&quot;
+            return self._scalar(engine, sql)
+        s = total(self.source, c[&quot;source_table&quot;], self.source.dialect.name)
+        t = total(self.target, c[&quot;target_table&quot;], self.target.dialect.name)
+        ok = s == t
+        return CheckResult(
+            name=c[&quot;name&quot;], check_type=CheckType.HASH_TOTAL,
+            status=Status.PASS if ok else Status.FAIL,
+            source_value=s, target_value=t,
+            delta=(t - s) if (s is not None and t is not None) else None,
+            detail=f&quot;row-content checksum over {c[&#x27;columns&#x27;]}&quot;,
+        )
+
+    # ---- orchestration -----------------------------------------------------
+
+    _DISPATCH = {
+        CheckType.ROW_COUNT: &quot;_run_row_count&quot;,
+        CheckType.AGGREGATE: &quot;_run_aggregate&quot;,
+        CheckType.DISTINCT_COUNT: &quot;_run_distinct_count&quot;,
+        CheckType.NULL_RATE: &quot;_run_null_rate&quot;,
+        CheckType.GROUPED_COUNT: &quot;_run_grouped_count&quot;,
+        CheckType.REFERENTIAL: &quot;_run_referential&quot;,
+        CheckType.HASH_TOTAL: &quot;_run_hash_total&quot;,
+    }
+
+    def run(self, checks: list[dict]) -&gt; list[CheckResult]:
+        self.results = []
+        for c in checks:
+            ctype = CheckType(c[&quot;type&quot;])
+            method = getattr(self, self._DISPATCH[ctype])
+            try:
+                self.results.append(method(c))
+            except Exception as e:  # an erroring check is a finding, not a crash
+                self.results.append(CheckResult(
+                    name=c.get(&quot;name&quot;, &quot;&lt;unnamed&gt;&quot;), check_type=ctype,
+                    status=Status.ERROR, detail=f&quot;{type(e).__name__}: {e}&quot;,
+                ))
+        return self.results
+
+    def summary(self) -&gt; dict:
+        counts = {s: 0 for s in Status}
+        for r in self.results:
+            counts[r.status] += 1
+        return {
+            &quot;generated_at&quot;: datetime.now(timezone.utc).isoformat(),
+            &quot;total&quot;: len(self.results),
+            &quot;passed&quot;: counts[Status.PASS],
+            &quot;failed&quot;: counts[Status.FAIL],
+            &quot;errored&quot;: counts[Status.ERROR],
+            &quot;overall&quot;: &quot;PASS&quot; if counts[Status.FAIL] == 0 and counts[Status.ERROR] == 0 else &quot;FAIL&quot;,
+        }
+</code></pre></div>
+          </details>
+        </div>
+      </div>
+    </div>
+
+    <div class="task" data-id="appendix-report.py">
+      <div class="top">
+        <input type="checkbox" class="check" title="mark as reviewed">
+        <div style="min-width:0;flex:1">
+          <h3>report.py</h3>
+          <p class="goal">Renders results to console, markdown (the audit artifact), and JSON.</p>
+          <details><summary>View source<span class="lvl">79 lines</span></summary>
+            <div class="body"><pre style="max-height:520px"><code>&quot;&quot;&quot;
+Report rendering for the reconciliation harness.
+
+Three outputs, each with a purpose:
+  - console  : fast feedback while iterating
+  - markdown : the audit artifact you attach to a cutover sign-off / hand to a
+               client PM. This is the deliverable.
+  - json     : machine-readable, for CI gates or a dashboard feed.
+&quot;&quot;&quot;
+
+from __future__ import annotations
+
+import json
+from pathlib import Path
+
+from .engine import CheckResult, Status
+
+
+def _badge(status: Status) -&gt; str:
+    return {&quot;PASS&quot;: &quot;✓ PASS&quot;, &quot;FAIL&quot;: &quot;✗ FAIL&quot;, &quot;ERROR&quot;: &quot;! ERROR&quot;}[status.value]
+
+
+def to_console(results: list[CheckResult], summary: dict) -&gt; str:
+    lines = [&quot;&quot;, &quot;RECONCILIATION REPORT&quot;, &quot;=&quot; * 60]
+    for r in results:
+        lines.append(f&quot;{_badge(r.status):10} {r.name}&quot;)
+        if r.status != Status.PASS:
+            lines.append(f&quot;            src={r.source_value} tgt={r.target_value} &quot;
+                         f&quot;delta={r.delta} tol={r.tolerance}&quot;)
+            if r.detail:
+                lines.append(f&quot;            {r.detail}&quot;)
+            if r.breakdown is not None and not r.breakdown.empty:
+                head = r.breakdown.head(10).to_string(index=False)
+                lines.append(&quot;            top drift:\n&quot; +
+                             &quot;\n&quot;.join(&quot;              &quot; + ln for ln in head.splitlines()))
+    lines.append(&quot;=&quot; * 60)
+    lines.append(f&quot;OVERALL: {summary[&#x27;overall&#x27;]}  &quot;
+                 f&quot;({summary[&#x27;passed&#x27;]} passed, {summary[&#x27;failed&#x27;]} failed, &quot;
+                 f&quot;{summary[&#x27;errored&#x27;]} errored)&quot;)
+    return &quot;\n&quot;.join(lines)
+
+
+def to_markdown(results: list[CheckResult], summary: dict, title: str = &quot;Migration Reconciliation&quot;) -&gt; str:
+    md = [f&quot;# {title}&quot;, &quot;&quot;,
+          f&quot;**Generated:** {summary[&#x27;generated_at&#x27;]}  &quot;,
+          f&quot;**Result:** {&#x27;✅ PASS&#x27; if summary[&#x27;overall&#x27;] == &#x27;PASS&#x27; else &#x27;❌ FAIL&#x27;} &quot;
+          f&quot;— {summary[&#x27;passed&#x27;]}/{summary[&#x27;total&#x27;]} checks passed&quot;, &quot;&quot;,
+          &quot;| Check | Type | Status | Source | Target | Delta | Tol |&quot;,
+          &quot;|---|---|:---:|--:|--:|--:|--:|&quot;]
+    for r in results:
+        icon = {&quot;PASS&quot;: &quot;✅&quot;, &quot;FAIL&quot;: &quot;❌&quot;, &quot;ERROR&quot;: &quot;⚠️&quot;}[r.status.value]
+        md.append(f&quot;| {r.name} | {r.check_type.value} | {icon} | &quot;
+                  f&quot;{r.source_value} | {r.target_value} | {r.delta} | {r.tolerance} |&quot;)
+    # drift detail blocks
+    drifted = [r for r in results if r.breakdown is not None and not r.breakdown.empty]
+    if drifted:
+        md += [&quot;&quot;, &quot;## Drift detail&quot;, &quot;&quot;]
+        for r in drifted:
+            md += [f&quot;### {r.name}&quot;, &quot;&quot;, r.breakdown.head(25).to_markdown(index=False), &quot;&quot;]
+    errored = [r for r in results if r.status == Status.ERROR]
+    if errored:
+        md += [&quot;&quot;, &quot;## Errors&quot;, &quot;&quot;]
+        for r in errored:
+            md.append(f&quot;- **{r.name}**: {r.detail}&quot;)
+    return &quot;\n&quot;.join(md)
+
+
+def to_json(results: list[CheckResult], summary: dict) -&gt; str:
+    return json.dumps({&quot;summary&quot;: summary, &quot;checks&quot;: [r.to_row() for r in results]},
+                      indent=2, default=str)
+
+
+def write_all(results, summary, out_dir: str, stem: str = &quot;reconciliation&quot;) -&gt; None:
+    out = Path(out_dir)
+    out.mkdir(parents=True, exist_ok=True)
+    (out / f&quot;{stem}.md&quot;).write_text(to_markdown(results, summary))
+    (out / f&quot;{stem}.json&quot;).write_text(to_json(results, summary))
+    print(to_console(results, summary))
+    print(f&quot;\nWrote {out / stem}.md and {out / stem}.json&quot;)
+</code></pre></div>
+          </details>
+        </div>
+      </div>
+    </div>
+
+    <div class="task" data-id="appendix-cli.py">
+      <div class="top">
+        <input type="checkbox" class="check" title="mark as reviewed">
+        <div style="min-width:0;flex:1">
+          <h3>cli.py</h3>
+          <p class="goal">CLI + YAML loader with ${ENV_VAR} interpolation so creds never hit git.</p>
+          <details><summary>View source<span class="lvl">72 lines</span></summary>
+            <div class="body"><pre style="max-height:520px"><code>&quot;&quot;&quot;
+CLI for the reconciliation harness.
+
+Usage:
+    uv run reconcile run --config checks.yml --out ./reports
+    uv run reconcile run --config checks.yml --fail-on-error   # CI gate
+
+The config file holds connections + checks. Connection URLs can use ${ENV_VAR}
+so you never commit credentials.
+&quot;&quot;&quot;
+
+from __future__ import annotations
+
+import argparse
+import os
+import re
+import sys
+from pathlib import Path
+
+import yaml
+
+from .engine import ReconciliationEngine, Status
+from .report import write_all
+
+_ENV_PAT = re.compile(r&quot;\$\{([^}]+)\}&quot;)
+
+
+def _expand_env(value: str) -&gt; str:
+    def sub(m):
+        var = m.group(1)
+        if var not in os.environ:
+            raise SystemExit(f&quot;Env var {var} referenced in config but not set&quot;)
+        return os.environ[var]
+    return _ENV_PAT.sub(sub, value)
+
+
+def load_config(path: str) -&gt; dict:
+    cfg = yaml.safe_load(Path(path).read_text())
+    cfg[&quot;source_url&quot;] = _expand_env(cfg[&quot;source_url&quot;])
+    cfg[&quot;target_url&quot;] = _expand_env(cfg[&quot;target_url&quot;])
+    return cfg
+
+
+def cmd_run(args: argparse.Namespace) -&gt; int:
+    cfg = load_config(args.config)
+    engine = ReconciliationEngine(cfg[&quot;source_url&quot;], cfg[&quot;target_url&quot;])
+    results = engine.run(cfg[&quot;checks&quot;])
+    summary = engine.summary()
+    write_all(results, summary, args.out, stem=cfg.get(&quot;name&quot;, &quot;reconciliation&quot;))
+
+    if summary[&quot;failed&quot;] or summary[&quot;errored&quot;]:
+        return 1 if args.fail_on_error or args.strict else 0
+    return 0
+
+
+def main(argv: list[str] | None = None) -&gt; int:
+    p = argparse.ArgumentParser(prog=&quot;reconcile&quot;,
+                                description=&quot;Eigenbasis migration reconciliation harness&quot;)
+    sub = p.add_subparsers(dest=&quot;cmd&quot;, required=True)
+    r = sub.add_parser(&quot;run&quot;, help=&quot;Run checks from a config file&quot;)
+    r.add_argument(&quot;--config&quot;, required=True)
+    r.add_argument(&quot;--out&quot;, default=&quot;./reports&quot;)
+    r.add_argument(&quot;--fail-on-error&quot;, action=&quot;store_true&quot;,
+                   help=&quot;Exit non-zero if any check fails (use in CI)&quot;)
+    r.add_argument(&quot;--strict&quot;, action=&quot;store_true&quot;, help=&quot;Alias for --fail-on-error&quot;)
+    r.set_defaults(func=cmd_run)
+    args = p.parse_args(argv)
+    return args.func(args)
+
+
+if __name__ == &quot;__main__&quot;:
+    sys.exit(main())
+</code></pre></div>
+          </details>
+        </div>
+      </div>
+    </div>
+
+    <div class="task" data-id="appendix-test_harness.py">
+      <div class="top">
+        <input type="checkbox" class="check" title="mark as reviewed">
+        <div style="min-width:0;flex:1">
+          <h3>test_harness.py</h3>
+          <p class="goal">Self-test: builds a broken target and proves all defects are caught. Your live demo.</p>
+          <details><summary>View source<span class="lvl">85 lines</span></summary>
+            <div class="body"><pre style="max-height:520px"><code>&quot;&quot;&quot;
+Self-test for the reconciliation harness.
+
+Builds two DuckDB databases — a &#x27;source&#x27; and a deliberately-corrupted &#x27;target&#x27; —
+then runs the engine and asserts it CATCHES the drift. This is both a unit test
+and a live demo you can run in an interview: &#x27;here&#x27;s the harness catching a
+broken migration in real time.&#x27;
+
+Run:  uv run python -m tests.test_harness   (from the harness/ dir)
+&quot;&quot;&quot;
+
+import duckdb
+
+from reconcile import ReconciliationEngine, Status
+from reconcile.report import to_console
+
+
+def build_fixtures(src_path: str, tgt_path: str) -&gt; None:
+    # SOURCE: the truth
+    s = duckdb.connect(src_path)
+    s.execute(&quot;&quot;&quot;
+        create or replace table orders as
+        select * from (values
+            (&#x27;o1&#x27;,&#x27;c1&#x27;,&#x27;delivered&#x27;, 100.0),
+            (&#x27;o2&#x27;,&#x27;c2&#x27;,&#x27;delivered&#x27;, 200.0),
+            (&#x27;o3&#x27;,&#x27;c3&#x27;,&#x27;shipped&#x27;,   150.0),
+            (&#x27;o4&#x27;,&#x27;c4&#x27;,&#x27;canceled&#x27;,   50.0),
+            (&#x27;o5&#x27;,&#x27;c5&#x27;,&#x27;delivered&#x27;, 300.0)
+        ) t(order_id, customer_id, order_status, price)
+    &quot;&quot;&quot;)
+    s.close()
+
+    # TARGET: a migration with THREE planted defects:
+    #   1. o5 dropped entirely        -&gt; row_count + price_sum + grouped_count fail
+    #   2. o3 status flipped to delivered -&gt; grouped_count + hash fail
+    #   3. (counts of delivered now differ)
+    t = duckdb.connect(tgt_path)
+    t.execute(&quot;&quot;&quot;
+        create or replace table orders as
+        select * from (values
+            (&#x27;o1&#x27;,&#x27;c1&#x27;,&#x27;delivered&#x27;, 100.0),
+            (&#x27;o2&#x27;,&#x27;c2&#x27;,&#x27;delivered&#x27;, 200.0),
+            (&#x27;o3&#x27;,&#x27;c3&#x27;,&#x27;delivered&#x27;, 150.0),
+            (&#x27;o4&#x27;,&#x27;c4&#x27;,&#x27;canceled&#x27;,   50.0)
+        ) t(order_id, customer_id, order_status, price)
+    &quot;&quot;&quot;)
+    t.close()
+
+
+def main():
+    src, tgt = &quot;/tmp/recon_src.duckdb&quot;, &quot;/tmp/recon_tgt.duckdb&quot;
+    build_fixtures(src, tgt)
+
+    checks = [
+        {&quot;name&quot;: &quot;orders_row_count&quot;, &quot;type&quot;: &quot;row_count&quot;,
+         &quot;source_table&quot;: &quot;orders&quot;, &quot;target_table&quot;: &quot;orders&quot;},
+        {&quot;name&quot;: &quot;price_sum&quot;, &quot;type&quot;: &quot;aggregate&quot;, &quot;agg&quot;: &quot;sum&quot;, &quot;column&quot;: &quot;price&quot;,
+         &quot;source_table&quot;: &quot;orders&quot;, &quot;target_table&quot;: &quot;orders&quot;, &quot;tolerance&quot;: 0.0},
+        {&quot;name&quot;: &quot;distinct_customers&quot;, &quot;type&quot;: &quot;distinct_count&quot;, &quot;column&quot;: &quot;customer_id&quot;,
+         &quot;source_table&quot;: &quot;orders&quot;, &quot;target_table&quot;: &quot;orders&quot;},
+        {&quot;name&quot;: &quot;orders_by_status&quot;, &quot;type&quot;: &quot;grouped_count&quot;, &quot;group_by&quot;: &quot;order_status&quot;,
+         &quot;source_table&quot;: &quot;orders&quot;, &quot;target_table&quot;: &quot;orders&quot;},
+        {&quot;name&quot;: &quot;content_hash&quot;, &quot;type&quot;: &quot;hash_total&quot;,
+         &quot;columns&quot;: [&quot;order_id&quot;, &quot;customer_id&quot;, &quot;order_status&quot;],
+         &quot;source_table&quot;: &quot;orders&quot;, &quot;target_table&quot;: &quot;orders&quot;},
+    ]
+
+    engine = ReconciliationEngine(f&quot;duckdb:///{src}&quot;, f&quot;duckdb:///{tgt}&quot;)
+    results = engine.run(checks)
+    summary = engine.summary()
+    print(to_console(results, summary))
+
+    # Assertions: the harness MUST catch every planted defect.
+    by_name = {r.name: r for r in results}
+    assert by_name[&quot;orders_row_count&quot;].status == Status.FAIL, &quot;missed dropped row&quot;
+    assert by_name[&quot;price_sum&quot;].status == Status.FAIL, &quot;missed missing revenue&quot;
+    assert by_name[&quot;orders_by_status&quot;].status == Status.FAIL, &quot;missed status drift&quot;
+    assert by_name[&quot;content_hash&quot;].status == Status.FAIL, &quot;missed content change&quot;
+    assert by_name[&quot;distinct_customers&quot;].status == Status.FAIL, &quot;missed customer drop&quot;
+    assert summary[&quot;overall&quot;] == &quot;FAIL&quot;
+    print(&quot;\n✓ self-test passed: harness correctly caught all 5 planted defects&quot;)
+
+
+if __name__ == &quot;__main__&quot;:
+    main()
+</code></pre></div>
+          </details>
+        </div>
+      </div>
+    </div>
+
+    <div class="task" data-id="appendix-pyproject">
+      <div class="top">
+        <input type="checkbox" class="check" title="mark as reviewed">
+        <div style="min-width:0;flex:1">
+          <h3>harness/pyproject.toml</h3>
+          <p class="goal">Package metadata + the <code>reconcile</code> CLI entry point. Install with <code>uv sync</code>.</p>
+          <details><summary>View source<span class="lvl">config</span></summary>
+            <div class="body"><pre><code>[project]
+name = &quot;eigenbasis-reconcile&quot;
+version = &quot;0.1.0&quot;
+description = &quot;Config-driven migration reconciliation harness&quot;
+requires-python = &quot;&gt;=3.13&quot;
+dependencies = [
+    &quot;pandas&gt;=2.2&quot;,
+    &quot;sqlalchemy&gt;=2.0&quot;,
+    &quot;pyyaml&gt;=6.0&quot;,
+    &quot;tabulate&gt;=0.9&quot;,       # pandas.to_markdown
+    &quot;duckdb-engine&gt;=0.13&quot;,  # DuckDB via SQLAlchemy
+    &quot;psycopg2-binary&gt;=2.9&quot;, # Postgres
+]
+
+[project.scripts]
+reconcile = &quot;reconcile.cli:main&quot;
+
+[build-system]
+requires = [&quot;hatchling&quot;]
+build-backend = &quot;hatchling.build&quot;
+</code></pre></div>
+          </details>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <footer class="end">
+    <b>Finished?</b> Everything you need is in this one file — tasks, hints, full answers, and the harness source below.<br>
+    The rep that matters most for selling migration work is <b>3.2</b>: rehearse the break-and-catch until you can narrate it cold.<br>
+    The harness source lives in the <a href="#appendix">Appendix</a>; run it from the <code>harness/</code> folder on disk.
+  </footer>
+
+</div>
+
+<script>
+  const KEY = "eigenbasis_guided_progress_v1";
+  const boxes = [...document.querySelectorAll(".task .check")].filter(b => !b.closest('.task').dataset.id.startsWith('appendix'));
+  const fill = document.getElementById("barfill");
+  const pct  = document.getElementById("pct");
+
+  function idFor(box){ return box.closest(".task").dataset.id; }
+
+  function load(){
+    let saved = {};
+    try { saved = JSON.parse(localStorage.getItem(KEY)) || {}; } catch(e){}
+    boxes.forEach(b => {
+      const on = !!saved[idFor(b)];
+      b.checked = on;
+      b.closest(".task").classList.toggle("done", on);
+    });
+    render();
+  }
+  function save(){
+    const state = {};
+    boxes.forEach(b => state[idFor(b)] = b.checked);
+    localStorage.setItem(KEY, JSON.stringify(state));
+  }
+  function render(){
+    const done = boxes.filter(b => b.checked).length;
+    const total = boxes.length;
+    pct.textContent = done + " / " + total + " done";
+    fill.style.width = (total ? (done/total*100) : 0) + "%";
+  }
+  boxes.forEach(b => b.addEventListener("change", () => {
+    b.closest(".task").classList.toggle("done", b.checked);
+    save(); render();
+  }));
+  document.getElementById("reset").addEventListener("click", () => {
+    if(confirm("Reset all progress and close all hints?")){
+      localStorage.removeItem(KEY);
+      boxes.forEach(b => { b.checked = false; b.closest(".task").classList.remove("done"); });
+      document.querySelectorAll("details[open]").forEach(d => d.open = false);
+      render();
+    }
+  });
+
+  // gentle accountability: opening the answer key auto-opens the hints above it
+  // (nudges you to have at least seen the smaller pushes first — but never blocks)
+  document.querySelectorAll("details.answer").forEach(ans => {
+    ans.addEventListener("toggle", () => {
+      if(ans.open){
+        let prev = ans.previousElementSibling;
+        while(prev && prev.tagName === "DETAILS"){ prev.open = true; prev = prev.previousElementSibling; }
+      }
+    });
+  });
+
+  load();
+</script>
+</body>
+</html>

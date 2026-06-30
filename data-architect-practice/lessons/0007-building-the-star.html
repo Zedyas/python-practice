@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 0007 — Building the Star (dbt project)</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+<script src="../assets/quiz.js"></script>
+</head>
+<body id="top">
+
+<header class="hero">
+  <div class="hero-inner">
+    <p class="eyebrow">Eigenbasis Lab · Lesson 0007 · Transform, deep · how it's actually built</p>
+    <h1 class="title">Building the star — a dbt project, end to end</h1>
+    <p class="lede">0006 named the Transform words; this lesson shows how a transformation project is <em>structured and assembled</em>. The model layers (staging → intermediate → marts), how <code>ref</code> and <code>source</code> build the DAG, and the claims star wired up model-by-model — including the surrogate-key/SCD2 trap we deferred. Still healthcare claims.</p>
+    <div class="crosslinks">
+      <a class="alt" href="0006-transform-vocab.html">← Lesson 0006</a>
+      <a class="alt" href="../reference/01-glossary.html#transform">Glossary · Transform</a>
+      <a class="alt" href="../reference/00-the-spine.html">Spine one-pager</a>
+      <a href="#practice">Jump to practice</a>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+<main>
+
+  <div class="win">
+    <span class="k">The win</span>
+    <p>You can answer "walk me through your dbt project structure" — the <strong>staging → intermediate → marts</strong> layering and what each layer is and isn't allowed to do; explain how <strong><code>ref()</code> and <code>source()</code> give you the DAG, ordering, and lineage for free; and wire a fact to an <strong>SCD2 dimension correctly</strong> via a surrogate key resolved at load. The throughline: <em>a transformation project is a graph of small single-purpose models, layered from raw to business-ready.</em></p>
+  </div>
+
+  <!-- 1 -->
+  <section class="blk" id="elt">
+    <h2><span class="num">01</span>Where Transform sits — ELT, not ETL <span class="spot flow">Transform</span></h2>
+    <p><strong>Definition:</strong> in the modern stack the order is <em class="term">ELT</em> — Extract and Load land <em>raw</em> data in the warehouse first (the Ingest/Store stages), then Transform runs <em>as SQL inside the warehouse</em>. dbt <em>is</em> that T: it takes a folder of <code>SELECT</code> statements ("models") and builds them into tables/views in dependency order.</p>
+    <p>The old <em class="term">ETL</em> transformed data <em>before</em> loading, on a separate box. ELT won because storage is cheap (keep the raw), and the warehouse's MPP compute is the best engine you have to transform with — so push the work to where the data already is. <span class="gbreak">This is why "Transform" on the spine is in-warehouse SQL, not a separate processing tier.</span></p>
+  </section>
+
+  <!-- 2 -->
+  <section class="blk" id="layers">
+    <h2><span class="num">02</span>The three model layers <span class="spot flow">Transform · project structure</span></h2>
+    <p>A dbt project is organised into three layers, each with a job it is and isn't allowed to do. This is the single most-asked structural question in interviews.</p>
+    <table>
+      <thead><tr><th>Layer</th><th>Job — and the rule</th><th>Claims models</th><th>Medallion</th></tr></thead>
+      <tbody>
+        <tr><td><strong>staging</strong> <code>stg_</code></td><td>one model <em>per source table</em>; only rename, recast, light cleanup. <em>No joins, no business logic.</em> Usually views.</td><td><code>stg_claims</code>, <code>stg_members</code>, <code>stg_providers</code></td><td>bronze→silver</td></tr>
+        <tr><td><strong>intermediate</strong> <code>int_</code></td><td>the messy middle — joins, dedupe, reshaping, business logic. Not exposed to BI.</td><td><code>int_claim_enriched</code> (lines + header + member)</td><td>silver</td></tr>
+        <tr><td><strong>marts</strong> <code>dim_</code>/<code>fct_</code></td><td>the business-ready star — what BI and analysts actually query.</td><td><code>fct_claim_line</code>, <code>dim_member</code>, <code>dim_date</code>, <code>dim_cpt</code></td><td>gold</td></tr>
+      </tbody>
+    </table>
+    <div class="note"><span class="tag">Why the discipline</span>Each model does <em>one</em> thing, so logic lives in exactly one place and is testable. Staging being 1:1 with sources means there's a single spot where each raw table gets cleaned — every downstream model reads the clean version, never the raw. <span class="gbreak">Skip the layers and you get the same join logic copy-pasted into five marts, drifting out of sync — the thing the structure exists to prevent.</span></div>
+  </section>
+
+  <!-- 3 -->
+  <section class="blk" id="ref">
+    <h2><span class="num">03</span><code>ref()</code> / <code>source()</code> and the DAG <span class="spot flow">Transform · the engine</span></h2>
+    <p>You never hardcode a table name in dbt. You write two functions, and dbt reads them to build the dependency graph:</p>
+    <ul>
+      <li><strong><code>source('raw', 'claims')</code></strong> — "this model depends on a declared <em>raw input</em>." Marks the edge of your project where external data enters.</li>
+      <li><strong><code>ref('stg_claims')</code></strong> — "this model depends on <em>another model</em>." dbt substitutes the real (environment-correct) table name.</li>
+    </ul>
+    <pre><code><span class="c">-- models/intermediate/int_claim_enriched.sql</span>
+<span class="k">SELECT</span> l.claim_id, l.line_no, l.cpt, l.line_amount, c.member_id, c.service_date
+<span class="k">FROM</span> {{ <span class="f">ref</span>(<span class="s">'stg_claim_line'</span>) }} l
+<span class="k">JOIN</span> {{ <span class="f">ref</span>(<span class="s">'stg_claims'</span>)    }} c <span class="k">USING</span> (claim_id)</code></pre>
+    <p>From those calls dbt derives the whole <em class="term">DAG</em> (directed acyclic graph) and gets three things <strong>for free</strong>: <strong>build order</strong> (a model runs only after its refs), <strong>parallelism</strong> (independent branches run together), and <strong>lineage</strong> (it knows every model's upstream sources and downstream consumers — so "what breaks if this column changes?" is answerable). Hardcoding a table name would sever that edge and you'd lose all three.</p>
+  </section>
+
+  <!-- 4 -->
+  <section class="blk" id="assemble">
+    <h2><span class="num">04</span>Assembling the claims star <span class="spot flow">Transform · putting it together</span></h2>
+    <p>Here is the whole project as a graph — raw on the left, the star on the right, each box a single model file:</p>
+    <pre class="ascii"><code>raw.claims  ──▶ stg_claims   ─┐
+raw.members ──▶ stg_members  ─┤                              ┌─▶ dim_member  ─┐
+raw.cpt     ──▶ stg_cpt      ─┼─▶ int_claim_enriched ──────▶ ┤  dim_date     ─┼─▶ fct_claim_line ──▶ BI
+raw.lines   ──▶ stg_claim_line┘                              └─▶ dim_cpt      ─┘
+                staging (views)        intermediate              marts (the star)</code></pre>
+    <ul>
+      <li><strong>staging</strong> cleans each source once (cast <code>service_date</code> to a date, trim ids, standardise plan codes).</li>
+      <li><strong>int_claim_enriched</strong> joins lines to their header and member, dedupes resubmitted claims — all the logic that needs more than one table.</li>
+      <li><strong>dims</strong> are built from staging (<code>dim_member</code> as an SCD2 snapshot — see §05); <strong><code>fct_claim_line</code></strong> is the atomic-grain fact (incremental, merged on <code>(claim_id, line_no)</code>) carrying foreign keys to each dim plus the additive measures.</li>
+    </ul>
+    <div class="note"><span class="tag">Read the grain off the graph</span>The fact sits at the <em>line</em> grain (0005); every dimension feeding it is at one-row-per-entity grain. The layers are just the path from raw to that declared grain — staging makes raw trustworthy, intermediate does the joins, the mart <em>is</em> the grain made into a table.</div>
+  </section>
+
+  <!-- 5 -->
+  <section class="blk" id="scdkey">
+    <h2><span class="num">05</span>The surrogate-key / SCD2 fact wiring <span class="spot flow">Transform · the trap</span></h2>
+    <p>The deferred question from 0006: <em>does the fact store <code>member_id</code> (natural) or <code>member_key</code> (surrogate)?</em> With an SCD2 dimension the answer matters, and getting it wrong silently corrupts history.</p>
+    <p>An SCD2 <code>dim_member</code> has <strong>one row per version</strong>, each with its own <em>surrogate</em> <code>member_key</code> (1, 2, 3…) — so M-1's BRONZE era is key&nbsp;1 and its GOLD era is key&nbsp;2. The load step resolves <em>which version was valid at the event date</em> and stamps that surrogate onto the fact:</p>
+    <pre><code><span class="c">-- LOAD: resolve the SCD2 version valid AT the service date, freeze its surrogate key</span>
+<span class="k">INSERT INTO</span> fct_claim_line
+<span class="k">SELECT</span> r.claim_id, r.line_no, m.member_key, r.service_date, r.line_amount
+<span class="k">FROM</span> raw_claim_line r
+<span class="k">JOIN</span> dim_member m
+  <span class="k">ON</span> r.member_id = m.member_id
+ <span class="k">AND</span> r.service_date &gt;= m.valid_from <span class="k">AND</span> r.service_date &lt; m.valid_to;
+
+<span class="c">-- result: Jan lines get member_key 1 (BRONZE), Mar line gets member_key 2 (GOLD)</span></code></pre>
+    <p>Now the point-in-time logic is <strong>frozen into the fact at load</strong>, so every query is a plain surrogate join — no date ranges, and history stays correct:</p>
+    <pre><code><span class="k">SELECT</span> m.plan, <span class="f">sum</span>(f.line_amount)
+<span class="k">FROM</span> fct_claim_line f <span class="k">JOIN</span> dim_member m <span class="k">USING</span> (member_key)
+<span class="k">GROUP BY</span> m.plan;
+<span class="c">--  BRONZE 300.00   GOLD 300.00     ✓  (vs. natural-key+is_current = 600 all GOLD)</span></code></pre>
+    <div class="note warn"><span class="tag">The rule + interview line</span>Store the <strong>surrogate</strong> <code>member_key</code> on the fact, resolved to the version valid at event time. Storing the natural <code>member_id</code> forces a fragile point-in-time join on every query — and joining to <code>is_current</code> instead silently relabels old claims with today's plan. "Facts carry the surrogate key of the dimension version that was true when the event happened — that's what makes SCD2 history queryable with a normal join." Ties back to <a href="0003-bedrock-vocab.html">surrogate keys (0003)</a> and <a href="0006-transform-vocab.html#scd">SCD2 (0006)</a>.</div>
+  </section>
+
+  <!-- PRACTICE -->
+  <section class="blk" id="practice">
+    <h2><span class="num">06</span>Practice — say it before you flip</h2>
+
+    <div class="recall">
+      <p class="q">Name the three model layers and the one-line rule for each.</p>
+      <div class="a">staging = 1:1 per source, clean only, no joins · intermediate = joins/dedupe/business logic, not for BI · marts = the business-ready star (dim_/fct_) that BI queries.</div>
+    </div>
+    <div class="recall">
+      <p class="q">What do <code>ref()</code> and <code>source()</code> buy you?</p>
+      <div class="a">dbt reads them to build the DAG → automatic build order, parallelism, and end-to-end lineage. source() = declared raw input; ref() = dependency on another model.</div>
+    </div>
+    <div class="recall">
+      <p class="q">Why ELT instead of ETL?</p>
+      <div class="a">Cheap storage means you keep the raw; the warehouse's MPP compute is the best transform engine you have, so push the T to where the data already sits. dbt is the T.</div>
+    </div>
+    <div class="recall">
+      <p class="q">Natural or surrogate key on a fact pointing at an SCD2 dim — and why?</p>
+      <div class="a">Surrogate (member_key), resolved at load to the version valid at event time. It freezes point-in-time history so query joins are plain and correct; natural key + is_current relabels old facts with current values.</div>
+    </div>
+
+    <h3>Choose</h3>
+    <div class="mcq" data-explain="Joining two source tables is business logic — it belongs in intermediate, never in a 1:1 staging model.">
+      <p class="q">Where does a join between claims and members belong?</p>
+      <button>staging</button>
+      <button data-correct>intermediate</button>
+      <button>a source() call</button>
+      <button>the raw layer</button>
+    </div>
+    <div class="mcq" data-explain="ref/source build the dependency graph; lose them and dbt can't order, parallelise, or trace lineage.">
+      <p class="q">Hardcoding <code>analytics.stg_claims</code> instead of <code>ref('stg_claims')</code> costs you…</p>
+      <button>nothing, it's equivalent</button>
+      <button>only some typing</button>
+      <button data-correct>build order, parallelism, and lineage</button>
+      <button>the ability to use views</button>
+    </div>
+    <div class="mcq" data-explain="The surrogate key resolved at the event date freezes the correct version; a plain join then reproduces the historical split.">
+      <p class="q">M-1 went BRONZE→GOLD. A Jan claim shows up under GOLD in your report. Likely cause?</p>
+      <button>The fact is at the wrong grain</button>
+      <button data-correct>Fact joined member on is_current, not the as-of key</button>
+      <button>dim_member isn't conformed</button>
+      <button>The model should be ephemeral</button>
+    </div>
+
+    <div class="teacher"><span class="tag">Your teacher</span>Transform isn't exhausted yet — say the word and we go deep on any of: <strong>incremental strategies</strong> (append vs merge vs insert_overwrite, late-arriving data, full-refresh), <strong>many-to-many</strong> (bridge tables — a claim's multiple diagnoses — and factless facts), or <strong>Kimball vs Data Vault vs One Big Table</strong> (when each modeling style wins).</div>
+  </section>
+
+  <section class="blk" id="next">
+    <h2><span class="num">→</span>Still on Transform</h2>
+    <p>Covered so far: grain (0005) · vocab (0006) · project structure + star assembly + SCD2 wiring (this one). Remaining Transform deep-dives, your pick:</p>
+    <ul>
+      <li><strong>Incremental models, deep</strong> — append vs merge vs insert_overwrite, <code>unique_key</code>, late-arriving facts, when to <code>--full-refresh</code>. (High interview value; flagged twice now.)</li>
+      <li><strong>Hard modeling shapes</strong> — bridge tables &amp; many-to-many, factless facts, snapshots vs accumulating snapshots.</li>
+      <li><strong>Modeling styles</strong> — Kimball vs Data Vault vs One Big Table / wide tables; when each is right.</li>
+    </ul>
+    <p>Name one, or say "next" when you're ready to leave Transform for Quality.</p>
+  </section>
+
+</main>
+</div>
+
+<footer>
+  <div class="wrap">
+    <p><strong>Lesson 0007 · Building the Star</strong> — Eigenbasis Lab. SCD2 surrogate-key load + query verified in DuckDB v1.5 on the claims fixture (load freezes member_key 1/2 by service date → plain join yields $300 BRONZE / $300 GOLD).
+    <a href="0006-transform-vocab.html">← 0006</a> · <a href="../reference/01-glossary.html">Glossary</a> · <a href="../reference/00-the-spine.html">Spine</a>.</p>
+  </div>
+</footer>
+
+</body>
+</html>

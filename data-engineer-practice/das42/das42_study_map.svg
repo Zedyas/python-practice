@@ -1,0 +1,182 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1160 1480" font-family="-apple-system, BlinkMacSystemFont, Segoe UI, Roboto, sans-serif">
+  <defs>
+    <linearGradient id="top" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#29b5e8"/>
+      <stop offset="0.5" stop-color="#2196d6"/>
+      <stop offset="1" stop-color="#1271c4"/>
+    </linearGradient>
+  </defs>
+  <rect width="1160" height="1480" fill="#f4f9fd"/>
+  <rect width="1160" height="6" fill="url(#top)"/>
+  <text x="40" y="58" font-size="30" font-weight="700" fill="#15293d">DAS42 Interview Study Guide &#10052;</text>
+  <text x="40" y="86" font-size="15" fill="#3f5973">Everything covered, mapped to the four-round process and prep weighting</text>
+
+  <text x="40" y="128" font-size="13" font-weight="700" fill="#2196d6" letter-spacing="1">THE FOUR ROUNDS</text>
+  <rect x="40" y="140" width="255" height="64" rx="9" fill="#fff" stroke="#d4e4f0"/>
+  <text x="56" y="166" font-size="13" font-weight="700" fill="#15293d">1 &#183; Recruiter screen</text>
+  <text x="56" y="188" font-size="12" fill="#6b8299">Fit, "why consulting", confirm ETL</text>
+  <rect x="307" y="140" width="255" height="64" rx="9" fill="#fff" stroke="#d4e4f0"/>
+  <text x="323" y="166" font-size="13" font-weight="700" fill="#15293d">2 &#183; Python/SQL OA</text>
+  <text x="323" y="188" font-size="12" fill="#6b8299">Auto-graded, no humans</text>
+  <rect x="574" y="140" width="255" height="64" rx="9" fill="#e3f3fc" stroke="#2196d6" stroke-width="1.5"/>
+  <text x="590" y="166" font-size="13" font-weight="700" fill="#1271c4">3 &#183; Technical (make-or-break)</text>
+  <text x="590" y="188" font-size="12" fill="#3f5973">Design Q + resume deep-dive</text>
+  <rect x="841" y="140" width="279" height="64" rx="9" fill="#fff" stroke="#d4e4f0"/>
+  <text x="857" y="166" font-size="13" font-weight="700" fill="#15293d">4 &#183; Behavioral / partner</text>
+  <text x="857" y="188" font-size="12" fill="#6b8299">Often a formality &#8212; stay sharp</text>
+  <text x="299" y="178" font-size="16" fill="#6b8299">&#8594;</text>
+  <text x="566" y="178" font-size="16" fill="#6b8299">&#8594;</text>
+  <text x="833" y="178" font-size="16" fill="#6b8299">&#8594;</text>
+
+  <text x="40" y="244" font-size="13" font-weight="700" fill="#2196d6" letter-spacing="1">PREP WEIGHTING</text>
+  <rect x="40" y="256" width="448" height="34" rx="5" fill="#1271c4"/>
+  <text x="56" y="278" font-size="13" font-weight="700" fill="#fff">Resume walkthrough &#183; 40%</text>
+  <rect x="492" y="256" width="280" height="34" rx="5" fill="#2196d6"/>
+  <text x="508" y="278" font-size="13" font-weight="700" fill="#fff">DB design &#183; 25%</text>
+  <rect x="776" y="256" width="224" height="34" rx="5" fill="#29b5e8"/>
+  <text x="792" y="278" font-size="13" font-weight="700" fill="#fff">SQL &#183; 20%</text>
+  <rect x="1004" y="256" width="80" height="34" rx="5" fill="#7cc9ec"/>
+  <text x="1014" y="278" font-size="12" font-weight="700" fill="#0c3a5c">Py 10%</text>
+  <rect x="1088" y="256" width="32" height="34" rx="5" fill="#b3e0f4"/>
+  <text x="1093" y="278" font-size="11" font-weight="700" fill="#0c3a5c">5%</text>
+
+  <rect x="40" y="324" width="340" height="470" rx="11" fill="#fff" stroke="#2196d6" stroke-width="1.5"/>
+  <rect x="40" y="324" width="340" height="40" rx="11" fill="#e3f3fc"/>
+  <rect x="40" y="350" width="340" height="14" fill="#e3f3fc"/>
+  <text x="60" y="350" font-size="16" font-weight="700" fill="#1271c4">&#9635; Database Design</text>
+  <text x="320" y="350" font-size="12" font-weight="700" fill="#2196d6">25%</text>
+  <text x="60" y="392" font-size="12.5" font-weight="700" fill="#15293d">Core vocabulary</text>
+  <text x="60" y="412" font-size="12" fill="#3f5973">Entity &#183; attribute &#183; PK &#183; FK</text>
+  <text x="60" y="430" font-size="12" fill="#3f5973">Cardinality &#183; schema</text>
+  <text x="60" y="458" font-size="12.5" font-weight="700" fill="#15293d">Normalization</text>
+  <text x="60" y="478" font-size="12" fill="#3f5973">1NF &#8594; 2NF &#8594; 3NF</text>
+  <text x="60" y="496" font-size="12" fill="#3f5973">"key, whole key, nothing but"</text>
+  <text x="60" y="524" font-size="12.5" font-weight="700" fill="#15293d">Relationships &amp; keys</text>
+  <text x="60" y="544" font-size="12" fill="#3f5973">M:N &#8594; junction table</text>
+  <text x="60" y="562" font-size="12" fill="#3f5973">Surrogate vs natural keys</text>
+  <text x="60" y="590" font-size="12.5" font-weight="700" fill="#15293d">Indexes</text>
+  <text x="60" y="610" font-size="12" fill="#3f5973">Faster reads, slower writes</text>
+  <text x="60" y="628" font-size="12" fill="#3f5973">Index FKs &amp; filter columns</text>
+  <text x="60" y="656" font-size="12.5" font-weight="700" fill="#15293d">6-step walkthrough</text>
+  <text x="60" y="676" font-size="12" fill="#3f5973">Scope &#8594; entities &#8594; keys &#8594;</text>
+  <text x="60" y="694" font-size="12" fill="#3f5973">relationships &#8594; normalize &#8594;</text>
+  <text x="60" y="712" font-size="12" fill="#3f5973">bridge to analytics</text>
+  <rect x="60" y="730" width="300" height="48" rx="7" fill="#fbeceb"/>
+  <text x="74" y="750" font-size="12" font-weight="700" fill="#c0392b">&#9733; Worked designs (rehearse aloud)</text>
+  <text x="74" y="768" font-size="12" fill="#3f5973">AllRecipes &#183; Online store</text>
+
+  <rect x="408" y="324" width="340" height="470" rx="11" fill="#fff" stroke="#d4e4f0"/>
+  <rect x="408" y="324" width="340" height="40" rx="11" fill="#e0eefb"/>
+  <rect x="408" y="350" width="340" height="14" fill="#e0eefb"/>
+  <text x="428" y="350" font-size="16" font-weight="700" fill="#1271c4">&#9067; Dimensional Modeling</text>
+  <text x="428" y="392" font-size="12.5" font-weight="700" fill="#15293d">OLTP vs OLAP</text>
+  <text x="428" y="412" font-size="12" fill="#3f5973">Normalized txn vs</text>
+  <text x="428" y="430" font-size="12" fill="#3f5973">denormalized analytics</text>
+  <text x="428" y="458" font-size="12.5" font-weight="700" fill="#15293d">Star schema</text>
+  <text x="428" y="478" font-size="12" fill="#3f5973">Fact (measures + FKs)</text>
+  <text x="428" y="496" font-size="12" fill="#3f5973">surrounded by dimensions</text>
+  <text x="428" y="524" font-size="12.5" font-weight="700" fill="#15293d">Grain</text>
+  <text x="428" y="544" font-size="12" fill="#3f5973">What one fact row =</text>
+  <text x="428" y="562" font-size="12" fill="#3f5973">Define it FIRST</text>
+  <text x="428" y="590" font-size="12.5" font-weight="700" fill="#15293d">Star vs snowflake</text>
+  <text x="428" y="610" font-size="12" fill="#3f5973">Denormalized vs normalized</text>
+  <text x="428" y="628" font-size="12" fill="#3f5973">dimensions</text>
+  <text x="428" y="656" font-size="12.5" font-weight="700" fill="#15293d">Slowly changing dims</text>
+  <text x="428" y="676" font-size="12" fill="#3f5973">Type 1 = overwrite</text>
+  <text x="428" y="694" font-size="12" fill="#3f5973">Type 2 = new row + history</text>
+  <rect x="428" y="730" width="300" height="48" rx="7" fill="#e3f3fc"/>
+  <text x="442" y="750" font-size="12" font-weight="700" fill="#1271c4">The consulting differentiator</text>
+  <text x="442" y="768" font-size="12" fill="#3f5973">Bridge OLTP design &#8594; analytics</text>
+
+  <rect x="776" y="324" width="344" height="470" rx="11" fill="#fff" stroke="#2196d6" stroke-width="1.5"/>
+  <rect x="776" y="324" width="344" height="40" rx="11" fill="#e3f3fc"/>
+  <rect x="776" y="350" width="344" height="14" fill="#e3f3fc"/>
+  <text x="796" y="350" font-size="16" font-weight="700" fill="#1271c4">&#8644; Migration &amp; Pipelines</text>
+  <text x="796" y="392" font-size="12.5" font-weight="700" fill="#15293d">ETL vs ELT</text>
+  <text x="796" y="412" font-size="12" fill="#3f5973">Transform-then-load (old) vs</text>
+  <text x="796" y="430" font-size="12" fill="#3f5973">load-then-transform (cloud)</text>
+  <text x="796" y="458" font-size="12.5" font-weight="700" fill="#15293d">Migration walkthrough</text>
+  <text x="796" y="478" font-size="12" fill="#3f5973">Problem &#8594; your role &#8594; ELT &#8594;</text>
+  <text x="796" y="496" font-size="12" fill="#3f5973">hardest part &#8594; validate &#8594; result</text>
+  <text x="796" y="524" font-size="12.5" font-weight="700" fill="#15293d">Validation strategies</text>
+  <text x="796" y="544" font-size="12" fill="#3f5973">Source-to-target reconciliation</text>
+  <text x="796" y="562" font-size="12" fill="#3f5973">Schema + business-rule tests</text>
+  <text x="796" y="590" font-size="12.5" font-weight="700" fill="#15293d">dbt concepts</text>
+  <text x="796" y="610" font-size="12" fill="#3f5973">Models &#183; ref() &#183; materialization</text>
+  <text x="796" y="628" font-size="12" fill="#3f5973">Tests &#183; sources &#183; staging/marts</text>
+  <rect x="796" y="730" width="304" height="48" rx="7" fill="#fbeceb"/>
+  <text x="810" y="750" font-size="12" font-weight="700" fill="#c0392b">&#9733; Your resume's core</text>
+  <text x="810" y="768" font-size="12" fill="#3f5973">Have a "what broke" story ready</text>
+
+  <rect x="40" y="818" width="340" height="300" rx="11" fill="#fff" stroke="#d4e4f0"/>
+  <rect x="40" y="818" width="340" height="40" rx="11" fill="#e0eefb"/>
+  <rect x="40" y="844" width="340" height="14" fill="#e0eefb"/>
+  <text x="60" y="844" font-size="16" font-weight="700" fill="#1271c4">&#10052; Snowflake</text>
+  <text x="270" y="844" font-size="11" font-weight="700" fill="#2196d6">+ separate guide</text>
+  <text x="60" y="886" font-size="12.5" font-weight="700" fill="#15293d">Architecture</text>
+  <text x="60" y="906" font-size="12" fill="#3f5973">Storage / compute separation</text>
+  <text x="60" y="924" font-size="12" fill="#3f5973">Virtual warehouses (XS&#8211;L)</text>
+  <text x="60" y="942" font-size="12" fill="#3f5973">Micro-partitions</text>
+  <text x="60" y="970" font-size="12.5" font-weight="700" fill="#15293d">Performance</text>
+  <text x="60" y="990" font-size="12" fill="#3f5973">Pruning &#183; clustering keys</text>
+  <text x="60" y="1008" font-size="12" fill="#3f5973">Scale up vs out &#183; caching</text>
+  <text x="60" y="1036" font-size="12.5" font-weight="700" fill="#15293d">Deep-dive (guide 2)</text>
+  <text x="60" y="1056" font-size="12" fill="#3f5973">Stages + COPY INTO &#183; VARIANT</text>
+  <text x="60" y="1074" font-size="12" fill="#3f5973">Time Travel &#183; zero-copy clone</text>
+  <text x="60" y="1092" font-size="12" fill="#3f5973">Cost model &#183; streams &amp; tasks</text>
+
+  <rect x="408" y="818" width="340" height="300" rx="11" fill="#fff" stroke="#d4e4f0"/>
+  <rect x="408" y="818" width="340" height="40" rx="11" fill="#e3f3fc"/>
+  <rect x="408" y="844" width="340" height="14" fill="#e3f3fc"/>
+  <text x="428" y="844" font-size="16" font-weight="700" fill="#1271c4">&#9095; SQL</text>
+  <text x="690" y="844" font-size="12" font-weight="700" fill="#2196d6">20%</text>
+  <text x="428" y="886" font-size="12.5" font-weight="700" fill="#15293d">Window functions &#9733;</text>
+  <text x="428" y="906" font-size="12" fill="#3f5973">ROW_NUMBER / RANK / DENSE</text>
+  <text x="428" y="924" font-size="12" fill="#3f5973">LAG/LEAD &#183; running totals</text>
+  <text x="428" y="942" font-size="12" fill="#3f5973">Top-N-per-group pattern</text>
+  <text x="428" y="970" font-size="12.5" font-weight="700" fill="#15293d">Joins &amp; dedup</text>
+  <text x="428" y="990" font-size="12" fill="#3f5973">Inner/left/full/self</text>
+  <text x="428" y="1008" font-size="12" fill="#3f5973">Anti-join &#183; dedup via ROW_NUMBER</text>
+  <text x="428" y="1036" font-size="12.5" font-weight="700" fill="#15293d">Query optimization</text>
+  <text x="428" y="1056" font-size="12" fill="#3f5973">Sargable predicates &#183; EXPLAIN</text>
+  <text x="428" y="1074" font-size="12" fill="#3f5973">Filter early &#183; no SELECT *</text>
+  <text x="428" y="1092" font-size="12" fill="#3f5973">Have an optimization story</text>
+
+  <rect x="776" y="818" width="344" height="300" rx="11" fill="#fff" stroke="#d4e4f0"/>
+  <rect x="776" y="818" width="344" height="40" rx="11" fill="#e0eefb"/>
+  <rect x="776" y="844" width="344" height="14" fill="#e0eefb"/>
+  <text x="796" y="844" font-size="16" font-weight="700" fill="#1271c4">&#10216;&#10217; Python &amp; Behavioral</text>
+  <text x="796" y="886" font-size="12.5" font-weight="700" fill="#15293d">Python OA patterns &#183; 10%</text>
+  <text x="796" y="906" font-size="12" fill="#3f5973">Dict aggregation / grouping</text>
+  <text x="796" y="924" font-size="12" fill="#3f5973">Pandas groupby / merge</text>
+  <text x="796" y="942" font-size="12" fill="#3f5973">String parsing &#183; dedup &#183; pairs</text>
+  <text x="796" y="970" font-size="12.5" font-weight="700" fill="#15293d">Behavioral &#183; 5%</text>
+  <text x="796" y="990" font-size="12" fill="#3f5973">STAR structure</text>
+  <text x="796" y="1008" font-size="12" fill="#3f5973">Challenge &#183; cross-team &#183; ambiguity</text>
+  <rect x="796" y="1030" width="304" height="66" rx="7" fill="#fbeceb"/>
+  <text x="810" y="1050" font-size="12" font-weight="700" fill="#c0392b">&#9733; Your weak spot</text>
+  <text x="810" y="1068" font-size="12" fill="#3f5973">Client-facing framing &#8212; explain a</text>
+  <text x="810" y="1086" font-size="12" fill="#3f5973">tradeoff to a non-technical client</text>
+
+  <text x="40" y="1162" font-size="13" font-weight="700" fill="#2196d6" letter-spacing="1">REVIEW TOOLS</text>
+  <rect x="40" y="1176" width="525" height="58" rx="9" fill="#fff" stroke="#d4e4f0"/>
+  <text x="58" y="1202" font-size="13" font-weight="700" fill="#15293d">&#9871; Flashcards</text>
+  <text x="58" y="1223" font-size="12" fill="#6b8299">28 tap-to-flip cards for active recall</text>
+  <rect x="595" y="1176" width="525" height="58" rx="9" fill="#fff" stroke="#d4e4f0"/>
+  <text x="613" y="1202" font-size="13" font-weight="700" fill="#15293d">&#9645; One-page cheat sheet</text>
+  <text x="613" y="1223" font-size="12" fill="#6b8299">6-step script + one-liners for the night before</text>
+
+  <rect x="40" y="1258" width="1080" height="180" rx="12" fill="#102438"/>
+  <text x="64" y="1294" font-size="15" font-weight="700" fill="#29b5e8">The two things that decide the interview (both in Round 3)</text>
+  <rect x="64" y="1312" width="510" height="104" rx="9" fill="#15293d"/>
+  <text x="84" y="1340" font-size="14" font-weight="700" fill="#fff">1 &#183; Design a data model for an online store</text>
+  <text x="84" y="1364" font-size="12.5" fill="#9fc4e0">The confirmed design question. Walk the 6 steps</text>
+  <text x="84" y="1384" font-size="12.5" fill="#9fc4e0">aloud for 10&#8211;15 min. Rehearse e-commerce first,</text>
+  <text x="84" y="1404" font-size="12.5" fill="#9fc4e0">AllRecipes / Spotify / Uber as reps.</text>
+  <rect x="586" y="1312" width="510" height="104" rx="9" fill="#15293d"/>
+  <text x="606" y="1340" font-size="14" font-weight="700" fill="#fff">2 &#183; Walk through your Snowflake migration</text>
+  <text x="606" y="1364" font-size="12.5" fill="#9fc4e0">Every resume bullet defensible. Narrate the</text>
+  <text x="606" y="1384" font-size="12.5" fill="#9fc4e0">SQL Server &#8594; Snowflake project end-to-end, with</text>
+  <text x="606" y="1404" font-size="12.5" fill="#9fc4e0">one concrete "what broke and how I fixed it."</text>
+  <text x="40" y="1466" font-size="11.5" fill="#6b8299">Examples throughout use trading / fund + healthcare data &#183; all three guides share the same theme &#183; part 1 of 3</text>
+</svg>

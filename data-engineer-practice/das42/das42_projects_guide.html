@@ -1,0 +1,564 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Data Engineering Practice Projects</title>
+<style>
+  :root {
+    --ink: #15293d; --ink-soft: #3f5973; --ink-faint: #6b8299;
+    --paper: #f4f9fd; --card: #ffffff; --line: #d4e4f0; --line-soft: #e6f1f8;
+    --accent: #2196d6; --accent-soft: #e3f3fc;
+    --blue: #1271c4; --blue-soft: #e0eefb;
+    --amber: #8a5208; --amber-soft: #faeed8;
+    --red: #c0392b; --red-soft: #fbeceb;
+    --purple: #5b4bb8; --purple-soft: #ecebfb;
+    --code-bg: #102438; --code-ink: #dbeaf5; --code-green: #8fd6b0;
+    --code-blue: #6bc4f0; --code-amber: #f0c674; --code-pink: #8fd0f5; --code-faint: #5e7d96;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: var(--paper); color: var(--ink); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; line-height: 1.65; font-size: 16px; }
+  body:before { content: ""; position: fixed; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, #29b5e8, #2196d6, #1271c4); z-index: 100; }
+  .wrap { max-width: 1180px; margin: 0 auto; display: flex; }
+  nav { width: 250px; flex-shrink: 0; position: sticky; top: 0; height: 100vh; overflow-y: auto; padding: 28px 18px 40px 24px; border-right: 1px solid var(--line); background: var(--paper); }
+  nav .brand { font-size: 13px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--accent); margin-bottom: 4px; }
+  nav .brand-sub { font-size: 12px; color: var(--ink-faint); margin-bottom: 18px; line-height: 1.4; }
+  nav a { display: block; color: var(--ink-soft); text-decoration: none; font-size: 13.5px; padding: 5px 10px; border-radius: 6px; margin-bottom: 1px; transition: background 0.12s, color 0.12s; }
+  nav a:hover { background: var(--accent-soft); color: var(--accent); }
+  nav a.group { font-weight: 700; color: var(--ink); margin-top: 16px; font-size: 11px; letter-spacing: 0.05em; text-transform: uppercase; padding-left: 10px; pointer-events: none; }
+  nav a.sub { padding-left: 20px; font-size: 12.5px; color: var(--ink-faint); }
+  nav .backlink { font-size: 12px; color: var(--accent); margin-bottom: 18px; display: block; padding-left: 10px; }
+  main { flex: 1; min-width: 0; padding: 36px 48px 100px; }
+  header.hero { margin-bottom: 36px; padding-bottom: 26px; border-bottom: 2px solid var(--ink); }
+  header.hero h1 { font-size: 30px; margin: 0 0 8px; letter-spacing: -0.02em; line-height: 1.15; }
+  header.hero p { font-size: 15px; color: var(--ink-soft); margin: 0; max-width: 720px; }
+  .hero-meta { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 16px; }
+  .hero-meta span { font-size: 12px; padding: 4px 11px; border-radius: 20px; background: var(--card); border: 1px solid var(--line); color: var(--ink-soft); }
+  section { margin-bottom: 52px; scroll-margin-top: 20px; }
+  h2.sec { font-size: 13px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent); margin: 0 0 4px; }
+  h2.sec-title { font-size: 25px; margin: 0 0 6px; letter-spacing: -0.015em; }
+  .sec-intro { color: var(--ink-soft); font-size: 15px; margin: 0 0 24px; max-width: 730px; }
+  h3 { font-size: 19px; margin: 30px 0 10px; letter-spacing: -0.01em; }
+  h4 { font-size: 15.5px; margin: 24px 0 8px; padding-top: 4px; }
+  p { margin: 0 0 14px; }
+  ul, ol { margin: 0 0 14px; padding-left: 22px; }
+  li { margin-bottom: 7px; }
+  .def { background: var(--card); border: 1px solid var(--line); border-left: 3px solid var(--accent); border-radius: 8px; padding: 16px 20px; margin: 16px 0; }
+  .def .term { font-weight: 700; font-size: 16px; margin-bottom: 4px; }
+  .def p { margin: 0; font-size: 14.5px; color: var(--ink-soft); }
+  .say { background: var(--blue-soft); border-radius: 8px; padding: 14px 18px; margin: 14px 0; font-size: 14.5px; color: #123; }
+  .say .lab { font-size: 11px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--blue); display: block; margin-bottom: 5px; }
+  .say em { color: var(--blue); font-style: normal; font-weight: 600; }
+  .warn { background: var(--amber-soft); border-radius: 8px; padding: 14px 18px; margin: 14px 0; font-size: 14px; color: #5a3a08; }
+  .warn .lab { font-size: 11px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--amber); display: block; margin-bottom: 5px; }
+  .note { background: var(--purple-soft); border-radius: 8px; padding: 14px 18px; margin: 14px 0; font-size: 14px; color: #2c2466; }
+  .note .lab { font-size: 11px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--purple); display: block; margin-bottom: 5px; }
+  pre { background: var(--code-bg); color: var(--code-ink); border-radius: 8px; padding: 16px 18px; overflow-x: auto; font-size: 12.5px; line-height: 1.55; margin: 14px 0; font-family: "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace; }
+  pre .c { color: var(--code-faint); font-style: italic; }
+  pre .k { color: var(--code-pink); }
+  pre .f { color: var(--code-blue); }
+  pre .s { color: var(--code-green); }
+  pre .n { color: var(--code-amber); }
+  pre .fn { color: #b4b2a9; }
+  code.inline { background: var(--line-soft); padding: 1.5px 6px; border-radius: 4px; font-family: "SF Mono", Menlo, Consolas, monospace; font-size: 13px; color: var(--accent); }
+  table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 14px; }
+  th { text-align: left; padding: 9px 12px; background: var(--line-soft); font-weight: 700; font-size: 12.5px; border-bottom: 2px solid var(--line); }
+  td { padding: 9px 12px; border-bottom: 1px solid var(--line-soft); vertical-align: top; color: var(--ink-soft); }
+  td strong { color: var(--ink); }
+  tr:last-child td { border-bottom: none; }
+  .pill-row { display: flex; gap: 8px; flex-wrap: wrap; margin: 6px 0 18px; }
+  .pill { font-size: 12px; padding: 3px 10px; border-radius: 20px; font-weight: 600; }
+  .pill.guided { background: var(--accent-soft); color: var(--accent); }
+  .pill.rough { background: var(--red-soft); color: var(--red); }
+  .pill.time { background: var(--line-soft); color: var(--ink-soft); }
+  .pill.teach { background: var(--blue-soft); color: var(--blue); }
+  .pcard { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 4px 0; }
+  .checklist { list-style: none; padding: 0; }
+  .checklist li { padding-left: 28px; position: relative; margin-bottom: 9px; }
+  .checklist li:before { content: "\2192"; position: absolute; left: 6px; color: var(--accent); font-weight: 700; }
+  .filetree { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 16px 18px; font-family: "SF Mono", Menlo, monospace; font-size: 12.5px; line-height: 1.7; color: var(--ink-soft); white-space: pre; overflow-x: auto; }
+  .filetree b { color: var(--accent); }
+  .step { display: flex; gap: 14px; margin: 22px 0 8px; align-items: baseline; }
+  .step-num { flex-shrink: 0; width: 26px; height: 26px; border-radius: 50%; background: var(--accent); color: #fff; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+  .step-title { font-size: 16px; font-weight: 700; }
+  @media (max-width: 920px) { nav { display: none; } main { padding: 28px 22px 80px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav>
+  <div class="brand">&#10052; Practice Projects</div>
+  <div class="brand-sub">Hands-on DE learning · all local & free</div>
+  <a class="backlink" href="das42_study_guide.html">&larr; Back to study guide</a>
+  <a href="#setup">Setup & tool stack</a>
+  <a href="#datasets">Easy datasets</a>
+  <a class="group">Guided (step-by-step)</a>
+  <a class="sub" href="#p1">1 · Sales mart (no Airflow)</a>
+  <a class="sub" href="#p2">2 · Same, orchestrated (Airflow)</a>
+  <a class="group">Rough edges (you build)</a>
+  <a class="sub" href="#p3">3 · Weather pipeline</a>
+  <a class="sub" href="#p4">4 · Movies star schema</a>
+  <a class="group">Level up</a>
+  <a class="sub" href="#p5">5 · Re-do P1/P2 on Snowflake</a>
+  <a class="sub" href="#next">Where to go next</a>
+</nav>
+
+<main>
+<header class="hero">
+  <h1>Data engineering practice projects <span style="color:var(--accent); font-size:26px;">&#10052;</span></h1>
+  <p>Five projects that build real muscle memory for the DAS42 stack — ingestion, dbt transformations, dimensional modeling, orchestration, and validation. The first two hold your hand with full code; the next two give you a spec and let you struggle productively; the last re-does the early work on Snowflake so you feel the difference. Every dataset is deliberately easy to model, so the learning stays on the engineering.</p>
+  <div class="hero-meta">
+    <span>2 guided · 2 rough · 1 Snowflake re-do</span>
+    <span>Stack: DuckDB + dbt + Airflow</span>
+    <span>All free, all local</span>
+  </div>
+</header>
+
+<section id="setup">
+  <h2 class="sec">Before you start</h2>
+  <h2 class="sec-title">Setup & the local tool stack</h2>
+  <p class="sec-intro">This stack mirrors DAS42's (Snowflake + dbt + Airflow + Fivetran + BI) but runs entirely on your laptop for free. The skills transfer 1:1 — you change a connection profile, not your knowledge.</p>
+  <table>
+    <tr><th>DAS42 uses</th><th>You practice with</th><th>Same concept</th></tr>
+    <tr><td>Snowflake</td><td><strong>DuckDB</strong></td><td>Columnar analytical SQL, warehousing, query optimization</td></tr>
+    <tr><td>dbt</td><td><strong>dbt Core + dbt-duckdb</strong></td><td>The actual tool — models, tests, lineage, materialization</td></tr>
+    <tr><td>Fivetran/Airbyte</td><td><strong>a Python script</strong></td><td>Extract + Load (so you understand what connectors automate)</td></tr>
+    <tr><td>Airflow</td><td><strong>Airflow (standalone)</strong></td><td>DAGs, tasks, dependencies, scheduling, retries</td></tr>
+    <tr><td>BI tool</td><td><strong>DuckDB SQL / Metabase</strong></td><td>Querying the marts (optional polish)</td></tr>
+  </table>
+  <h4>One-time install</h4>
+<pre><span class="c"># a clean Python environment</span>
+python -m venv venv
+<span class="k">source</span> venv/bin/activate          <span class="c"># Windows: venv\Scripts\activate</span>
+
+<span class="c"># core tools for projects 1-5</span>
+pip install duckdb dbt-core dbt-duckdb pandas requests
+
+<span class="c"># verify</span>
+dbt --version
+python -c <span class="s">"import duckdb; print('duckdb', duckdb.__version__)"</span></pre>
+  <div class="note"><span class="lab">Keep a differences log</span>
+  Make a file <code class="inline">REAL_STACK_NOTES.md</code>. Each time the local tool differs from Snowflake/Fivetran/Airflow-in-prod, jot it down. By project 5 you'll have a ready-made "I practiced locally but understand production" talking point — the exact thing that turns a gap into initiative in the interview.</div>
+</section>
+
+<section id="datasets">
+  <h2 class="sec">Pick your data</h2>
+  <h2 class="sec-title">Easy-to-model datasets</h2>
+  <p class="sec-intro">All chosen because the schema is obvious — you won't burn hours deciding how to model them. Each project below names its dataset, but you can swap freely.</p>
+  <table>
+    <tr><th>Dataset</th><th>How to get it</th><th>Why it's easy to model</th></tr>
+    <tr><td><strong>TPC-H</strong> (sales/orders)</td><td>Built into DuckDB — one command, no download</td><td>Clean orders→lineitems→parts→suppliers; the textbook star schema</td></tr>
+    <tr><td><strong>Open-Meteo weather</strong></td><td>Free public API, no key needed</td><td>One reading per city per timestamp — trivial grain, real API ingestion</td></tr>
+    <tr><td><strong>MovieLens (small)</strong></td><td>One zip from grouplens.org (~1MB)</td><td>movies, ratings, users — clean star schema, classic teaching set</td></tr>
+    <tr><td><strong>NYC Taxi</strong> (optional, bigger)</td><td>Public Parquet by month</td><td>One row per trip; good when you want volume for incremental practice</td></tr>
+  </table>
+  <div class="say"><span class="lab">Fastest possible start</span>
+  TPC-H ships <em>inside</em> DuckDB. <code class="inline">INSTALL tpch; LOAD tpch; CALL dbgen(sf=1);</code> generates a full multi-table sales dataset with zero download. Project 1 uses it so you can begin in 60 seconds.</div>
+</section>
+
+<!-- ===================== PROJECT 1 ===================== -->
+<section id="p1">
+  <h2 class="sec">Guided · fully step-by-step</h2>
+  <h2 class="sec-title">Project 1 — a sales data mart with dbt + DuckDB (no Airflow)</h2>
+  <div class="pill-row"><span class="pill guided">Hand-held</span> <span class="pill time">~2 hours</span> <span class="pill teach">Teaches: ELT, staging→mart, star schema, dbt tests, lineage</span></div>
+  <div class="pcard" style="padding:18px 22px;">
+  <p style="margin:0;"><strong>Goal:</strong> turn raw sales data into a clean star schema you can query, using the exact staging→mart pattern DAS42 uses. You run dbt by hand (no orchestration yet — that's Project 2). Every command and file is given.</p>
+  </div>
+
+  <h4>Project layout you'll end up with</h4>
+  <div class="filetree"><b>sales_mart/</b>
+├── warehouse.duckdb          <span style="color:#888">← your local "Snowflake"</span>
+├── load_raw.py               <span style="color:#888">← the extract+load script</span>
+├── dbt_project.yml
+├── profiles.yml
+└── <b>models/</b>
+    ├── staging/
+    │   ├── sources.yml
+    │   ├── stg_orders.sql
+    │   └── stg_customers.sql
+    └── marts/
+        ├── dim_customer.sql
+        ├── dim_date.sql
+        └── fct_orders.sql</div>
+
+  <div class="step"><div class="step-num">1</div><div class="step-title">Generate raw data into DuckDB</div></div>
+  <p>Create <code class="inline">load_raw.py</code>. This is your hand-written "Fivetran" — it lands raw tables in a <code class="inline">raw</code> schema. We use TPC-H so there's nothing to download.</p>
+<pre><span class="c"># load_raw.py</span>
+<span class="k">import</span> duckdb
+
+con = duckdb.connect(<span class="s">"warehouse.duckdb"</span>)
+con.execute(<span class="s">"INSTALL tpch; LOAD tpch;"</span>)
+con.execute(<span class="s">"CALL dbgen(sf=0.1);"</span>)       <span class="c"># generates orders, customer, etc.</span>
+con.execute(<span class="s">"CREATE SCHEMA IF NOT EXISTS raw;"</span>)
+
+<span class="c"># copy the two tables we'll model into our raw schema</span>
+con.execute(<span class="s">"CREATE OR REPLACE TABLE raw.orders    AS SELECT * FROM orders;"</span>)
+con.execute(<span class="s">"CREATE OR REPLACE TABLE raw.customer  AS SELECT * FROM customer;"</span>)
+
+<span class="k">print</span>(<span class="s">"orders:"</span>, con.execute(<span class="s">"SELECT COUNT(*) FROM raw.orders"</span>).fetchone()[<span class="n">0</span>])
+<span class="k">print</span>(<span class="s">"customers:"</span>, con.execute(<span class="s">"SELECT COUNT(*) FROM raw.customer"</span>).fetchone()[<span class="n">0</span>])
+con.close()</pre>
+  <p>Run it: <code class="inline">python load_raw.py</code>. You should see row counts print. The E and L are done — by hand, exactly what a managed connector automates for you.</p>
+
+  <div class="step"><div class="step-num">2</div><div class="step-title">Configure dbt to talk to DuckDB</div></div>
+  <p>Two small files. <code class="inline">profiles.yml</code> is the <em>only</em> thing that would change to point at Snowflake instead.</p>
+<pre><span class="c"># profiles.yml  (put it in the project folder)</span>
+sales_mart:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: warehouse.duckdb
+      schema: analytics</pre>
+<pre><span class="c"># dbt_project.yml</span>
+name: <span class="s">'sales_mart'</span>
+profile: <span class="s">'sales_mart'</span>
+version: <span class="s">'1.0'</span>
+models:
+  sales_mart:
+    staging:
+      +materialized: view
+    marts:
+      +materialized: table</pre>
+  <div class="note"><span class="lab">Concept: materialization</span>
+  Staging models are <code class="inline">view</code> (cheap, always-fresh logical layers); marts are <code class="inline">table</code> (physically built for fast reads). This staging-as-view, marts-as-table convention is standard at dbt shops and maps directly to Snowflake object types.</div>
+
+  <div class="step"><div class="step-num">3</div><div class="step-title">Declare your sources + tests</div></div>
+<pre><span class="c"># models/staging/sources.yml</span>
+version: <span class="n">2</span>
+sources:
+  - name: raw
+    schema: raw
+    tables:
+      - name: orders
+      - name: customer</pre>
+
+  <div class="step"><div class="step-num">4</div><div class="step-title">Build the staging models (clean + rename)</div></div>
+  <p>Staging models do one job: take a raw source and make it tidy — sensible names, correct types, light filtering. No business logic yet.</p>
+<pre><span class="c">-- models/staging/stg_orders.sql</span>
+<span class="k">SELECT</span>
+  o_orderkey      <span class="k">AS</span> order_id,
+  o_custkey       <span class="k">AS</span> customer_id,
+  o_orderstatus   <span class="k">AS</span> status,
+  o_totalprice    <span class="k">AS</span> order_total,
+  o_orderdate     <span class="k">AS</span> order_date
+<span class="k">FROM</span> {{ source(<span class="s">'raw'</span>, <span class="s">'orders'</span>) }}</pre>
+<pre><span class="c">-- models/staging/stg_customers.sql</span>
+<span class="k">SELECT</span>
+  c_custkey   <span class="k">AS</span> customer_id,
+  c_name      <span class="k">AS</span> customer_name,
+  c_mktsegment <span class="k">AS</span> market_segment,
+  c_acctbal   <span class="k">AS</span> account_balance
+<span class="k">FROM</span> {{ source(<span class="s">'raw'</span>, <span class="s">'customer'</span>) }}</pre>
+
+  <div class="step"><div class="step-num">5</div><div class="step-title">Build the marts (the star schema)</div></div>
+  <p>Now the dimensional model: dimensions for context, a fact for the measurable events. Grain of the fact = <strong>one row per order</strong>.</p>
+<pre><span class="c">-- models/marts/dim_customer.sql</span>
+<span class="k">SELECT</span>
+  customer_id,
+  customer_name,
+  market_segment,
+  account_balance
+<span class="k">FROM</span> {{ ref(<span class="s">'stg_customers'</span>) }}</pre>
+<pre><span class="c">-- models/marts/dim_date.sql  — a date dimension built from the orders</span>
+<span class="k">SELECT DISTINCT</span>
+  order_date                       <span class="k">AS</span> date_day,
+  <span class="f">EXTRACT</span>(year  <span class="k">FROM</span> order_date) <span class="k">AS</span> year,
+  <span class="f">EXTRACT</span>(month <span class="k">FROM</span> order_date) <span class="k">AS</span> month,
+  <span class="f">EXTRACT</span>(quarter <span class="k">FROM</span> order_date) <span class="k">AS</span> quarter
+<span class="k">FROM</span> {{ ref(<span class="s">'stg_orders'</span>) }}</pre>
+<pre><span class="c">-- models/marts/fct_orders.sql  — grain: one row per order</span>
+<span class="k">SELECT</span>
+  o.order_id,
+  o.customer_id,          <span class="c">-- FK to dim_customer</span>
+  o.order_date,           <span class="c">-- FK to dim_date</span>
+  o.status,
+  o.order_total           <span class="c">-- the measure</span>
+<span class="k">FROM</span> {{ ref(<span class="s">'stg_orders'</span>) }} o</pre>
+
+  <div class="step"><div class="step-num">6</div><div class="step-title">Add tests, then run the whole thing</div></div>
+<pre><span class="c"># models/marts/marts.yml — tests that run on every build</span>
+version: <span class="n">2</span>
+models:
+  - name: fct_orders
+    columns:
+      - name: order_id
+        tests: [unique, not_null]
+      - name: customer_id
+        tests:
+          - relationships:                 <span class="c"># FK integrity!</span>
+              to: ref(<span class="s">'dim_customer'</span>)
+              field: customer_id
+  - name: dim_customer
+    columns:
+      - name: customer_id
+        tests: [unique, not_null]</pre>
+<pre>dbt run      <span class="c"># builds staging (views) then marts (tables), in dependency order</span>
+dbt test     <span class="c"># runs unique / not_null / relationships checks</span>
+dbt docs generate && dbt docs serve   <span class="c"># open the lineage graph in a browser</span></pre>
+
+  <div class="step"><div class="step-num">7</div><div class="step-title">See your warehouse work</div></div>
+  <p>Query the finished mart with a real star-schema question. The <code class="inline">duckdb</code> command-line tool is a separate one-line install (<code class="inline">brew install duckdb</code>, or download from duckdb.org); if you'd rather not install it, use the Python snippet just below instead.</p>
+<pre><span class="c"># option A: the DuckDB CLI (needs the separate `duckdb` binary)</span>
+duckdb warehouse.duckdb <span class="s">"
+  SELECT c.market_segment, d.year,
+         ROUND(SUM(f.order_total),0) AS revenue
+  FROM analytics.fct_orders f
+  JOIN analytics.dim_customer c USING (customer_id)
+  JOIN analytics.dim_date d ON f.order_date = d.date_day
+  GROUP BY 1,2 ORDER BY revenue DESC LIMIT 10;
+"</span></pre>
+<pre><span class="c"># option B: same query, pure Python (only needs the duckdb you already pip-installed)</span>
+<span class="k">import</span> duckdb
+con = duckdb.connect(<span class="s">"warehouse.duckdb"</span>)
+<span class="k">print</span>(con.execute(<span class="s">"""
+  SELECT c.market_segment, d.year,
+         ROUND(SUM(f.order_total),0) AS revenue
+  FROM analytics.fct_orders f
+  JOIN analytics.dim_customer c USING (customer_id)
+  JOIN analytics.dim_date d ON f.order_date = d.date_day
+  GROUP BY 1,2 ORDER BY revenue DESC LIMIT 10
+"""</span>).fetchall())</pre>
+  <div class="say"><span class="lab">What you can now say in the interview</span>
+  "I built an ELT pipeline: a Python load step landing raw data, dbt staging models to clean and rename, then a star schema — dimensions plus a <em>fct_orders</em> fact at one-row-per-order grain. dbt resolved build order via <em>ref()</em>, and I added unique, not_null, and a <em>relationships</em> test enforcing FK integrity between fact and dimension. The lineage graph documents the whole flow." That's a complete, defensible project.</div>
+</section>
+
+<!-- ===================== PROJECT 2 ===================== -->
+<section id="p2">
+  <h2 class="sec">Guided · step-by-step</h2>
+  <h2 class="sec-title">Project 2 — orchestrate Project 1 with Airflow</h2>
+  <div class="pill-row"><span class="pill guided">Hand-held</span> <span class="pill time">~2-3 hours</span> <span class="pill teach">Teaches: DAGs, tasks, dependencies, scheduling, retries</span></div>
+  <div class="pcard" style="padding:18px 22px;">
+  <p style="margin:0;"><strong>Goal:</strong> take Project 1's two steps (load, then dbt) and let Airflow run them on a schedule, in the right order, with automatic retries. This is exactly what Airflow does at DAS42: orchestrate ingestion and dbt. Keep your Project 1 folder; you're just adding a DAG that calls it.</p>
+  </div>
+
+  <div class="warn"><span class="lab">Version note that matters</span>
+  Airflow 3.x (current) moved <code class="inline">BashOperator</code> out of core into the <em>standard provider</em> package, and the DAG class now comes from <code class="inline">airflow.sdk</code>. The imports below are the modern 3.x ones. If you ever see tutorials using <code class="inline">from airflow.operators.bash import BashOperator</code> or <code class="inline">from airflow import DAG</code>, that's the older 2.x style. Note this difference in your REAL_STACK_NOTES.md.</div>
+
+  <div class="step"><div class="step-num">1</div><div class="step-title">Install Airflow in standalone mode</div></div>
+  <p>Standalone runs the scheduler, the API/UI, and a local executor in one process — perfect for learning. It also creates the dags folder and prints a login.</p>
+<pre><span class="c"># pick an AIRFLOW_HOME so everything lives in one place</span>
+<span class="k">export</span> AIRFLOW_HOME=~/airflow
+
+<span class="c"># install core + the standard provider (which now holds BashOperator)</span>
+pip install <span class="s">"apache-airflow"</span> <span class="s">"apache-airflow-providers-standard"</span>
+
+<span class="c"># first run: spins up the UI at http://localhost:8080 and prints an admin password</span>
+airflow standalone</pre>
+  <p>Leave it running. In a browser, open <code class="inline">localhost:8080</code> and log in with the printed credentials. You'll create the DAG file next; Airflow auto-discovers files dropped in <code class="inline">~/airflow/dags/</code>.</p>
+
+  <div class="step"><div class="step-num">2</div><div class="step-title">Write the DAG</div></div>
+  <p>Create <code class="inline">~/airflow/dags/sales_pipeline.py</code>. Use absolute paths to your Project 1 folder so Airflow finds the script and dbt project regardless of where it runs from.</p>
+<pre><span class="c"># ~/airflow/dags/sales_pipeline.py</span>
+<span class="k">from</span> datetime <span class="k">import</span> datetime
+<span class="k">from</span> airflow.sdk <span class="k">import</span> DAG                                  <span class="c"># 3.x: DAG comes from the SDK</span>
+<span class="k">from</span> airflow.providers.standard.operators.bash <span class="k">import</span> BashOperator  <span class="c"># 3.x path</span>
+
+<span class="c"># EDIT these two to your real absolute paths</span>
+PROJECT = <span class="s">"/Users/you/sales_mart"</span>
+VENV    = <span class="s">"/Users/you/sales_mart/venv/bin/activate"</span>
+
+<span class="k">with</span> DAG(
+    dag_id=<span class="s">"sales_pipeline"</span>,
+    start_date=datetime(<span class="n">2024</span>, <span class="n">1</span>, <span class="n">1</span>),
+    schedule=<span class="s">"@daily"</span>,          <span class="c"># run once a day</span>
+    catchup=<span class="k">False</span>,               <span class="c"># don't backfill every missed day</span>
+    default_args={<span class="s">"retries"</span>: <span class="n">2</span>},   <span class="c"># auto-retry a failed task twice</span>
+    tags=[<span class="s">"sales"</span>, <span class="s">"dbt"</span>],
+) <span class="k">as</span> dag:
+
+    extract_load = BashOperator(
+        task_id=<span class="s">"extract_load"</span>,
+        bash_command=<span class="s">f"source {VENV} && cd {PROJECT} && python load_raw.py"</span>,
+    )
+
+    dbt_build = BashOperator(
+        task_id=<span class="s">"dbt_build"</span>,
+        <span class="c"># dbt build = run + test in one command; DBT_PROFILES_DIR points at our profiles.yml</span>
+        bash_command=<span class="s">f"source {VENV} && cd {PROJECT} && DBT_PROFILES_DIR={PROJECT} dbt build"</span>,
+    )
+
+    extract_load &gt;&gt; dbt_build      <span class="c"># THE dependency: load must finish before transform</span></pre>
+  <div class="note"><span class="lab">Concept: the dependency operator</span>
+  <code class="inline">extract_load &gt;&gt; dbt_build</code> is the whole point. It tells Airflow "don't start the transform until the load succeeds." If <code class="inline">extract_load</code> fails, <code class="inline">dbt_build</code> never runs — which is exactly the data-integrity guarantee you want in a pipeline.</div>
+
+  <div class="step"><div class="step-num">3</div><div class="step-title">Run it and watch the graph</div></div>
+  <ul>
+    <li>Refresh the UI; within ~30s <code class="inline">sales_pipeline</code> appears (Airflow scans the dags folder periodically).</li>
+    <li>Unpause it with the toggle, then hit the play button to trigger a manual run.</li>
+    <li>Open the <strong>Graph</strong> view: watch <code class="inline">extract_load</code> go green, then <code class="inline">dbt_build</code> start and go green. That ordering is the DAG working.</li>
+    <li>Click any task → <strong>Logs</strong> to see the actual stdout from your script and dbt — this is the observability story.</li>
+  </ul>
+
+  <div class="step"><div class="step-num">4</div><div class="step-title">Break it on purpose (learn the failure path)</div></div>
+  <p>Edit <code class="inline">load_raw.py</code> to raise an error (add <code class="inline">raise Exception("boom")</code> at the top). Trigger the DAG again. Watch <code class="inline">extract_load</code> retry twice (your <code class="inline">retries: 2</code>), then go red — and notice <code class="inline">dbt_build</code> never runs because its upstream failed. Then fix it and re-run. You've now seen retries, failure propagation, and recovery.</p>
+  <div class="say"><span class="lab">What you can now say</span>
+  "I orchestrated the pipeline as an Airflow DAG — a directed graph of tasks with dependencies. <em>extract_load &gt;&gt; dbt_build</em> guarantees ingestion finishes before transformation, the retry policy handles transient failures, and the UI gives run history and per-task logs for monitoring." That single explanation covers most orchestration questions an interviewer will ask.</div>
+  <div class="warn"><span class="lab">Real-stack difference to log</span>
+  Locally you run <code class="inline">airflow standalone</code> (one process, SQLite, LocalExecutor). In production / at DAS42, Airflow runs a separate scheduler + workers on Postgres, often in Docker or Kubernetes, with connections and secrets managed centrally. The DAG code is identical; only the deployment differs.</div>
+</section>
+
+<!-- ===================== PROJECT 3 ===================== -->
+<section id="p3">
+  <h2 class="sec">Rough edges · you build it (no full code)</h2>
+  <h2 class="sec-title">Project 3 — a daily weather pipeline (Airflow + incremental dbt)</h2>
+  <div class="pill-row"><span class="pill rough">No copy-paste code</span> <span class="pill time">~1 day</span> <span class="pill teach">Teaches: API ingestion, incremental models, idempotency</span></div>
+  <div class="pcard" style="padding:18px 22px;">
+  <p style="margin:0;"><strong>Goal:</strong> build a pipeline that pulls weather readings from a free API every day, lands them in DuckDB, and transforms them with an <em>incremental</em> dbt model so reruns only process new data. You get the spec and hints — not the code. Messy Python is fine. The dataset is trivial to model so you can focus on the engineering.</p>
+  </div>
+
+  <h4>Why weather, and why it's easy to model</h4>
+  <p>The Open-Meteo API is free, needs no API key, and returns hourly temperature for a location. Your grain is dead simple: <strong>one row per city per hour</strong>. No tricky relationships — all your effort goes into ingestion and incremental logic, which is the point.</p>
+
+  <h4>The spec (what to build, not how)</h4>
+  <ul class="checklist">
+    <li>A Python script that calls Open-Meteo for 3-4 cities and appends the readings to a <code class="inline">raw.weather</code> table in DuckDB (don't overwrite — append, so history accumulates).</li>
+    <li>A dbt staging model that cleans/types the raw readings.</li>
+    <li>A dbt <strong>incremental</strong> model <code class="inline">fct_weather</code> that, on each run, only inserts readings newer than what it already has.</li>
+    <li>An Airflow DAG that runs the ingestion then the dbt build, on an <code class="inline">@hourly</code> or <code class="inline">@daily</code> schedule.</li>
+    <li>At least two dbt tests (e.g. <code class="inline">not_null</code> on the timestamp, a freshness or range check on temperature).</li>
+  </ul>
+
+  <h4>Hints to get unstuck (not solutions)</h4>
+  <table>
+    <tr><th>You'll wonder…</th><th>Hint</th></tr>
+    <tr><td>How do I call the API?</td><td>It's a GET request; <code class="inline">requests.get(url).json()</code>. The endpoint is <code class="inline">api.open-meteo.com/v1/forecast</code> with <code class="inline">latitude</code>, <code class="inline">longitude</code>, and <code class="inline">hourly=temperature_2m</code> params. Look at the JSON shape before modeling it.</td></tr>
+    <tr><td>How does an incremental model work?</td><td>Wrap the new-rows filter in <code class="inline">{% if is_incremental() %} WHERE reading_time &gt; (SELECT MAX(reading_time) FROM {{ this }}) {% endif %}</code>. <code class="inline">{{ this }}</code> is the model's own existing table.</td></tr>
+    <tr><td>Config for incremental?</td><td>Top of the model: <code class="inline">{{ config(materialized='incremental', unique_key='...') }}</code>.</td></tr>
+    <tr><td>How do I avoid duplicate rows on rerun?</td><td>That's exactly what <code class="inline">unique_key</code> + the incremental filter solve. Test it by running twice and checking the count doesn't double.</td></tr>
+  </table>
+
+  <h4>The lesson hiding in here</h4>
+  <div class="note"><span class="lab">Idempotency</span>
+  The real skill is making the pipeline <em>idempotent</em> — running it twice produces the same correct result, not duplicates. Getting the incremental filter and unique_key right is the single most transferable production-pipeline concept, and you'll only truly get it by fighting through it once here.</div>
+  <div class="say"><span class="lab">The interview payoff</span>
+  When asked "walk me through a pipeline you built," you'll describe real API ingestion, an incremental model that handles new data without reprocessing history, and Airflow scheduling — with specific gotchas you hit (duplicate rows, a timestamp comparison that didn't work at first). That specificity is impossible to fake.</div>
+</section>
+
+<!-- ===================== PROJECT 4 ===================== -->
+<section id="p4">
+  <h2 class="sec">Rough edges · you build it (no full code)</h2>
+  <h2 class="sec-title">Project 4 — MovieLens star schema (Airflow-orchestrated)</h2>
+  <div class="pill-row"><span class="pill rough">No copy-paste code</span> <span class="pill time">~1 day</span> <span class="pill teach">Teaches: dimensional modeling, multi-step DAG, reconciliation</span></div>
+  <div class="pcard" style="padding:18px 22px;">
+  <p style="margin:0;"><strong>Goal:</strong> take the small MovieLens dataset (movies + ratings + users), build a clean star schema with dbt, and orchestrate the whole load-and-transform with Airflow — plus a reconciliation check. Again: spec and hints only. MovieLens is a classic teaching set precisely because the model is obvious.</p>
+  </div>
+
+  <h4>The dataset</h4>
+  <p>Grab <strong>MovieLens "ml-latest-small"</strong> from grouplens.org (~1MB zip). It has <code class="inline">movies.csv</code> (movieId, title, genres), <code class="inline">ratings.csv</code> (userId, movieId, rating, timestamp), and <code class="inline">tags.csv</code>. The star schema almost designs itself.</p>
+
+  <h4>The spec</h4>
+  <ul class="checklist">
+    <li>A Python step that reads the CSVs and loads them into <code class="inline">raw.movies</code>, <code class="inline">raw.ratings</code> in DuckDB.</li>
+    <li>Staging models that clean each (split genres, cast the timestamp to a real datetime).</li>
+    <li>A star schema: <code class="inline">fct_rating</code> at grain <strong>one row per user per movie rating</strong>, with <code class="inline">dim_movie</code> and <code class="inline">dim_date</code>.</li>
+    <li>A <code class="inline">relationships</code> test enforcing every rating's <code class="inline">movie_id</code> exists in <code class="inline">dim_movie</code>.</li>
+    <li>A <strong>reconciliation</strong> model or test: raw ratings row count must equal <code class="inline">fct_rating</code> row count, and average rating should match between raw and fact. If they differ, you dropped or duplicated rows somewhere.</li>
+    <li>An Airflow DAG chaining load &rarr; dbt build &rarr; (optionally) a final reconciliation task that fails loudly if counts mismatch.</li>
+  </ul>
+
+  <h4>Hints</h4>
+  <table>
+    <tr><th>Challenge</th><th>Hint</th></tr>
+    <tr><td>Defining the fact grain</td><td>State it in one sentence before writing SQL: "one row per (userId, movieId, timestamp)." That sentence prevents double-counting and tells you the FKs.</td></tr>
+    <tr><td>Genres are a pipe-delimited string</td><td>Decide: keep as-is in <code class="inline">dim_movie</code>, or split into a bridge table (movie&harr;genre many-to-many). Either is defensible — say which and why.</td></tr>
+    <tr><td>Reconciliation that fails the DAG</td><td>Write a dbt test (or a tiny SQL check in a final BashOperator) comparing counts; a non-zero exit makes Airflow mark the task failed.</td></tr>
+  </table>
+  <div class="note"><span class="lab">The lesson</span>
+  This is the closest project to the actual DAS42 work: messy source files &rarr; clean dimensional model &rarr; validated against the source. The reconciliation step <em>is</em> the "source-to-target validation" bullet on your resume, made real. Expect your counts to mismatch the first time — finding out why is the entire point.</div>
+</section>
+
+<!-- ===================== PROJECT 5 ===================== -->
+<section id="p5">
+  <h2 class="sec">Level up</h2>
+  <h2 class="sec-title">Project 5 — re-do Projects 1 &amp; 2 on real Snowflake</h2>
+  <div class="pill-row"><span class="pill guided">Partly guided</span> <span class="pill time">~half a day</span> <span class="pill teach">Teaches: what's actually different on the real platform</span></div>
+  <div class="pcard" style="padding:18px 22px;">
+  <p style="margin:0;"><strong>Goal:</strong> take your working sales mart from Projects 1-2 and point it at a real Snowflake account. The dbt models barely change — the value is <em>feeling</em> the differences (staging/COPY INTO, warehouses, the cost meter) so you can speak to them with first-hand authority. Read the <a href="das42_snowflake_guide.html" style="color:var(--accent)">Snowflake guide</a> alongside this.</p>
+  </div>
+
+  <div class="step"><div class="step-num">1</div><div class="step-title">Get a free Snowflake trial</div></div>
+  <p>Snowflake offers a 30-day trial with $400 in credits and no credit card. Sign up at <code class="inline">signup.snowflake.com</code>, choose any cloud/region, and pick Enterprise edition (it includes longer Time Travel and multi-cluster, useful to see). Critically: set your warehouse <code class="inline">AUTO_SUSPEND</code> to 60s and keep it XS so $400 lasts the whole month.</p>
+  <div class="warn"><span class="lab">Protect your credits</span>
+  Credits burn only while a warehouse runs. Use an XS warehouse, aggressive auto-suspend, and don't leave queries looping. Light learning easily fits inside 30 days of the $400 balance.</div>
+
+  <div class="step"><div class="step-num">2</div><div class="step-title">Create the objects + load data the Snowflake way</div></div>
+  <p>This is the part that's genuinely different from DuckDB. Instead of generating data in-process, you stage a file and <code class="inline">COPY INTO</code>.</p>
+<pre><span class="c">-- run in a Snowflake worksheet</span>
+<span class="k">CREATE WAREHOUSE</span> <span class="k">IF NOT EXISTS</span> learn_wh
+  <span class="k">WAREHOUSE_SIZE</span>=<span class="s">'XSMALL'</span> <span class="k">AUTO_SUSPEND</span>=<span class="n">60</span> <span class="k">AUTO_RESUME</span>=<span class="k">TRUE</span>;
+<span class="k">CREATE DATABASE</span> <span class="k">IF NOT EXISTS</span> sales_mart;
+<span class="k">CREATE SCHEMA</span> <span class="k">IF NOT EXISTS</span> sales_mart.raw;
+<span class="k">USE</span> <span class="k">WAREHOUSE</span> learn_wh;
+<span class="k">USE SCHEMA</span> sales_mart.raw;
+
+<span class="c">-- export your DuckDB raw tables to CSV first (locally):</span>
+<span class="c">--   COPY raw.orders   TO 'orders.csv'   (HEADER, DELIMITER ',');</span>
+<span class="c">--   COPY raw.customer TO 'customer.csv' (HEADER, DELIMITER ',');</span>
+
+<span class="k">CREATE</span> <span class="k">OR REPLACE</span> <span class="k">FILE FORMAT</span> csv_ff
+  <span class="k">TYPE</span>=csv <span class="k">SKIP_HEADER</span>=<span class="n">1</span> <span class="k">FIELD_OPTIONALLY_ENCLOSED_BY</span>=<span class="s">'"'</span>;
+<span class="k">CREATE</span> <span class="k">OR REPLACE</span> <span class="k">STAGE</span> load_stage <span class="k">FILE_FORMAT</span>=csv_ff;
+
+<span class="c">-- from SnowSQL CLI (or the Snowsight upload UI): push the files to the stage</span>
+<span class="c">--   PUT file://orders.csv   @load_stage;</span>
+<span class="c">--   PUT file://customer.csv @load_stage;</span>
+
+<span class="k">CREATE</span> <span class="k">OR REPLACE</span> <span class="k">TABLE</span> orders(
+  o_orderkey <span class="f">NUMBER</span>, o_custkey <span class="f">NUMBER</span>, o_orderstatus <span class="f">STRING</span>,
+  o_totalprice <span class="f">NUMBER</span>(<span class="n">18</span>,<span class="n">2</span>), o_orderdate <span class="f">DATE</span>);
+<span class="k">COPY INTO</span> orders <span class="k">FROM</span> @load_stage/orders.csv <span class="k">ON_ERROR</span>=<span class="s">'ABORT_STATEMENT'</span>;
+<span class="c">-- repeat the CREATE TABLE + COPY INTO for customer</span></pre>
+
+  <div class="step"><div class="step-num">3</div><div class="step-title">Point dbt at Snowflake — the only project change</div></div>
+  <p>Install the Snowflake adapter and swap your profile. <strong>Your models/, tests, and sources don't change at all.</strong> That's the whole lesson: the transformation layer is portable.</p>
+<pre>pip install dbt-snowflake</pre>
+<pre><span class="c"># profiles.yml — the ONLY file that differs from Project 1</span>
+sales_mart:
+  target: sf
+  outputs:
+    sf:
+      type: snowflake
+      account: <span class="s">"&lt;your_account_identifier&gt;"</span>   <span class="c"># e.g. ab12345.us-east-1</span>
+      user: <span class="s">"&lt;your_user&gt;"</span>
+      password: <span class="s">"&lt;your_password&gt;"</span>           <span class="c"># or key-pair auth</span>
+      role: <span class="s">"ACCOUNTADMIN"</span>
+      warehouse: <span class="s">"LEARN_WH"</span>
+      database: <span class="s">"SALES_MART"</span>
+      schema: <span class="s">"ANALYTICS"</span>
+      threads: <span class="n">4</span></pre>
+<pre>dbt run     <span class="c"># identical models now build as real Snowflake tables/views</span>
+dbt test    <span class="c"># same tests, executed by your XS warehouse</span></pre>
+
+  <div class="step"><div class="step-num">4</div><div class="step-title">Explore what DuckDB couldn't do</div></div>
+  <p>Now play with the Snowflake-only features from the Snowflake guide, against your own data:</p>
+  <ul class="checklist">
+    <li>Run <code class="inline">SELECT COUNT(*) FROM fct_orders AT(OFFSET =&gt; -300);</code> &mdash; Time Travel.</li>
+    <li><code class="inline">CREATE DATABASE sales_dev CLONE sales_mart;</code> &mdash; an instant zero-copy clone; check it took seconds and no extra storage.</li>
+    <li>Open <strong>Query History</strong> in Snowsight and look at a query profile &mdash; see partitions scanned vs pruned.</li>
+    <li>Watch your credit balance tick in the UI as the warehouse runs, then drop to zero usage after auto-suspend.</li>
+  </ul>
+  <div class="say"><span class="lab">The payoff — now your resume is fully authentic</span>
+  After this you can say, truthfully: "I've run the same dbt project against both DuckDB and Snowflake. On Snowflake I loaded via stages and COPY INTO, watched micro-partition pruning in the query profile, used zero-copy cloning to make a safe test copy, and managed warehouse auto-suspend for cost. The transformation layer was identical — only the profile and the loading mechanism changed." That's the migration narrative, lived.</div>
+</section>
+
+<!-- ===================== NEXT ===================== -->
+<section id="next">
+  <h2 class="sec">After the five</h2>
+  <h2 class="sec-title">Where to go next</h2>
+  <p class="sec-intro">If you've done all five, you've touched every concept the DAS42 technical round tests. If you want more reps, these extend naturally without new modeling headaches.</p>
+  <ul>
+    <li><strong>Add a BI layer.</strong> Point Metabase (free, runs in Docker) at your DuckDB or Snowflake marts and build a dashboard &mdash; closes the loop to the "BI tool" part of their stack.</li>
+    <li><strong>Add CI.</strong> Put your dbt project in a GitHub repo and add a GitHub Action that runs <code class="inline">dbt build</code> on every push &mdash; the CI/CD bullet, made real.</li>
+    <li><strong>Add a snapshot.</strong> Use dbt <code class="inline">snapshots</code> to track slowly-changing dimensions (e.g. a customer's market segment over time) &mdash; ties back to the SCD Type 2 concept in the study guide.</li>
+    <li><strong>Volume test.</strong> Re-run Project 3 or 4 on a full NYC Taxi month (millions of rows) to feel where incremental models and pruning actually earn their keep.</li>
+  </ul>
+  <div class="note"><span class="lab">Keep the differences log current</span>
+  By now your REAL_STACK_NOTES.md should have a dozen DuckDB-vs-Snowflake and standalone-vs-production-Airflow notes. Skim it the night before the interview &mdash; it's the most honest, specific prep you can bring, and it directly answers "how does your local practice translate to our stack?"</div>
+</section>
+
+</main>
+</div>
+</body>
+</html>

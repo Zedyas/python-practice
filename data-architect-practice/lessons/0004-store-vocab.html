@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lesson 0004 — Store / Platform Vocab</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+<script src="../assets/quiz.js"></script>
+</head>
+<body id="top">
+
+<header class="hero">
+  <div class="hero-inner">
+    <p class="eyebrow">Eigenbasis Lab · Lesson 0004 · Vocab series · pipeline order</p>
+    <h1 class="title">The <em>Store</em> — where analytics gets fast and cheap</h1>
+    <p class="lede">Next stage along the pipeline. This is "platform modernization" — the words behind <em>why</em> a cloud warehouse is different and how cost is a design choice, not a surprise. Partitioning and clustering, the two you flagged, land here.</p>
+    <div class="crosslinks">
+      <a class="alt" href="0003-bedrock-vocab.html">← Lesson 0003</a>
+      <a class="alt" href="../reference/01-glossary.html#store">Glossary · Store</a>
+      <a class="alt" href="../reference/00-the-spine.html">Spine one-pager</a>
+      <a href="#practice">Jump to practice</a>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+<main>
+
+  <div class="win">
+    <span class="k">The win</span>
+    <p>One sentence each for <strong>storage÷compute, MPP, lake / warehouse / lakehouse, table format, partitioning, clustering, bytes scanned</strong> — and the thread: <em>modern platforms decouple where data sits from what reads it, so you tune cost by reading less.</em></p>
+  </div>
+
+  <!-- 1 -->
+  <section class="blk" id="sepc">
+    <h2><span class="num">01</span>Storage ÷ compute (separation) <span class="spot flow">Store · the core idea</span></h2>
+    <p><strong>Definition:</strong> the cloud warehouse keeps your <em>data</em> in cheap object storage and runs <em>queries</em> on compute it spins up and down separately. The two are decoupled — you pay for each on its own.</p>
+    <p>Old on-prem warehouses fused them: one box held the disks <em>and</em> did the querying, so to store more you bought more compute you didn't need (and vice-versa). Separation is <strong>the</strong> modern-platform move:</p>
+    <ul>
+      <li>Storage is cheap and effectively unlimited — keep all the raw data.</li>
+      <li>Compute scales on demand — ten analysts at 9am spin up ten warehouses; at night it's off and costs nothing.</li>
+    </ul>
+    <div class="note"><span class="tag">Interview line</span>"Cloud warehouses separate storage from compute, so you scale and pay for each independently — that's why they're elastic and cheap at rest." <a class="cite" href="../reference/01-glossary.html#store">[Glossary · Store]</a></div>
+  </section>
+
+  <!-- 2 -->
+  <section class="blk" id="mpp">
+    <h2><span class="num">02</span>MPP — Massively Parallel Processing <span class="spot flow">Store</span></h2>
+    <p><strong>Definition:</strong> a query is split across many compute nodes, each scanning a <em>slice</em> of the data at the same time, then the partial results are combined.</p>
+    <p>It's <em>how</em> compute scales. "Sum revenue over 2 billion rows" doesn't run on one machine reading 2B rows; it runs on, say, 200 nodes each reading 10M, in parallel. Double the nodes ≈ halve the time. This is why warehouses (BigQuery "slots", Snowflake virtual warehouses) feel instant on huge tables — and why columnar storage matters so much: each node reads only the needed columns of its slice.</p>
+  </section>
+
+  <!-- 3 -->
+  <section class="blk" id="trio">
+    <h2><span class="num">03</span>Lake vs warehouse vs lakehouse <span class="spot flow">Store · know the trade</span></h2>
+    <p>The three shapes the store can take. Define each precisely:</p>
+    <ul>
+      <li><strong>Lake</strong> — raw <strong>files</strong> (Parquet/JSON/CSV) sitting in <em>your</em> cheap object storage, with <strong>no table layer</strong>. You read whatever files are there (schema-on-read). Flexible and cheap; untrustworthy on its own — the "data swamp."</li>
+      <li><strong>Lakehouse</strong> — those <em>same</em> open files in <em>your</em> object storage, <strong>plus an open table-format metadata layer</strong> (Iceberg/Delta) that tracks which files make up a table, its schema, and its versions. Result: ACID, schema enforcement, and time-travel on files you still own.</li>
+      <li><strong>Warehouse</strong> — you <strong>load data into the vendor's system</strong>, which stores it in its <em>own proprietary, internal format</em> you never see. Only the warehouse's engine reads it. Most polished and governed; proprietary lock-in and pricier (BigQuery, Snowflake).</li>
+    </ul>
+
+    <div class="note warn"><span class="tag">The distinction people get wrong</span>Both the <strong>warehouse and the lakehouse have strict tables, schemas, and ACID</strong> — so "strict tables" is <em>not</em> what separates them. Two different jumps:
+      <br>• <strong>Lake → lakehouse:</strong> add the metadata/table layer over the files.
+      <br>• <strong>Lakehouse → warehouse:</strong> open files <em>you own</em> (any engine reads them) vs a proprietary store the vendor fully manages (only their engine reads it).</div>
+
+    <div class="tw"><table>
+      <thead><tr><th></th><th>Stored as</th><th>Table / metadata layer</th><th>Who can read it</th><th>Format</th></tr></thead>
+      <tbody>
+        <tr><td><strong>Lake</strong></td><td>files in <em>your</em> bucket</td><td>none — just files</td><td>any engine</td><td>open (Parquet…)</td></tr>
+        <tr><td><strong>Lakehouse</strong></td><td>files in <em>your</em> bucket</td><td>yes — <strong>open</strong> (Iceberg/Delta)</td><td>any engine</td><td>open</td></tr>
+        <tr><td><strong>Warehouse</strong></td><td>loaded into the vendor</td><td>yes — <strong>internal/proprietary</strong></td><td>only the warehouse</td><td>proprietary, hidden</td></tr>
+      </tbody>
+    </table></div>
+
+    <p>You correctly put <strong>lakehouse</strong> as the Store on the spine — it's the modern default: keep everything in cheap files you own, but get transactions and schema on top so it's trustworthy. The thing that makes a lake into a lakehouse is the <em>table format</em>, next.</p>
+
+    <div class="note"><span class="tag">Don't conflate two axes</span><strong>Table format</strong> (lake vs lakehouse — a <em>storage-tech</em> choice) is independent of <strong>bronze→silver→gold</strong> (the medallion <em>refinement</em> layers, produced by transformations). You can have table-format tables at <em>every</em> medallion layer. "Bronze" is not "the lake part" — the lake substrate (cheap files in object storage) underlies <em>all</em> layers; the table format is the management you layer on top wherever you want it. <a class="cite" href="../Data_Consulting_Concepts_and_Readings.html#platform">[Concepts 01]</a></div>
+
+    <div class="note"><span class="tag">Nuance (the line is blurring)</span>Modern warehouses (Snowflake, BigQuery) increasingly read/write open Iceberg too — vendors are adopting the lakehouse formats. For getting the concepts straight, the table above is still the clean model.</div>
+  </section>
+
+  <!-- 4 -->
+  <section class="blk" id="tf">
+    <h2><span class="num">04</span>Table format (Iceberg / Delta / Hudi) <span class="spot flow">Store</span></h2>
+    <p><strong>Definition:</strong> a metadata layer over your Parquet files that tracks which files make up a table, so you get database features — <strong>ACID transactions, schema evolution, time-travel</strong> — on top of plain files.</p>
+    <p>Without it, "a table" is just a folder of Parquet; two writers collide, a schema change breaks readers, there's no "as of last Tuesday." A table format (Apache <strong>Iceberg</strong>, <strong>Delta Lake</strong>, Apache <strong>Hudi</strong>) adds a transaction log + manifest so the folder behaves like a real, safe table. <strong>This is what turns a lake into a lakehouse.</strong></p>
+    <p><strong>Parquet</strong> itself is the layer below: the open, compressed, columnar <em>file format</em> — the physical bytes. Table format = the rules over the files; Parquet = the files.</p>
+    <div class="note"><span class="tag">The standup question, answered</span>"What is an Iceberg table?" → "Parquet files plus a metadata/transaction layer that gives them ACID, schema evolution and time-travel — so a pile of files acts like a governed table." <a class="cite" href="../Data_Consulting_Concepts_and_Readings.html#platform">[Concepts 01 · table formats]</a></p></div>
+  </section>
+
+  <!-- 5 -->
+  <section class="blk" id="part">
+    <h2><span class="num">05</span>Partitioning <span class="spot flow">Store · the #1 cost lever</span></h2>
+    <p><strong>Definition:</strong> partitioning <em>physically splits a table into separate folders by the value of a column</em> (usually a date or category). The value lives <em>in the folder path</em>, not just inside the data — so a filtered query can read the folder names, throw away every folder it doesn't need, and never open those files at all. That skip is called <em class="term">partition pruning</em>.</p>
+    <p>It's a <strong>coarse, higher-order split</strong>: the division happens at the directory level, and a whole folder is either in or out. Partition your <code>orders</code> by <code>status</code> and the storage literally becomes separate folders:</p>
+    <pre><code><span class="k">COPY</span> (<span class="k">SELECT</span> * <span class="k">FROM</span> orders)
+  <span class="k">TO</span> 'orders_parq' (<span class="k">FORMAT</span> parquet, PARTITION_BY (status));
+
+<span class="c">-- on disk:
+--   orders_parq/status=paid/data_0.parquet
+--   orders_parq/status=refunded/data_0.parquet</span>
+
+<span class="c">-- a query filtered on status reads ONLY the paid folder — the
+-- refunded files are never opened (that's partition pruning):</span>
+<span class="k">SELECT</span> count(*) <span class="k">FROM</span> read_parquet('orders_parq/*/*.parquet', hive_partitioning=true)
+<span class="k">WHERE</span> status = 'paid';   <span class="c">-- 3</span></code></pre>
+    <p>Pick the partition column to match how you filter — almost always <strong>date</strong> ("last 7 days" reads 7 folders, not 5 years). <span class="gbreak">Partition on the wrong / too-fine a column (e.g. a unique id) and you get millions of tiny files — worse, not better.</span></p>
+  </section>
+
+  <!-- 6 -->
+  <section class="blk" id="clust">
+    <h2><span class="num">06</span>Clustering <span class="spot flow">Store</span></h2>
+    <p><strong>Definition:</strong> clustering <em>sorts / co-locates rows within the data</em> by a column, so similar values sit together in the same files. Each file then carries <em>min/max statistics</em> for its columns, and the engine skips any file whose range can't contain your filter value — without reading it. That skip is called <em class="term">data skipping</em> (or file skipping).</p>
+    <p>The efficiency comes entirely from <em>tight ranges</em>. Sort <code>orders</code> by <code>customer_id</code> and file A holds ids 1–4000, file B holds 4001–8000; a query for <code>customer_id = 5000</code> reads only B. Unsorted, every file's range would be ~1–8000 and skipping would do nothing.</p>
+    <p>The mental split: <strong>partitioning</strong> chops the table into separate folders — coarse, visible on disk, prune whole folders. <strong>Clustering</strong> orders the rows inside the files so min/max ranges stay tight — fine, invisible on disk, skip individual files. You often do both: partition by date, cluster by customer.</p>
+    <div class="note"><span class="tag">When each</span>Partition on a <strong>low-cardinality</strong> column you filter on a lot (date, region) — you want few, healthy-sized folders. Cluster on a <strong>high-cardinality</strong> column you also filter/join on (customer_id, product_id) — too many distinct values to partition by without exploding into tiny files.</div>
+    <div class="note warn"><span class="tag">…vs an index</span>Neither is a database index. A B-tree <em>index</em> is a separate structure of pointers to individual rows, built for OLTP <strong>point lookups</strong> ("fetch the one row where id = 5000"). Partitioning and clustering store no pointers — they organise the data so an OLAP engine can <strong>skip scanning</strong> what it doesn't need. The clean line: <em>OLTP indexes data to find rows; OLAP partitions and clusters data to skip scanning it.</em> Analytics warehouses generally don't maintain row-level indexes at all.</div>
+    <div class="note"><span class="tag">How fine / how many</span>
+      <ul>
+        <li><strong>Partitions — governed by size, not count.</strong> Aim for each partition to hold a healthy chunk (≈ a few hundred MB–1&nbsp;GB). Use <em>one</em> partition column (date), and pick the grain to hit that size: <strong>month</strong> for low volume, <strong>day</strong> as default, <strong>hour</strong> for a firehose. A second level (date + region) rarely pays — counts <em>multiply</em> into the small-file problem. Keep total partitions in the low thousands. <em>(BigQuery hard-caps a table at 4,000 partitions, one partition column.)</em></li>
+        <li><strong>Clusters — about 3–4 columns, order matters.</strong> Clustering takes an <em>ordered</em> list; put the most-filtered / most-selective column first, because a query only benefits from a <strong>prefix</strong> of that list. <em>(BigQuery max 4 clustering columns; Snowflake recommends ≤ 3–4.)</em> Past ~3 keys the benefit flattens and maintenance cost rises.</li>
+        <li><strong>Partitions are structural; clustering decays.</strong> New writes land unsorted, so clustering co-location degrades and needs periodic re-clustering / compaction (Snowflake auto-reclusters · Delta <code>OPTIMIZE ZORDER</code> · Iceberg compaction). Partitioning doesn't drift.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 7 -->
+  <section class="blk" id="bytes">
+    <h2><span class="num">07</span>Bytes scanned <span class="spot">Cost / FinOps</span></h2>
+    <p><strong>Definition:</strong> how much data a query actually reads off storage — and on a serverless warehouse like BigQuery, <em>literally what you're billed for</em>. The cost conversation is conducted in bytes scanned.</p>
+    <p>Everything above is a lever on this one number:</p>
+    <ul>
+      <li><strong>Columnar</strong> → read only the columns you select, not whole rows.</li>
+      <li><strong>Partitioning</strong> → read only the folders your filter needs.</li>
+      <li><strong>Clustering</strong> → skip blocks within those that can't match.</li>
+    </ul>
+    <p><strong>The senior framing:</strong> "reduce cost without hurting SLAs" = "scan fewer bytes" — select fewer columns, partition + cluster to match query patterns, and don't <code>SELECT *</code> on a wide table. Cost is a <em>designed</em> property, which is why it's a cross-cutting band, not an afterthought.</p>
+    <div class="note warn"><span class="tag">Interview line</span>"On a serverless warehouse you pay per byte scanned, so I tune cost by scanning less — column pruning, partition pruning, clustering — without changing the answer or the freshness." <a class="cite" href="../Data_Consulting_Concepts_and_Readings.html#platform">[Concepts 01 · the cost lever]</a></div>
+  </section>
+
+  <!-- PRACTICE -->
+  <section class="blk" id="practice">
+    <h2><span class="num">08</span>Practice — say it before you flip</h2>
+
+    <div class="recall">
+      <p class="q">What does "separation of storage and compute" buy you?</p>
+      <div class="a">Scale and pay for each independently — unlimited cheap storage, on-demand compute that costs nothing at rest. The core modern-platform property.</div>
+    </div>
+    <div class="recall">
+      <p class="q">What turns a data lake into a lakehouse?</p>
+      <div class="a">A table format (Iceberg/Delta/Hudi) — a metadata + transaction layer over the Parquet files giving ACID, schema evolution, and time-travel.</div>
+    </div>
+    <div class="recall">
+      <p class="q">Partitioning vs clustering — one line each.</p>
+      <div class="a">Partitioning splits the table into separate folders by a column (coarse, visible on disk); clustering sorts rows within them so filters skip blocks (fine, invisible). Both reduce bytes scanned.</div>
+    </div>
+    <div class="recall">
+      <p class="q">"Reduce warehouse cost without hurting SLAs" — translate to one metric and three levers.</p>
+      <div class="a">Metric: bytes scanned. Levers: column pruning (don't SELECT *), partition pruning (filter the partition key), clustering (skip blocks). Answer doesn't change; cost drops.</div>
+    </div>
+
+    <h3>Choose</h3>
+    <div class="mcq" data-explain="Filtering 'last 7 days' on a date-partitioned table prunes to ~7 folders — partitioning is the lever.">
+      <p class="q">Queries almost always filter to the last 7 days. Best lever?</p>
+      <button>Cluster the table by id</button>
+      <button data-correct>Partition the table by date</button>
+      <button>Switch storage to rows</button>
+      <button>Replicate to more nodes</button>
+    </div>
+    <div class="mcq" data-explain="ACID + schema + time-travel over Parquet files is exactly the table-format layer that defines a lakehouse.">
+      <p class="q">Cheap files, but you need ACID + time-travel. What gives you that?</p>
+      <button>A row-oriented warehouse</button>
+      <button>More MPP compute nodes</button>
+      <button data-correct>A table format layer</button>
+      <button>A finer partition column</button>
+    </div>
+    <div class="mcq" data-explain="On serverless warehouses you're billed by bytes scanned; SELECT * on a wide table reads every column.">
+      <p class="q">Same correct result, but the bill spiked. Most likely cause?</p>
+      <button>Compute wasn't separated</button>
+      <button data-correct>SELECT * scanned all columns</button>
+      <button>The table lacked ACID</button>
+      <button>MPP added more nodes..</button>
+    </div>
+
+    <div class="teacher"><span class="tag">Your teacher</span>Fuzzy on any? Ask — "Iceberg vs Delta, do I need to care?", "is a partition the same as a shard?", "how is clustering different from an index?" I'll go deeper before we move to Transform.</div>
+  </section>
+
+  <section class="blk" id="next">
+    <h2><span class="num">→</span>What's next (pipeline order)</h2>
+    <p>Source → Ingest → <strong>Store ✓</strong>. Next stop is the big one:</p>
+    <ul>
+      <li><strong>Transform vocab:</strong> materializations (view/table/incremental), star schema, fact &amp; dimension types, conformed/role-playing/degenerate dimensions — the dbt + Kimball words interviewers push hardest on.</li>
+      <li><strong>Or 0004.5 — The grain, deep:</strong> if you want the single most load-bearing Transform word on its own first.</li>
+    </ul>
+    <p>Say "next" for Transform vocab, or name your pick.</p>
+  </section>
+
+</main>
+</div>
+
+<footer>
+  <div class="wrap">
+    <p><strong>Lesson 0004 · Store / Platform Vocab</strong> — Eigenbasis Lab. Partition demo verified in DuckDB v1.5 against <code>shop_seed.sql</code>.
+    <a href="0003-bedrock-vocab.html">← 0003</a> · <a href="../reference/01-glossary.html">Glossary</a> · <a href="../reference/00-the-spine.html">Spine</a>.</p>
+  </div>
+</footer>
+
+</body>
+</html>

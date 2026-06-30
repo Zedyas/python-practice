@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Project Structure — How Real Data Projects Are Laid Out</title>
+<style>
+  :root{
+    --navy:#1F3864; --blue:#2E75B6; --ink:#1a1f2b; --muted:#5b6472;
+    --bg:#f5f7fb; --card:#ffffff; --line:#e3e9f2; --soft:#eef3fb;
+    --green:#1f7a4d; --greenbg:#e7f5ee; --amber:#9a6a00; --amberbg:#fdf3df;
+    --rose:#9a3357; --rosebg:#fdecf2; --code:#0f2540; --codebg:#0d1b2e;
+    --bronze:#9c6b3f; --silver:#6b7785; --gold:#b3902f;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font:16.5px/1.7 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+       color:var(--ink);background:var(--bg);-webkit-font-smoothing:antialiased}
+  .wrap{max-width:880px;margin:0 auto;padding:0 22px 110px}
+  header.hero{background:linear-gradient(135deg,#2a2356,#2E75B6);color:#fff;padding:48px 0 40px}
+  header.hero .wrap{padding-bottom:0}
+  .kicker{letter-spacing:.14em;text-transform:uppercase;font-size:12px;font-weight:700;opacity:.85}
+  h1{font-size:32px;margin:.25em 0 .2em;line-height:1.16}
+  .sub{font-size:17px;opacity:.93;max-width:700px}
+
+  nav.toc{background:var(--card);border:1px solid var(--line);border-radius:13px;padding:16px 22px;margin:26px 0 8px}
+  nav.toc b{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--blue)}
+  nav.toc ol{margin:9px 0 0;padding-left:20px;columns:2;column-gap:30px}
+  nav.toc li{margin:5px 0;break-inside:avoid}
+  nav.toc a{color:var(--ink);text-decoration:none}
+  nav.toc a:hover{color:var(--blue);text-decoration:underline}
+
+  section{margin-top:36px}
+  h2{font-size:23px;color:var(--navy);margin:0 0 4px;padding-bottom:8px;border-bottom:2px solid var(--line)}
+  h2 .n{color:var(--blue);font-size:15px;font-weight:700;margin-right:8px}
+  h3{font-size:18px;color:var(--blue);margin:24px 0 6px}
+  p{margin:12px 0}.lead{font-size:17.5px}
+  code{font:13.5px/1.4 "SF Mono",ui-monospace,Menlo,Consolas,monospace;background:#e9eef7;color:var(--code);padding:1.5px 6px;border-radius:5px}
+
+  .honest{background:var(--amberbg);border:1px solid #f0dcae;border-radius:11px;padding:15px 18px;margin:16px 0}
+  .honest .lbl{font-size:11.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--amber);margin-bottom:4px}
+  .keypt{background:var(--greenbg);border:1px solid #bfe3cf;border-radius:11px;padding:14px 18px;margin:16px 0}
+  .keypt .lbl{font-size:11.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--green);margin-bottom:3px}
+
+  /* file tree */
+  .tree{background:var(--codebg);border-radius:11px;padding:18px 20px;margin:16px 0;overflow-x:auto;
+        font:13px/1.62 "SF Mono",ui-monospace,Menlo,Consolas,monospace;color:#cdddee;
+        white-space:pre;display:block}
+  pre.tree{margin:16px 0}
+  .tree .dir{color:#79b8ff;font-weight:600}
+  .tree .key{color:#ffd479}        /* the boxes that matter most */
+  .tree .cmt{color:#7e93a8;font-style:italic}
+  .tree .you{color:#9ae6b4;font-weight:600}  /* where the harness lives */
+  .tree .brnz{color:#d9a06b;font-weight:600}  /* bronze tier */
+  .tree .silv{color:#aab8c6;font-weight:600}  /* silver tier */
+  .tree .gld{color:#e8c45f;font-weight:600}   /* gold tier */
+
+  /* tier band above the tree */
+  .tierband{display:flex;align-items:center;gap:0;margin:16px 0 6px;flex-wrap:wrap}
+  .tierband .tb{flex:1;min-width:120px;border-radius:10px;padding:11px 14px;color:#fff;text-align:center;margin:4px}
+  .tierband .tb .t{display:block;font-weight:800;font-size:14px;letter-spacing:.03em}
+  .tierband .tb .d{display:block;font-size:12px;opacity:.92;margin-top:2px;font-family:"SF Mono",ui-monospace,Menlo,monospace}
+  .tierband .tb.bronze{background:var(--bronze)}
+  .tierband .tb.silver{background:var(--silver)}
+  .tierband .tb.gold{background:var(--gold)}
+  .tierband .tbarrow{color:var(--muted);font-weight:700;font-size:22px}
+  .note-line{font-size:14px;color:var(--muted);background:var(--soft);border-radius:9px;padding:11px 15px;margin:12px 0}
+
+  /* flow diagram */
+  .flow{margin:18px 0}
+  .flow .row{display:flex;align-items:stretch;gap:0;flex-wrap:wrap}
+  .stage{flex:1;min-width:150px;border-radius:10px;padding:12px 14px;margin:6px;color:#fff;position:relative}
+  .stage h4{margin:0 0 5px;font-size:13.5px;letter-spacing:.02em}
+  .stage p{margin:0;font-size:12.5px;line-height:1.45;opacity:.95}
+  .stage.src{background:#5a6472}
+  .stage.ing{background:#3f6fae}
+  .stage.bronze{background:var(--bronze)}
+  .stage.silver{background:var(--silver)}
+  .stage.gold{background:var(--gold)}
+  .stage.dq{background:var(--green)}
+  .stage.orc{background:#6a4a9c}
+  .stage.bi{background:#1f3864}
+  .arrow{align-self:center;color:var(--muted);font-weight:700;font-size:20px;padding:0 2px}
+  .flow .label{font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;text-align:center;margin:2px 0 0}
+
+  table.t{width:100%;border-collapse:collapse;margin:16px 0;font-size:14.5px}
+  table.t th,table.t td{text-align:left;padding:10px 12px;border-bottom:1px solid var(--line);vertical-align:top}
+  table.t th{background:var(--navy);color:#fff;font-size:12.5px}
+  table.t tr:nth-child(even) td{background:#f9fbfe}
+  table.t td:first-child{font-weight:700;color:var(--navy)}
+
+  .gap{border-left:4px solid var(--rose);background:var(--rosebg);border-radius:0 10px 10px 0;padding:13px 17px;margin:14px 0}
+  .gap .num{font-weight:800;color:var(--rose);font-size:13px;letter-spacing:.04em;text-transform:uppercase}
+  .pill{display:inline-block;background:var(--soft);border:1px solid var(--line);border-radius:7px;padding:2px 9px;font-size:12.5px;color:var(--navy);margin:2px 4px 2px 0}
+
+  footer.end{margin-top:46px;padding:22px;background:var(--card);border:1px solid var(--line);border-radius:13px;color:var(--muted);font-size:14.5px;text-align:center}
+  a{color:var(--blue)}
+  .legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--muted);margin:8px 0 0}
+  .legend span{display:inline-flex;align-items:center;gap:6px}
+  .sw{width:13px;height:13px;border-radius:3px;display:inline-block}
+</style>
+</head>
+<body>
+<header class="hero">
+  <div class="wrap">
+    <div class="kicker">Eigenbasis Migration Lab</div>
+    <h1>How Real Data Projects Are Laid Out</h1>
+    <p class="sub">The de facto standard structure for analytics &amp; migration repos, how the pieces connect, where your lab maps onto it, and the three things production wraps around the core that the lab leaves out.</p>
+  </div>
+</header>
+
+<div class="wrap">
+  <nav class="toc">
+    <b>Contents</b>
+    <ol>
+      <li><a href="#isit">Is there a standard?</a></li>
+      <li><a href="#layout">The de facto layout</a></li>
+      <li><a href="#flow">How the pieces connect</a></li>
+      <li><a href="#medallion">Bronze / silver / gold</a></li>
+      <li><a href="#shape">Choosing the gold-layer shape</a></li>
+      <li><a href="#mapping">Where your lab maps on</a></li>
+      <li><a href="#gaps">Three production gaps</a></li>
+      <li><a href="#bottom">The bottom line</a></li>
+    </ol>
+  </nav>
+
+  <section id="isit">
+    <h2><span class="n">01</span>Is there actually a "standard"?</h2>
+    <p class="lead">Short answer: <b>there's a strong de facto convention, not a single canonical one.</b></p>
+    <p>Unlike a Python package (where the layout is essentially fixed), data projects don't have one official structure. But most modern teams converge on the same shape anyway, driven by two forces: <b>dbt's own opinions</b> about where models, tests, macros, and seeds go, and the <b>medallion pattern</b> (bronze → silver → gold layering). Learn this convention once and you'll recognize ~80% of real repos on sight.</p>
+    <div class="honest"><div class="lbl">Honest framing</div>What you built in the lab is <em>one reasonable version</em> of this convention — the dbt portion especially is exactly right. It's recognizable to anyone who's worked in a modern stack. The rest of this file shows the full shape so you know what the lab is a subset of.</div>
+  </section>
+
+  <section id="layout">
+    <h2><span class="n">02</span>The de facto layout</h2>
+    <p>The structure is organized around the <b>medallion layering</b> — bronze → silver → gold, which in dbt terms is <b>staging → intermediate → marts</b>. That layering is the spine; everything else (orchestration, ingestion, data quality) wraps around it. The tree below is annotated with which tier each folder produces. <span style="color:var(--amber);font-weight:600">Yellow</span> marks the highest-weight boxes; <span style="color:var(--green);font-weight:600">green</span> is where your reconciliation harness lives.</p>
+
+    <div class="tierband">
+      <div class="tb bronze"><span class="t">Bronze</span><span class="d">raw / landed</span></div>
+      <div class="tbarrow">→</div>
+      <div class="tb silver"><span class="t">Silver</span><span class="d">staging · intermediate</span></div>
+      <div class="tbarrow">→</div>
+      <div class="tb gold"><span class="t">Gold</span><span class="d">marts (fct_ / dim_)</span></div>
+    </div>
+
+    <pre class="tree"><span class="dir">my-data-platform/</span>
+├─ README.md
+├─ <span class="key">dbt_project.yml</span>            <span class="cmt"># dbt root config</span>
+├─ profiles.yml               <span class="cmt"># connections (usually gitignored / in ~/.dbt)</span>
+├─ packages.yml               <span class="cmt"># dbt package deps (dbt_utils, etc.)</span>
+│
+├─ <span class="dir">models/</span>                    <span class="cmt"># the heart — all transformations</span>
+│  ├─ <span class="silv">staging/</span>              <span class="cmt"># SILVER — 1:1 with sources, cleaned &amp; typed</span>
+│  │  ├─ _sources.yml         <span class="cmt"># source (bronze) declarations + freshness + tests</span>
+│  │  ├─ _staging__models.yml <span class="cmt"># model docs + column tests</span>
+│  │  └─ stg_&lt;source&gt;__&lt;entity&gt;.sql
+│  ├─ <span class="silv">intermediate/</span>         <span class="cmt"># SILVER — reusable joins/logic, not exposed to BI</span>
+│  │  └─ int_&lt;thing&gt;.sql
+│  └─ <span class="gld">marts/</span>                <span class="cmt"># GOLD — business-ready facts &amp; dimensions</span>
+│     ├─ <span class="dir">finance/</span>
+│     ├─ <span class="dir">marketing/</span>
+│     └─ <span class="dir">core/</span>
+│        ├─ fct_orders.sql    <span class="cmt"># fact: one row per order</span>
+│        └─ dim_customers.sql <span class="cmt"># dimension: descriptive context</span>
+│
+├─ <span class="dir">tests/</span>                     <span class="cmt"># singular (custom SQL) tests</span>
+├─ <span class="dir">macros/</span>                    <span class="cmt"># reusable SQL functions</span>
+├─ <span class="dir">seeds/</span>                     <span class="cmt"># small static CSVs loaded as tables</span>
+├─ <span class="dir">snapshots/</span>                 <span class="cmt"># SCD Type 2 history tracking</span>
+├─ <span class="dir">analyses/</span>                  <span class="cmt"># ad-hoc queries, not materialized</span>
+│
+├─ <span class="brnz">ingestion/</span>                 <span class="cmt"># BRONZE — how raw data lands (Fivetran/Airbyte or scripts)</span>
+├─ <span class="key">orchestration/</span>             <span class="cmt"># Airflow/Dagster DAGs — schedules &amp; sequences the runs</span>
+│  └─ <span class="dir">dags/</span>
+│
+├─ <span class="you">data_quality/</span>              <span class="cmt"># ← YOUR HARNESS LIVES HERE (validates every tier)</span>
+│  ├─ <span class="you">reconcile/</span>             <span class="cmt"># the engine</span>
+│  ├─ <span class="you">checks/</span>                <span class="cmt"># per-domain YAML configs</span>
+│  └─ great_expectations/     <span class="cmt"># or GE suites, if used</span>
+│
+├─ <span class="dir">tests_python/</span>              <span class="cmt"># unit tests for the Python (harness, scripts)</span>
+├─ <span class="dir">.github/workflows/</span>         <span class="cmt"># CI: dbt build + tests + reconcile on every PR</span>
+└─ .pre-commit-config.yaml    <span class="cmt"># sqlfluff linting, etc.</span></pre>
+
+    <p class="note-line">Read the layering as: <span class="brnz">ingestion → bronze</span>, <span class="silv">staging/intermediate → silver</span>, <span class="gld">marts → gold</span>. The <code>models/</code> folder holds the silver and gold transformations; bronze lands just before it; orchestration and data quality sit outside the layering because they act on all of it.</p>
+  </section>
+
+  <section id="flow">
+    <h2><span class="n">03</span>How the pieces connect</h2>
+    <p>The folders above aren't independent — they form a pipeline. Data flows left to right; orchestration sits above it deciding <em>when</em> each stage runs; data quality validates the output and gates promotion or cutover.</p>
+
+    <div class="flow">
+      <div class="row">
+        <div class="stage src"><h4>Sources</h4><p>Legacy DB, SaaS APIs, flat files</p></div>
+        <div class="arrow">→</div>
+        <div class="stage ing"><h4>Ingestion (EL)</h4><p>Fivetran / Airbyte / custom extract</p></div>
+        <div class="arrow">→</div>
+        <div class="stage bronze"><h4>Bronze · Raw</h4><p>Landed, untouched copy</p></div>
+      </div>
+      <div class="label">extract &amp; load — no transformation yet</div>
+
+      <div class="row" style="margin-top:14px">
+        <div class="stage bronze"><h4>Bronze · Raw</h4><p>Landed, untouched. <code>raw_*</code> / <code>sources</code></p></div>
+        <div class="arrow">→</div>
+        <div class="stage silver"><h4>Silver · Staging</h4><p>Cleaned, typed, conformed (dbt staging + intermediate)</p></div>
+        <div class="arrow">→</div>
+        <div class="stage gold"><h4>Gold · Marts</h4><p>Facts &amp; dimensions (dbt marts)</p></div>
+        <div class="arrow">→</div>
+        <div class="stage bi"><h4>BI</h4><p>Metabase / dashboards</p></div>
+      </div>
+      <div class="label">transform in-warehouse — the medallion layering, dbt territory</div>
+
+      <div class="row" style="margin-top:14px">
+        <div class="stage orc"><h4>⟲ Orchestration</h4><p>Airflow / Dagster schedules &amp; sequences every stage above, with retries, logging, alerting</p></div>
+        <div class="stage dq"><h4>✓ Data Quality</h4><p>dbt tests + your reconciliation harness validate the result → audit report → gates cutover</p></div>
+      </div>
+      <div class="label">cross-cutting — these wrap the whole pipeline</div>
+    </div>
+
+    <div class="keypt"><div class="lbl">The relationship in one line</div>Ingestion <b>lands</b> raw data; dbt <b>transforms</b> it through the layers; orchestration decides <b>when</b> it all runs and in what order; the data-quality layer <b>proves</b> the result is correct and gates go-live. Your harness is the validation box — a legitimately distinct piece many teams under-build.</div>
+  </section>
+
+  <section id="medallion">
+    <h2><span class="n">04</span>The bronze / silver / gold vocabulary</h2>
+    <p>You'll hear "medallion architecture" constantly. It's just named tiers of refinement — the same three zones from the concepts companion, with industry labels:</p>
+    <table class="t">
+      <tr><th>Tier</th><th>What's in it</th><th>Your lab equivalent</th></tr>
+      <tr><td style="color:var(--bronze)">Bronze</td><td>Raw, landed data exactly as it arrived. Immutable.</td><td>The <code>raw_*</code> tables in DuckDB</td></tr>
+      <tr><td style="color:var(--silver)">Silver</td><td>Cleaned, typed, deduplicated, conformed. One row per real entity.</td><td>dbt <code>staging/</code> models</td></tr>
+      <tr><td style="color:var(--gold)">Gold</td><td>Business-ready facts &amp; dimensions BI reads from.</td><td>dbt <code>marts/</code> (fct_/dim_)</td></tr>
+    </table>
+    <p>Bronze/silver/gold and staging/intermediate/marts describe the <em>same idea</em> from two angles — the medallion terms name the data tiers, the dbt folder names organize the code that produces them. Knowing both vocabularies means you can talk to a Databricks shop (medallion-speak) and a dbt shop (folder-speak) without missing a beat.</p>
+  </section>
+
+  <section id="shape">
+    <h2><span class="n">05</span>Choosing the gold-layer shape</h2>
+    <p>The medallion tiers tell you <em>how refined</em> the data is, not <em>what shape</em> the gold tables take. <code>fct_</code>/<code>dim_</code> is one shape — the <b>star schema</b> — and it's the right default, but it isn't the only option. Three shapes show up in practice, and they're really points on a <b>denormalization spectrum</b>: how much you pre-join so the consumer doesn't have to.</p>
+
+    <div class="tierband">
+      <div class="tb" style="background:#5a6472"><span class="t">Normalized · 3NF</span><span class="d">many narrow tables</span></div>
+      <div class="tbarrow">→</div>
+      <div class="tb gold"><span class="t">Star schema</span><span class="d">fact + denormalized dims</span></div>
+      <div class="tbarrow">→</div>
+      <div class="tb" style="background:var(--blue)"><span class="t">One Big Table</span><span class="d">single wide table</span></div>
+    </div>
+    <p class="note-line">Left is write-optimized and join-heavy; right is read-optimized and join-free. You move rightward as you go from the operational source toward the dashboard.</p>
+
+    <h3>1 · Normalized (3NF) — the source's shape, not the warehouse's</h3>
+    <p>Every fact is stored exactly once, split across many narrow tables linked by keys (an order references a <code>customer_id</code>, not the customer's name and city). This kills update anomalies and is ideal for transactional writes — which is why your <b>Postgres source is almost certainly 3NF</b>. It's poor for analytics: a single business question fans out across a dozen joins, and BI users can't navigate it.</p>
+    <div class="keypt"><div class="lbl">Use when</div>The system is <b>transactional</b> (the OLTP source). In the warehouse, 3NF is the thing you're migrating <em>away</em> from — reshaping it is the gold layer's job.</div>
+
+    <h3>2 · Star schema — the default gold layer</h3>
+    <p>One central <b>fact</b> table at a fixed grain (one row per order), surrounded by <b>dimension</b> tables that hold descriptive context (<code>dim_customers</code>, <code>dim_products</code>, <code>dim_date</code>). Dimensions are denormalized — each collapses its own sub-tables so a query joins fact→dim once, not through a chain — but the fact and dims stay separate so wide text isn't duplicated on every fact row. It's the Kimball standard because it balances three things at once: simple joins, BI-tool friendliness, and one model that many dashboards read.</p>
+    <div class="keypt"><div class="lbl">Use when</div>It's the <b>default</b> — pick it unless you have a specific reason not to. Especially when several facts share the same dimensions (<em>conformed</em> dims), when self-serve BI tools query the model, or when you want one governed layer many reports sit on.</div>
+
+    <h3>3 · One Big Table (OBT) — fully flattened, no joins</h3>
+    <p>Take the star and pre-join every dimension attribute into the fact, producing a single wide table the consumer scans with zero joins. On columnar engines (DuckDB, BigQuery, Snowflake) a wide scan is cheap and the join is the real cost, so this can be faster <em>and</em> simpler for one consumer. The price: data is duplicated (every order row carries the full customer name/city), it's harder to keep consistent, and a dimension change has to be rewritten across all history.</p>
+    <div class="keypt"><div class="lbl">Use when</div>One well-understood consumer — a single dashboard, an ML <b>feature table</b>, or analysts who can't/won't write joins. Build it <b>on top of</b> the marts as a convenience layer, not instead of them.</div>
+
+    <table class="t">
+      <tr><th>Shape</th><th>Denormalization</th><th>Best for</th><th>Where you meet it</th><th>Main cost</th></tr>
+      <tr><td>Normalized (3NF)</td><td>None — split into narrow tables</td><td>Transactional writes &amp; integrity</td><td>The OLTP <b>source</b> (Postgres)</td><td>Unusable for analytics (join sprawl)</td></tr>
+      <tr><td>Star schema</td><td>Moderate — dims denormalized, fact separate</td><td>General-purpose analytics &amp; BI</td><td>The <b>marts/</b> gold layer (default)</td><td>Still needs fact→dim joins</td></tr>
+      <tr><td>One Big Table</td><td>Full — everything pre-joined</td><td>One dashboard / ML feature table</td><td>A convenience layer above marts</td><td>Duplication; costly to keep consistent</td></tr>
+    </table>
+
+    <div class="honest"><div class="lbl">One more you'll hear named</div>The <b>snowflake schema</b> is a star whose dimensions are themselves normalized (a <code>dim_product</code> that points out to a separate <code>dim_category</code> rather than carrying the category name). It saves a little storage at the cost of more joins, and on cheap columnar storage that trade rarely pays — most teams keep dims flat and stay with a plain star. <b>Data Vault</b> exists for highly-audited, many-source enterprise warehouses; it's almost never your call on a single migration.</div>
+
+    <div class="keypt"><div class="lbl">For this migration specifically</div>Your source is 3NF; the gold layer's job is to reshape <b>3NF → star</b> in <code>marts/</code>. That's the work, and it's exactly what dbt staging→marts produces. Reach for an <b>OBT only when a named consumer asks for one</b> — build it downstream of the star, never as a replacement for it.</div>
+  </section>
+
+  <section id="mapping">
+    <h2><span class="n">06</span>Where your lab maps onto this</h2>
+    <p>Your lab lines up cleanly with the real shape — it's a faithful subset, not a different thing.</p>
+    <table class="t">
+      <tr><th>Your lab</th><th>Production equivalent</th><th>Fidelity</th></tr>
+      <tr><td>Postgres source + DuckDB target</td><td>Sources + warehouse (the EL boundary)</td><td>Accurate stand-in</td></tr>
+      <tr><td><code>migrate_to_target.py</code></td><td>Ingestion layer (in prod often Fivetran/Airbyte)</td><td>Fine for one-time migration</td></tr>
+      <tr><td>dbt staging → marts</td><td>The same, unchanged</td><td><b>Exactly production-standard</b></td></tr>
+      <tr><td><code>harness/</code></td><td>The data_quality layer</td><td>Real capability, cleanly packaged</td></tr>
+      <tr><td>You run scripts by hand</td><td>Orchestration (Airflow/Dagster)</td><td>The main lab simplification</td></tr>
+    </table>
+  </section>
+
+  <section id="gaps">
+    <h2><span class="n">07</span>Three things production wraps around the core</h2>
+    <p>These are the honest gaps between the lab and a full production repo. None of them undercut the lab — they're the next layers out — but knowing them is the difference between "I built a thing" and "I built a thing a team can run safely."</p>
+
+    <div class="gap">
+      <div class="num">Gap 1 · Orchestration</div>
+      <p>In the lab you run <code>load_source.py</code>, then <code>dbt run</code>, then <code>reconcile</code> by hand. Production wires those into a scheduled, dependency-aware pipeline (Airflow or Dagster) with retries, alerting, and logging. You already know these tools — the lab just doesn't exercise them. Expect the interview question: <em>"how does this run on a schedule?"</em></p>
+    </div>
+
+    <div class="gap">
+      <div class="num">Gap 2 · Ingestion is usually bought, not built</div>
+      <p>Your hand-written migration script is correct for a <b>one-time cutover migration</b> — which is exactly your use case, so this is appropriate. But for <b>ongoing</b> pipelines most shops use managed connectors (Fivetran/Airbyte) instead of custom Python. The distinction to hold: migration (one-time, custom, where your harness shines) vs. ingestion (continuous, off-the-shelf).</p>
+    </div>
+
+    <div class="gap">
+      <div class="num">Gap 3 · Environments &amp; CI</div>
+      <p>Production separates dev / staging / prod, runs <code>dbt build</code> + tests + reconciliation on every pull request via CI, and lints SQL (sqlfluff). The lab is single-environment. This is the gap between a working artifact and one a team can change without fear.</p>
+    </div>
+
+    <p style="margin-top:14px">Tools that fill these gaps, for reference: <span class="pill">Airflow</span><span class="pill">Dagster</span><span class="pill">Fivetran</span><span class="pill">Airbyte</span><span class="pill">GitHub Actions</span><span class="pill">sqlfluff</span><span class="pill">pre-commit</span> — most are already in your stack familiarity.</p>
+  </section>
+
+  <section id="bottom">
+    <h2><span class="n">08</span>The bottom line</h2>
+    <p class="lead">Your layout is a correct and recognizable version of the standard — the dbt portion especially is exactly right.</p>
+    <p>The convention itself is real and worth internalizing as a template. A full production repo wraps that core in three things the lab omits: <b>orchestration</b>, <b>environment/CI discipline</b>, and (for ongoing work) <b>managed ingestion</b>.</p>
+    <div class="keypt"><div class="lbl">For a migration engagement specifically</div>One-time move, prove it, cut over — your setup is close to complete, because migration leans on the <b>validation harness</b> far more than on continuous orchestration. The gaps above matter most for <em>ongoing</em> data-platform work, which is your Phase 3 (fractional/advisory) territory, not your entry point.</div>
+  </section>
+
+  <footer class="end">
+    Pair this with <b>Understanding the Pieces</b> (the concepts), <b>How This Maps to Production</b> (scope &amp; interview framing), and the <b>Olist Migration Workbook</b> (where you build it). This file is the one to keep open when you start structuring a real client repo.
+  </footer>
+</div>
+</body>
+</html>

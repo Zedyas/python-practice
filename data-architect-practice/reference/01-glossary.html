@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Reference 01 — Master Glossary</title>
+<link rel="stylesheet" href="../assets/lesson.css">
+</head>
+<body id="top">
+
+<header class="hero">
+  <div class="hero-inner">
+    <p class="eyebrow">Eigenbasis Lab · Reference 01</p>
+    <h1 class="title">Master <em>Glossary</em></h1>
+    <p class="lede">Every load-bearing term in the curriculum, in one place, grouped by where it lives on the <a class="inline" href="00-the-spine.html">spine</a>. Each entry: a one-line definition + (where useful) what breaks without it. This is the canonical wording — lessons adhere to it. Skim it whenever a word feels like a black box.</p>
+    <div class="gnav">
+      <a href="#bedrock">Bedrock</a><a href="#store">Store</a><a href="#ingest">Ingest / Migrate</a>
+      <a href="#transform">Transform</a><a href="#quality">Quality</a><a href="#orch">Orchestration</a>
+      <a href="#gov">Governance</a><a href="#serve">Serve / BI</a><a href="#arch">Architecture</a>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+<main>
+
+  <!-- BEDROCK -->
+  <section class="blk" id="bedrock">
+    <h2><span class="num">BEDROCK</span>Foundations underneath everything</h2>
+    <p class="gi"><span class="gt">OLTP</span> <span class="spot">Source</span> — <span class="gdef">Online Transaction Processing: a database tuned for many small reads/writes (orders, logins). Row-oriented, normalized, built for <em>writes</em>, not analytics.</span></p>
+    <p class="gi"><span class="gt">OLAP</span> <span class="spot flow">Store</span> — <span class="gdef">Online Analytical Processing: a system tuned for large scans/aggregations over few columns. Columnar, denormalized. The warehouse side.</span></p>
+    <p class="gi"><span class="gt">Row-oriented</span> — <span class="gdef">stores all of a row's columns together. Fast to fetch/modify a whole record. <span class="gbreak">Slow to scan one column across millions of rows.</span></span></p>
+    <p class="gi"><span class="gt">Columnar</span> — <span class="gdef">stores each column together. Reads only the columns a query needs and compresses them hard — why analytics warehouses are columnar.</span></p>
+    <p class="gi"><span class="gt">Normalization</span> — <span class="gdef">splitting data into many tables with no duplication (3rd normal form). Great for OLTP write-integrity; needs lots of joins to analyze.</span></p>
+    <p class="gi"><span class="gt">Denormalization</span> — <span class="gdef">deliberately duplicating data into wide tables to avoid joins at read time. The analytics trade-off.</span></p>
+    <p class="gi"><span class="gt">Schema-on-write</span> — <span class="gdef">enforce structure when data is written (classic warehouse). vs <span class="gt">schema-on-read</span> — store raw, impose structure when queried (data lake).</span></p>
+    <p class="gi"><span class="gt">ACID</span> — <span class="gdef">Atomicity, Consistency, Isolation, Durability — the transactional guarantees an OLTP database makes so a transfer can't half-happen.</span></p>
+    <p class="gi"><span class="gt">CAP theorem</span> <span class="spot">Architecture</span> — <span class="gdef">under a network partition a distributed system can keep only Consistency <em>or</em> Availability, not both. Names the trade-off you're forced into.</span></p>
+    <p class="gi"><span class="gt">PACELC</span> — <span class="gdef">CAP's extension: under a Partition choose A or C; Else (normal operation) choose Latency or Consistency. The everyday version of the trade-off.</span></p>
+    <p class="gi"><span class="gt">Strong vs eventual consistency</span> — <span class="gdef">strong = every reader sees the latest write immediately; eventual = readers may lag briefly but converge. Eventual buys availability/latency.</span></p>
+    <p class="gi"><span class="gt">Idempotency</span> <span class="spot">Orchestration</span> — <span class="gdef">running a step twice = same result as once. Achieved by loading on a key (merge). <span class="gbreak">Without it, a retry double-counts rows.</span></span></p>
+    <p class="gi"><span class="gt">Delivery guarantees</span> — <span class="gdef">at-most-once (may lose), at-least-once (may duplicate), exactly-once (neither — usually = at-least-once + idempotency).</span></p>
+    <p class="gi"><span class="gt">The grain</span> <span class="spot">Transform</span> — <span class="gdef">"one row represents exactly ___." The first thing you declare for any table. <span class="gbreak">Get it wrong and every downstream number lies.</span></span></p>
+    <p class="gi"><span class="gt">Surrogate vs natural key</span> — <span class="gdef">natural = the business id (email, order #); surrogate = a system-generated id (1,2,3…) used to join dimensions, stable across source changes and needed for SCD2.</span></p>
+  </section>
+
+  <!-- STORE -->
+  <section class="blk" id="store">
+    <h2><span class="num">STORE</span>Platform &amp; warehouse modernization</h2>
+    <p class="gi"><span class="gt">Storage ÷ compute</span> — <span class="gdef">cloud warehouses keep data in cheap object storage and spin compute up/down separately. You pay for each independently — the core modern-platform idea.</span></p>
+    <p class="gi"><span class="gt">MPP</span> — <span class="gdef">Massively Parallel Processing: split a query across many nodes, each scanning a slice, then combine. How warehouses scan huge tables fast.</span></p>
+    <p class="gi"><span class="gt">Data lake</span> — <span class="gdef">raw files (Parquet/JSON/CSV) in <em>your</em> cheap object storage with <strong>no table layer</strong> — read whatever files are there (schema-on-read). Cheap &amp; flexible; <span class="gbreak">untrustworthy alone (the "swamp").</span></span></p>
+    <p class="gi"><span class="gt">Lakehouse</span> — <span class="gdef">the same open files you own, <strong>plus an open table-format layer</strong> (Iceberg/Delta) tracking which files = a table, its schema &amp; versions → ACID, schema, time-travel on files you still own. The modern default.</span></p>
+    <p class="gi"><span class="gt">Data warehouse</span> — <span class="gdef">data <strong>loaded into the vendor's system</strong>, stored in a <em>proprietary internal format</em> only its engine reads (BigQuery, Snowflake). Most polished/governed; lock-in &amp; pricier. <span class="gbreak">Note: both warehouse &amp; lakehouse have strict tables — the split is open files you own vs proprietary vendor-managed storage.</span></span></p>
+    <p class="gi"><span class="gt">Table format</span> — <span class="gdef">a metadata layer (Iceberg, Delta, Hudi) over Parquet files that adds transactions, schema evolution, time-travel — what makes a lakehouse possible.</span></p>
+    <p class="gi"><span class="gt">Parquet</span> — <span class="gdef">the standard open columnar file format. Compressed, columnar, splittable — the physical bytes a lake/lakehouse stores.</span></p>
+    <p class="gi"><span class="gt">Partitioning</span> — <span class="gdef">physically splitting a table into separate folders by a column's value (often date); the value lives in the folder path, so a filtered query prunes whole folders unopened. Coarse, directory-level. <span class="gbreak">The #1 lever to cut bytes scanned = cost.</span></span></p>
+    <p class="gi"><span class="gt">Clustering</span> — <span class="gdef">sorting/co-locating rows within files by a column so per-file min/max ranges stay tight and the engine skips files that can't match. Fine-grained complement to partitioning; cluster high-cardinality cols, partition low-cardinality ones.</span></p>
+    <p class="gi"><span class="gt">Index (vs partition/cluster)</span> — <span class="gdef">a separate structure of pointers to individual rows for OLTP point lookups. <span class="gbreak">OLAP warehouses don't index to find rows — they partition/cluster to skip scanning data.</span></span></p>
+    <p class="gi"><span class="gt">Bytes scanned</span> — <span class="gdef">how much data a query reads — and on BigQuery, what you pay. Partition + cluster + select fewer columns to scan less. The cost language.</span></p>
+    <p class="gi"><span class="gt">External table</span> — <span class="gdef">a table defined over files left in the lake (not loaded in). Query files in place — the lakehouse access pattern.</span></p>
+    <p class="gi"><span class="gt">Medallion (bronze/silver/gold)</span> — <span class="gdef">layering convention: bronze = raw, silver = cleaned/conformed, gold = business-ready marts. Maps onto dbt staging→intermediate→marts.</span></p>
+  </section>
+
+  <!-- INGEST -->
+  <section class="blk" id="ingest">
+    <h2><span class="num">INGEST / MIGRATE</span>Moving data, and proving it moved</h2>
+    <p class="gi"><span class="gt">ETL</span> — <span class="gdef">Extract → Transform → Load: transform <em>before</em> loading. Classic, used when storage was expensive or transforms must precede landing.</span></p>
+    <p class="gi"><span class="gt">ELT</span> — <span class="gdef">Extract → Load → Transform: land raw first, transform <em>inside</em> the warehouse with SQL/dbt. The modern default (cheap storage + powerful warehouses).</span></p>
+    <p class="gi"><span class="gt">CDC</span> — <span class="gdef">Change Data Capture: move only rows that changed. Query-based (watermark column) or log-based (read the write-ahead log; catches deletes).</span></p>
+    <p class="gi"><span class="gt">Watermark</span> — <span class="gdef">the high-water value (e.g. max <code>updated_at</code>) you remember from the last run, to fetch only newer rows next time.</span></p>
+    <p class="gi"><span class="gt">Backfill</span> — <span class="gdef">re-processing historical periods through a pipeline (after a fix or a new column). Only safe if the step is idempotent.</span></p>
+    <p class="gi"><span class="gt">Big-bang migration</span> — <span class="gdef">cut over all at once. Simple, high-risk, hard to roll back.</span></p>
+    <p class="gi"><span class="gt">Phased migration</span> — <span class="gdef">move in slices (by module/table/region). Lower risk, longer, needs both systems coexisting.</span></p>
+    <p class="gi"><span class="gt">Parallel run</span> — <span class="gdef">run old and new side by side, compare outputs until trust is earned, then cut over. Safest, most expensive.</span></p>
+    <p class="gi"><span class="gt">Strangler fig</span> — <span class="gdef">incrementally route functionality to the new system until the old one is dead. Fowler's pattern, reframed for data.</span></p>
+    <p class="gi"><span class="gt">Reconciliation</span> — <span class="gdef">proving landed data matches source. The ladder: counts → column aggregates/checksums → row-level diff on PK. <span class="gbreak">Skip it and data loss goes silent.</span></span></p>
+    <p class="gi"><span class="gt">Checksum / hash</span> — <span class="gdef">a fingerprint of a column or row used to compare source vs target without shipping all the data.</span></p>
+    <p class="gi"><span class="gt">Failure classes</span> — <span class="gdef">the usual migration corruptions to name on sight: truncation, timezone shift, collation/encoding, numeric rounding, null handling.</span></p>
+  </section>
+
+  <!-- TRANSFORM -->
+  <section class="blk" id="transform">
+    <h2><span class="num">TRANSFORM</span>Analytics engineering &amp; dbt</h2>
+    <p class="gi"><span class="gt">dbt model</span> — <span class="gdef">a <code>SELECT</code> in a <code>.sql</code> file that dbt turns into a view/table. The unit of transformation.</span></p>
+    <p class="gi"><span class="gt">ref() / source()</span> — <span class="gdef"><code>ref()</code> links a model to another (builds the DAG); <code>source()</code> points at raw input tables. Lineage comes for free.</span></p>
+    <p class="gi"><span class="gt">Materialization</span> — <span class="gdef">how a model is built: <strong>view</strong> (logic only), <strong>table</strong> (full rebuild), <strong>incremental</strong> (append/merge new rows), <strong>ephemeral</strong> (inlined CTE).</span></p>
+    <p class="gi"><span class="gt">Staging → intermediate → marts</span> — <span class="gdef">the standard layering: <code>stg_</code> (1:1 cleaned/typed) → <code>int_</code> (joins/logic) → <code>fct_/dim_</code> (business-ready). The expected project answer.</span></p>
+    <p class="gi"><span class="gt">Star schema</span> — <span class="gdef">one central fact table surrounded by dimension tables. The Kimball default for BI; few joins, intuitive.</span></p>
+    <p class="gi"><span class="gt">Snowflake schema</span> — <span class="gdef">a star whose dimensions are further normalized into sub-tables. More joins, less duplication; usually avoided for BI.</span></p>
+    <p class="gi"><span class="gt">Fact table</span> — <span class="gdef">the measurements/events (one row per order line). Types: <strong>transaction</strong>, <strong>periodic snapshot</strong>, <strong>accumulating snapshot</strong>.</span></p>
+    <p class="gi"><span class="gt">Dimension</span> — <span class="gdef">the descriptive context you filter/group by (customer, product, date).</span></p>
+    <p class="gi"><span class="gt">Additive / semi / non-additive</span> — <span class="gdef">a measure you can sum across all dimensions (revenue) / only some (a balance, not over time) / none (a ratio). Governs how you aggregate.</span></p>
+    <p class="gi"><span class="gt">Conformed dimension</span> — <span class="gdef">one dimension shared identically across multiple facts, so "customer" means the same everywhere.</span></p>
+    <p class="gi"><span class="gt">Role-playing dimension</span> — <span class="gdef">one dimension used in several roles (date as order_date, ship_date, due_date).</span></p>
+    <p class="gi"><span class="gt">Degenerate dimension</span> — <span class="gdef">a dimension attribute that lives on the fact with no separate table (e.g. order_id itself).</span></p>
+    <p class="gi"><span class="gt">SCD Type 1</span> — <span class="gdef">overwrite the changed attribute. Simple; <span class="gbreak">history is lost.</span></span></p>
+    <p class="gi"><span class="gt">SCD Type 2</span> — <span class="gdef">keep history: close the old row, open a new one with <code>valid_from/valid_to</code>. Point-in-time questions stay correct.</span></p>
+    <p class="gi"><span class="gt">SCD Type 3</span> — <span class="gdef">add a column for the prior value (<code>plan</code> + <code>prior_plan</code>). Keeps exactly one previous value, not a full timeline.</span></p>
+    <p class="gi"><span class="gt">Snapshot (dbt)</span> — <span class="gdef">dbt's built-in mechanism that implements SCD2 for you over a changing source.</span></p>
+    <p class="gi"><span class="gt">Incremental model</span> — <span class="gdef">a model that processes only new/changed rows each run (via <code>is_incremental()</code> + <code>unique_key</code>) instead of full rebuild.</span></p>
+    <p class="gi"><span class="gt">Macro / Jinja</span> — <span class="gdef">dbt's templating: reusable SQL snippets (macros) written in Jinja to DRY up repeated logic.</span></p>
+    <p class="gi"><span class="gt">Data Vault</span> — <span class="gdef">an alternative modeling paradigm (hubs/links/satellites) for auditability/scale. Name it; know it's heavier than Kimball.</span></p>
+    <p class="gi"><span class="gt">One Big Table (OBT)</span> — <span class="gdef">flatten everything into one wide denormalized table. Simple for a single use case; duplicative across many.</span></p>
+  </section>
+
+  <!-- QUALITY -->
+  <section class="blk" id="quality">
+    <h2><span class="num">QUALITY</span>Reliability &amp; observability</h2>
+    <p class="gi"><span class="gt">7 quality dimensions</span> — <span class="gdef">completeness, validity, accuracy, consistency, uniqueness, timeliness, integrity. The vocabulary for "what does good data mean."</span></p>
+    <p class="gi"><span class="gt">5 observability pillars</span> — <span class="gdef">freshness, volume, schema, lineage, distribution. What you monitor to know a pipeline is healthy (Monte Carlo's framing).</span></p>
+    <p class="gi"><span class="gt">dbt test — generic</span> — <span class="gdef">reusable column assertions: <code>unique</code>, <code>not_null</code>, <code>relationships</code>, <code>accepted_values</code>.</span></p>
+    <p class="gi"><span class="gt">dbt test — singular</span> — <span class="gdef">a one-off custom test: any SQL that returns failing rows.</span></p>
+    <p class="gi"><span class="gt">Source freshness</span> — <span class="gdef">a check that raw source data arrived recently enough (an SLA on lateness).</span></p>
+    <p class="gi"><span class="gt">Data contract</span> — <span class="gdef">a producer-side promise (schema + types + freshness + owner) that <span class="gbreak">fails the build if violated</span> — stops bad data at the source.</span></p>
+    <p class="gi"><span class="gt">Assertion vs anomaly detection</span> — <span class="gdef">assertion = a fixed rule you write (must be &gt; 0); anomaly = learned-normal monitoring that flags deviations.</span></p>
+  </section>
+
+  <!-- ORCHESTRATION -->
+  <section class="blk" id="orch">
+    <h2><span class="num">ORCHESTRATION</span>The conductor</h2>
+    <p class="gi"><span class="gt">DAG</span> — <span class="gdef">Directed Acyclic Graph: the dependency map of steps, no cycles. Defines what runs before what.</span></p>
+    <p class="gi"><span class="gt">Retry</span> — <span class="gdef">automatically re-running a failed step. Only safe if the step is idempotent.</span></p>
+    <p class="gi"><span class="gt">Task-centric (Airflow)</span> — <span class="gdef">you orchestrate <em>tasks</em> ("run this script"). The incumbent model; you track what ran.</span></p>
+    <p class="gi"><span class="gt">Asset-centric (Dagster)</span> — <span class="gdef">you declare the <em>data assets</em> you want to exist; the tool figures out the tasks. You track what data is fresh.</span></p>
+    <p class="gi"><span class="gt">Software-defined asset</span> — <span class="gdef">Dagster's unit: a declared table/file + the code that produces it, with lineage built in.</span></p>
+    <p class="gi"><span class="gt">Sensor / schedule</span> — <span class="gdef">triggers: a schedule fires on cron; a sensor fires on an event (a file landed).</span></p>
+  </section>
+
+  <!-- GOVERNANCE -->
+  <section class="blk" id="gov">
+    <h2><span class="num">GOVERNANCE</span>Security, compliance &amp; lineage</h2>
+    <p class="gi"><span class="gt">RBAC</span> — <span class="gdef">Role-Based Access Control: permissions attached to <em>roles</em> (analyst, admin); users get a role. Coarse, simple, the default.</span></p>
+    <p class="gi"><span class="gt">ABAC</span> — <span class="gdef">Attribute-Based Access Control: access decided by <em>attributes</em> (department=finance AND region=EU). Finer-grained, more flexible, more complex.</span></p>
+    <p class="gi"><span class="gt">RLS (row-level security)</span> — <span class="gdef">a policy that filters which <em>rows</em> a role sees (EU team sees only EU rows). Same query, different result per user.</span></p>
+    <p class="gi"><span class="gt">Column masking</span> — <span class="gdef">show a sensitive column obscured (<code>a***@x.com</code>) to unprivileged roles; real value stays for authorized ones.</span></p>
+    <p class="gi"><span class="gt">Tokenization</span> — <span class="gdef">replace a sensitive value with a reversible token stored in a separate vault. Stronger than masking; original is recoverable only via the vault.</span></p>
+    <p class="gi"><span class="gt">PII</span> — <span class="gdef">Personally Identifiable Information (name, email, address). Classifying it is the starting point of governance.</span></p>
+    <p class="gi"><span class="gt">Data catalog</span> — <span class="gdef">a searchable inventory of tables/columns with owners, descriptions, classifications (DataHub, OpenMetadata).</span></p>
+    <p class="gi"><span class="gt">Column-level lineage</span> — <span class="gdef">tracing a single column from source through every transform to the dashboard. Required to answer "where did this number come from / where does this PII flow."</span></p>
+    <p class="gi"><span class="gt">MDM</span> — <span class="gdef">Master Data Management: one authoritative version of core entities (the single "customer") across systems.</span></p>
+    <p class="gi"><span class="gt">GDPR / HIPAA / SOX / PCI</span> — <span class="gdef">compliance regimes: EU privacy / US health data / financial reporting controls / card data. Each dictates access logs, retention, masking, erasure.</span></p>
+    <p class="gi"><span class="gt">FinOps</span> — <span class="gdef">treating cloud cost as a governed, monitored constraint — not a surprise bill. Bytes scanned is its main lever here.</span></p>
+  </section>
+
+  <!-- SERVE -->
+  <section class="blk" id="serve">
+    <h2><span class="num">SERVE / BI</span>The layer the client sees</h2>
+    <p class="gi"><span class="gt">Semantic / metrics layer</span> — <span class="gdef">define a metric (revenue) <em>once</em>, query it by any dimension. So finance and ops can't disagree on the number (dbt MetricFlow).</span></p>
+    <p class="gi"><span class="gt">Governed dashboard</span> — <span class="gdef">a certified dashboard built on trusted marts/metrics, with access controls — vs ad-hoc spreadsheets.</span></p>
+    <p class="gi"><span class="gt">Live vs extract</span> — <span class="gdef">(import vs DirectQuery) — query the warehouse on every view (fresh, slower/costlier) vs cache a copy in the BI tool (fast, stale-er).</span></p>
+    <p class="gi"><span class="gt">Report rationalization</span> — <span class="gdef">consolidating N sprawling legacy reports into a few certified dashboards. The reporting-modernization play.</span></p>
+  </section>
+
+  <!-- ARCH -->
+  <section class="blk" id="arch">
+    <h2><span class="num">ARCHITECTURE</span>The reasoning layer</h2>
+    <p class="gi"><span class="gt">Answer-shape</span> — <span class="gdef">the loop to run every design prompt through: requirements → assumptions → grain → design → trade-offs → failure modes → cost.</span></p>
+    <p class="gi"><span class="gt">The eternal triangle</span> — <span class="gdef">name what you're trading (consistency / availability / latency; or cost / speed / flexibility). Architecture = defensible trade-offs, not tool-picking.</span></p>
+    <p class="gi"><span class="gt">Partitioning / replication (distributed)</span> — <span class="gdef">split data across nodes (partition) and copy it for safety/reads (replicate). The two distributed-systems primitives.</span></p>
+    <p class="gi"><span class="gt">Skew / shuffle</span> — <span class="gdef">skew = uneven data per node (one slow worker); shuffle = moving data between nodes for a join/group (the expensive step).</span></p>
+    <p class="gi"><span class="gt">Modern data stack (MDS)</span> — <span class="gdef">the reference architecture you draw: sources → ingestion → lake/warehouse → dbt → semantic layer → BI, with orchestration/observability/governance cross-cutting.</span></p>
+  </section>
+
+  <section class="blk">
+    <h2><span class="num">USE</span>How this fits the lessons</h2>
+    <p>This glossary is breadth — the safety net so no word is ever a black box. The interactive <strong>vocab lessons</strong> take one area at a time and make a small batch <em>stick</em> (definition + tiny example on the shop data + what breaks + retrieval practice). First one: <a class="inline" href="../lessons/0002-five-words.html">Lesson 0002 · Five Words</a>. More by area as we go.</p>
+  </section>
+
+</main>
+</div>
+
+<footer>
+  <div class="wrap">
+    <p><strong>Reference 01 · Master Glossary</strong> — Eigenbasis Lab. Canonical wording; lessons adhere to it.
+    See also <a href="00-the-spine.html">the spine one-pager</a>.</p>
+  </div>
+</footer>
+
+</body>
+</html>

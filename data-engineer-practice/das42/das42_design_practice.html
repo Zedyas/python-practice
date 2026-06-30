@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Design Round — Practice &amp; Framework</title>
+<style>
+  :root {
+    --ink: #15293d; --ink-soft: #3f5973; --ink-faint: #6b8299;
+    --paper: #f4f9fd; --card: #ffffff; --line: #d4e4f0; --line-soft: #e6f1f8;
+    --accent: #2196d6; --accent-soft: #e3f3fc;
+    --blue: #1271c4; --blue-soft: #e0eefb;
+    --amber: #8a5208; --amber-soft: #faeed8;
+    --red: #c0392b; --red-soft: #fbeceb;
+    --purple: #5b4bb8; --purple-soft: #ecebfb;
+    --code-bg: #102438; --code-ink: #dbeaf5; --code-green: #8fd6b0;
+    --code-blue: #6bc4f0; --code-faint: #5e7d96;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body { margin: 0; background: var(--paper); color: var(--ink); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; line-height: 1.65; font-size: 16px; }
+  body:before { content: ""; position: fixed; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, #29b5e8, #2196d6, #1271c4); z-index: 100; }
+  .wrap { max-width: 1180px; margin: 0 auto; display: flex; }
+  nav { width: 240px; flex-shrink: 0; position: sticky; top: 0; height: 100vh; overflow-y: auto; padding: 28px 18px 40px 24px; border-right: 1px solid var(--line); background: var(--paper); }
+  nav .brand { font-size: 13px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--accent); margin-bottom: 4px; }
+  nav .brand-sub { font-size: 12px; color: var(--ink-faint); margin-bottom: 18px; line-height: 1.4; }
+  nav a { display: block; color: var(--ink-soft); text-decoration: none; font-size: 13.5px; padding: 5px 10px; border-radius: 6px; margin-bottom: 1px; }
+  nav a:hover { background: var(--accent-soft); color: var(--accent); }
+  nav a.group { font-weight: 700; color: var(--ink); margin-top: 16px; font-size: 11px; letter-spacing: 0.05em; text-transform: uppercase; padding-left: 10px; pointer-events: none; }
+  nav a.sub { padding-left: 20px; font-size: 12.5px; color: var(--ink-faint); }
+  nav .backlink { font-size: 12px; color: var(--accent); margin-bottom: 18px; display: block; padding-left: 10px; }
+  main { flex: 1; min-width: 0; padding: 36px 48px 100px; }
+  header.hero { margin-bottom: 32px; padding-bottom: 24px; border-bottom: 2px solid var(--ink); }
+  header.hero h1 { font-size: 28px; margin: 0 0 8px; letter-spacing: -0.02em; }
+  header.hero p { font-size: 15px; color: var(--ink-soft); margin: 0; max-width: 720px; }
+  section { margin-bottom: 48px; scroll-margin-top: 20px; }
+  h2.sec { font-size: 13px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent); margin: 0 0 4px; }
+  h2.sec-title { font-size: 24px; margin: 0 0 6px; letter-spacing: -0.015em; }
+  .sec-intro { color: var(--ink-soft); font-size: 15px; margin: 0 0 22px; max-width: 730px; }
+  h3 { font-size: 18px; margin: 28px 0 10px; }
+  h4 { font-size: 15px; margin: 20px 0 8px; }
+  p { margin: 0 0 13px; }
+  ul, ol { margin: 0 0 13px; padding-left: 22px; }
+  li { margin-bottom: 7px; }
+  .step-list { counter-reset: s; list-style: none; padding: 0; }
+  .step-list li { counter-increment: s; padding-left: 44px; position: relative; margin-bottom: 14px; }
+  .step-list li:before { content: counter(s); position: absolute; left: 0; top: 0; width: 28px; height: 28px; border-radius: 50%; background: var(--accent); color: #fff; font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+  .step-list li b { color: var(--ink); }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 18px 22px; margin: 16px 0; }
+  .pattern { background: var(--card); border: 1px solid var(--line); border-left: 3px solid var(--accent); border-radius: 8px; padding: 14px 18px; margin: 12px 0; }
+  .pattern.selfref { border-left-color: var(--red); }
+  .pattern .name { font-weight: 700; font-size: 15px; margin-bottom: 3px; }
+  .pattern .cue { font-size: 13.5px; color: var(--ink-soft); }
+  .pattern .fix { font-size: 13.5px; color: var(--blue); margin-top: 4px; }
+  .say { background: var(--accent-soft); border-radius: 8px; padding: 13px 17px; margin: 13px 0; font-size: 14px; color: #123; }
+  .say .lab { font-size: 11px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--blue); display: block; margin-bottom: 5px; }
+  .say em { color: var(--blue); font-style: normal; font-weight: 600; }
+  .warn { background: var(--amber-soft); border-radius: 8px; padding: 13px 17px; margin: 13px 0; font-size: 13.5px; color: #5a3a08; }
+  .warn .lab { font-size: 11px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--amber); display: block; margin-bottom: 5px; }
+  code.inline { background: var(--line-soft); padding: 1.5px 6px; border-radius: 4px; font-family: "SF Mono", Menlo, Consolas, monospace; font-size: 13px; color: var(--accent); }
+  table { width: 100%; border-collapse: collapse; margin: 14px 0; font-size: 14px; }
+  th { text-align: left; padding: 9px 12px; background: var(--line-soft); font-weight: 700; font-size: 12.5px; border-bottom: 2px solid var(--line); }
+  td { padding: 9px 12px; border-bottom: 1px solid var(--line-soft); vertical-align: top; color: var(--ink-soft); }
+  td strong { color: var(--ink); }
+  tr:last-child td { border-bottom: none; }
+  details { background: var(--card); border: 1px solid var(--line); border-radius: 8px; margin: 10px 0; padding: 0; overflow: hidden; }
+  details summary { padding: 13px 18px; cursor: pointer; font-weight: 600; font-size: 14px; color: var(--accent); background: var(--accent-soft); list-style: none; user-select: none; }
+  details summary:before { content: "\25B6  "; font-size: 11px; }
+  details[open] summary:before { content: "\25BC  "; }
+  details .body { padding: 14px 20px; }
+  .prompt-card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 20px 24px; margin: 16px 0; }
+  .prompt-card .ph { font-size: 19px; font-weight: 700; color: var(--blue); margin-bottom: 6px; }
+  .prompt-card .scope { font-size: 13.5px; color: var(--ink-soft); margin-bottom: 12px; }
+  .hintbtn { font-size: 12.5px; color: var(--accent); }
+  .erd { background: #102438; border-radius: 8px; padding: 15px 18px; font-family: "SF Mono", Menlo, monospace; font-size: 12px; line-height: 1.65; color: #dbeaf5; white-space: pre; overflow-x: auto; margin: 10px 0; }
+  .erd b { color: #6bc4f0; }
+  .erd .j { color: #8fd6b0; }
+  .erd .r { color: #f0a0a0; }
+  @media (max-width: 920px) { nav { display: none; } main { padding: 28px 22px 80px; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav>
+  <div class="brand">&#10052; Design Round</div>
+  <div class="brand-sub">Framework + practice prompts</div>
+  <a class="backlink" href="das42_study_guide.html">&larr; Back to study guide</a>
+  <a href="#mindset">The mindset</a>
+  <a href="#script">The 6-step script</a>
+  <a href="#tree">Relationship decision tree</a>
+  <a href="#followups">The "what happens when" follow-ups</a>
+  <a class="group">Worked (try first, answer hidden)</a>
+  <a class="sub" href="#worked">Spotify</a>
+  <a class="group">Practice prompts</a>
+  <a class="sub" href="#p-twitter">1 · Twitter / X</a>
+  <a class="sub" href="#p-uber">2 · Uber</a>
+  <a class="sub" href="#p-library">3 · Library</a>
+  <a class="sub" href="#p-ticket">4 · Event ticketing</a>
+  <a class="group">Reference</a>
+  <a class="sub" href="#checklist">Pre-interview checklist</a>
+</nav>
+
+<main>
+<header class="hero">
+  <h1>Design Round &mdash; Framework &amp; Practice &#10052;</h1>
+  <p>The interview's make-or-break round is a "design X" question (your referral got Reddit; the sample answer was AllRecipes). The prompt changes but the rubric never does. This file gives you the repeatable thinking process, then prompts to drill it &mdash; one fully worked (answer hidden so you try first), four to practice. The shape is always the same as Reddit/AllRecipes: entities, relationships, the tricky three. Nothing more exotic.</p>
+</header>
+
+<section id="mindset">
+  <h2 class="sec">Start here</h2>
+  <h2 class="sec-title">The mindset</h2>
+  <p class="sec-intro">A "design X" question is not a memory test. There's no single right schema. The interviewer is watching <em>how you think</em> &mdash; can you take a messy real-world thing, break it into entities and relationships out loud, and handle curveballs calmly. So the win condition is a calm, repeatable <strong>process</strong>, not a memorized diagram.</p>
+  <div class="say"><span class="lab">The reframe that removes the fear</span>
+  You are not recalling "the Spotify schema." You are running the same six steps on whatever noun they hand you, and asking one question over and over: <em>"how many of A relate to how many of B?"</em> That question routes every relationship. Master the process and any prompt is approachable.</div>
+</section>
+
+<section id="script">
+  <h2 class="sec-title">The 6-step script</h2>
+  <p class="sec-intro">Memorize <em>this</em>, not tables. Run these in order, out loud, for any prompt.</p>
+  <ol class="step-list">
+    <li><b>Clarify scope (30 sec, 2&ndash;3 questions).</b> "Are we modeling the operational app or the analytics behind it? What are the main things a user does?" Buys thinking time, shows consulting instinct, stops you building the wrong thing. State your assumption, then move.</li>
+    <li><b>List the core entities (the nouns).</b> Say them aloud as you draw boxes. Don't worry about relationships yet &mdash; just get the nouns down.</li>
+    <li><b>Add keys + 2&ndash;3 attributes each.</b> Every entity gets a surrogate primary key (<code class="inline">user_id</code>). Name a couple real attributes so it feels concrete; don't list them all.</li>
+    <li><b>Draw relationships &mdash; say the cardinality aloud for each pair.</b> This is the heart. For every pair ask "how many of A to how many of B?" and name it: "an artist has many albums, an album has one artist &mdash; one-to-many."</li>
+    <li><b>Resolve the tricky relationships.</b> Many-to-many &rarr; junction table. Self-referencing &rarr; nullable parent FK. Attributes that describe the pairing &rarr; put them on the junction. (This is where points are won.)</li>
+    <li><b>Gesture at scale / analytics.</b> One or two sentences: index the FKs, cache hot counts, denormalize for reads, feed a star schema for analytics. Separates you from someone who only knows OLTP &mdash; and it's the consulting differentiator at DAS42.</li>
+  </ol>
+  <div class="say"><span class="lab">Opening line, verbatim</span>
+  "Before I start drawing &mdash; am I designing the operational database that runs the app, or the analytics warehouse behind it? I'll assume operational first. Quick questions: what are the main actions a user takes, and what does the business most need to report on?" Then go.</div>
+</section>
+
+<section id="tree">
+  <h2 class="sec-title">The relationship decision tree</h2>
+  <p class="sec-intro">Steps 4&ndash;5 are where every design lives or dies. There are only four patterns. Recognizing which one applies is the entire skill.</p>
+
+  <div class="pattern">
+    <div class="name">1 &middot; One-to-Many (1:N)</div>
+    <div class="cue"><b>Cue:</b> "A has many B, but each B belongs to one A."</div>
+    <div class="fix">Fix: foreign key on the "many" side. &nbsp; e.g. <code class="inline">albums.artist_id</code>, <code class="inline">posts.user_id</code></div>
+  </div>
+  <div class="pattern">
+    <div class="name">2 &middot; Many-to-Many (M:N)</div>
+    <div class="cue"><b>Cue:</b> "A has many B AND B has many A."</div>
+    <div class="fix">Fix: junction table with two FKs + a unique constraint to stop duplicates. &nbsp; e.g. <code class="inline">playlist_songs</code>, <code class="inline">favorites</code></div>
+  </div>
+  <div class="pattern selfref">
+    <div class="name">3 &middot; Self-Referencing (threaded / hierarchy)</div>
+    <div class="cue"><b>Cue:</b> "B can relate to other B" &mdash; replies, org charts, nested categories.</div>
+    <div class="fix">Fix: nullable FK on the table pointing back at itself. <code class="inline">comments.parent_comment_id &rarr; comments.comment_id</code> (null = top level). This is the "adjacency list."</div>
+  </div>
+  <div class="pattern">
+    <div class="name">4 &middot; Attributes ON the relationship</div>
+    <div class="cue"><b>Cue:</b> a fact describes the <em>pairing</em>, not either entity alone.</div>
+    <div class="fix">Fix: put those columns on the junction table. &nbsp; e.g. <code class="inline">recipe_ingredients(recipe_id, ingredient_id, quantity, unit)</code>, a song's <code class="inline">sort_order</code> within a playlist.</div>
+  </div>
+
+  <div class="warn"><span class="lab">The one question that unlocks everything</span>
+  For every pair of entities: <strong>"How many of A relate to how many of B?"</strong> The answer points you straight at pattern 1, 2, 3, or 4. Drill that reflex and the relationships fall out automatically.</div>
+</section>
+
+<section id="followups">
+  <h2 class="sec-title">The "what happens when&hellip;" follow-ups</h2>
+  <p class="sec-intro">These aren't random &mdash; each maps to a specific pattern. So when you hear the cue, you already know the answer they're fishing for. Pre-empt them in your first pass and they have less to ask.</p>
+  <table>
+    <tr><th>The follow-up</th><th>What they're fishing for</th></tr>
+    <tr><td>"&hellip;lots of child items (steps, ingredients, photos)?"</td><td>Separate 1:N table + an explicit <code class="inline">sort_order</code> column (DB insertion order is not guaranteed).</td></tr>
+    <tr><td>"&hellip;a user favorites / likes / follows / saves?"</td><td>M:N junction table + unique constraint so the same action can't be stored twice.</td></tr>
+    <tr><td>"&hellip;replies to replies (nesting / threading)?"</td><td>Self-referencing <code class="inline">parent_id</code> (adjacency list). Name a recursive CTE for reads; mention closure table / materialized path if it gets very deep.</td></tr>
+    <tr><td>"&hellip;this gets huge / queries get slow?"</td><td>Index the FKs, cache hot counts (don't COUNT a billion rows each load), denormalize for reads, partition by date, feed a star schema for analytics.</td></tr>
+    <tr><td>"&hellip;the same thing can be liked/tagged in multiple places (posts AND comments)?"</td><td>Polymorphic association: a <code class="inline">type</code> + <code class="inline">id</code> pair. Name the tradeoff vs. separate tables (loses strict FK integrity, gains flexibility).</td></tr>
+    <tr><td>"&hellip;you need history / things change over time (price, status)?"</td><td>Don't overwrite &mdash; add a history/status table, or SCD Type 2 with valid_from / valid_to / is_current.</td></tr>
+  </table>
+</section>
+
+<section id="worked">
+  <h2 class="sec">Worked example &mdash; try before revealing</h2>
+  <h2 class="sec-title">Design Spotify</h2>
+  <p class="sec-intro">Do this one for real before opening anything. Read the hints, run the 6-step script out loud or on paper, sketch the tables, then reveal to compare. The goal isn't matching exactly &mdash; it's hitting the same <em>structure</em>.</p>
+
+  <div class="prompt-card">
+    <div class="ph">&ldquo;Design Spotify&rdquo;</div>
+    <div class="scope">Users stream songs, organize them into playlists, follow artists, like songs. Model the core operational app (not the recommendation engine).</div>
+  </div>
+
+  <details>
+    <summary>Hint 1 &mdash; the entities (peek if stuck on step 2)</summary>
+    <div class="body">
+    <p>The core nouns: <code class="inline">users</code>, <code class="inline">artists</code>, <code class="inline">albums</code>, <code class="inline">songs</code>, <code class="inline">playlists</code>. That's enough to build the whole thing. Don't over-add &mdash; you can mention genres or labels as "I'd extend with&hellip;" later.</p>
+    </div>
+  </details>
+  <details>
+    <summary>Hint 2 &mdash; the relationships to work out (peek if stuck on step 4)</summary>
+    <div class="body">
+    <p>Walk these pairs and name the cardinality for each: artist&harr;album, album&harr;song, playlist&harr;song, user&harr;song (likes), user&harr;artist (follows). Two of those are one-to-many; three are many-to-many. Which is which? And for playlist&harr;song, is there a fact that belongs on the <em>relationship</em> rather than the song?</p>
+    </div>
+  </details>
+  <details>
+    <summary>Reveal &mdash; the full walkthrough</summary>
+    <div class="body">
+    <p><strong>Scope:</strong> "Core app, not recommendations. Main actions: play a song, build a playlist, follow an artist, like a song."</p>
+    <p><strong>Entities + keys:</strong> users (user_id), artists (artist_id), albums (album_id), songs (song_id, title, duration_seconds), playlists (playlist_id, user_id).</p>
+    <p><strong>Relationships, cardinality said aloud:</strong></p>
+    <ul>
+      <li>Artist &rarr; albums: one artist, many albums &mdash; <b>1:N</b> &rarr; <code class="inline">albums.artist_id</code> FK.</li>
+      <li>Album &rarr; songs: one album, many songs &mdash; <b>1:N</b> &rarr; <code class="inline">songs.album_id</code> FK.</li>
+      <li>Playlist &harr; songs: many&ndash;many &rarr; junction <code class="inline">playlist_songs</code>. And <code class="inline">sort_order</code> goes <em>on the junction</em> (pattern 4) &mdash; a song's position is a fact about that pairing.</li>
+      <li>User &harr; songs (likes): M:N &rarr; <code class="inline">liked_songs(user_id, song_id, liked_at)</code>, unique on (user_id, song_id).</li>
+      <li>User &harr; artists (follows): M:N &rarr; <code class="inline">follows(user_id, artist_id)</code>.</li>
+    </ul>
+    <div class="erd"><b>users</b>(user_id PK, username, email)
+<b>artists</b>(artist_id PK, name)
+<b>albums</b>(album_id PK, <span class="r">artist_id FK</span>, title, release_date)
+<b>songs</b>(song_id PK, <span class="r">album_id FK</span>, title, duration_seconds)
+<b>playlists</b>(playlist_id PK, <span class="r">user_id FK</span>, name)
+<span class="j">playlist_songs</span>(playlist_id FK, song_id FK, sort_order)   <- M:N + position
+<span class="j">liked_songs</span>(user_id FK, song_id FK, liked_at)   unique(user_id,song_id)
+<span class="j">follows</span>(user_id FK, artist_id FK)</div>
+    <p><strong>Scale gesture:</strong> "Operationally 3NF. Play counts would hammer the DB if counted live, so I'd keep a denormalized <code class="inline">play_count</code> on songs updated async. For analytics &mdash; top songs by region by week &mdash; a star schema with <code class="inline">fct_play</code> and date/user/song/artist dimensions."</p>
+    <p><strong>Likely follow-ups &amp; answers:</strong> "What about a song appearing on multiple albums (single + compilation)?" &rarr; that flips album&harr;song to M:N, so a <code class="inline">song_albums</code> junction. "How do you store the order of a playlist?" &rarr; the <code class="inline">sort_order</code> you already put on the junction. "Following gets huge?" &rarr; index both FK columns, cache follower counts.</p>
+    </div>
+  </details>
+</section>
+
+<section id="p-twitter">
+  <h2 class="sec">Practice prompts &mdash; drill these</h2>
+  <h2 class="sec-title">1 &middot; Design Twitter / X</h2>
+  <p class="sec-intro">Same shape as Reddit. Run the script. Hints collapsed; sketch your answer before peeking.</p>
+  <div class="prompt-card">
+    <div class="ph">&ldquo;Design Twitter&rdquo;</div>
+    <div class="scope">Users post tweets, follow other users, like and retweet, and reply to tweets (threaded). Model the core app.</div>
+  </div>
+  <details><summary>Hint &mdash; where the four patterns show up</summary><div class="body">
+    <p>Entities: users, tweets. That's nearly it. Now the patterns: a user posts many tweets (1:N). A user follows many users and is followed by many &mdash; that's M:N <em>between users and themselves</em> (a <code class="inline">follows(follower_id, followee_id)</code> junction). Likes and retweets are M:N user&harr;tweet junctions. Replies are the threaded case &mdash; which pattern? (Self-referencing <code class="inline">parent_tweet_id</code> on tweets.) The "follow" relationship being user-to-user is the curveball here.</p>
+  </div></details>
+  <details><summary>Reveal &mdash; the structure</summary><div class="body">
+    <div class="erd"><b>users</b>(user_id PK, handle, display_name, created_at)
+<b>tweets</b>(tweet_id PK, <span class="r">user_id FK</span>, body, created_at,
+       <span class="r">parent_tweet_id FK -> tweets</span>)   <- self-ref: reply (null = top-level)
+<span class="j">follows</span>(follower_id FK->users, followee_id FK->users)  <- M:N user to user
+       unique(follower_id, followee_id)
+<span class="j">likes</span>(user_id FK, tweet_id FK, liked_at)  unique(user_id, tweet_id)
+<span class="j">retweets</span>(user_id FK, tweet_id FK, created_at)</div>
+    <p><strong>Scale gesture:</strong> "The home timeline is the hard part at scale &mdash; you don't query all followees' tweets live, you fan-out on write into a per-user timeline cache. For analytics, <code class="inline">fct_tweet</code> / <code class="inline">fct_engagement</code> with date and user dimensions."</p>
+    <p><strong>The teaching point:</strong> the follow relationship is many-to-many from a table to <em>itself</em> &mdash; same junction pattern, both FKs point at <code class="inline">users</code>. If you saw that, you've internalized the pattern rather than memorizing examples.</p>
+  </div></details>
+</section>
+
+<section id="p-uber">
+  <h2 class="sec-title">2 &middot; Design Uber</h2>
+  <div class="prompt-card">
+    <div class="ph">&ldquo;Design Uber&rdquo;</div>
+    <div class="scope">Riders request trips, drivers accept them, trips have a fare and a rating afterward. Model the core app.</div>
+  </div>
+  <details><summary>Hint &mdash; the entities and the central fact</summary><div class="body">
+    <p>Entities: users (or split riders/drivers), trips, vehicles. The interesting one is <code class="inline">trips</code> &mdash; it links a rider and a driver, so it carries two FKs to users (like Twitter's follows, but with trip data attached). A trip has one rider, one driver: that makes trips a 1:N child of each. Ratings &mdash; does a rating belong on the trip, or its own table? (Both riders and drivers rate each other, so a small <code class="inline">ratings</code> table tied to the trip is cleaner.) Watch the "price at time of trip" detail &mdash; store the fare on the trip, don't recompute from current rates.</p>
+  </div></details>
+  <details><summary>Reveal &mdash; the structure</summary><div class="body">
+    <div class="erd"><b>users</b>(user_id PK, name, role, rating_avg)   <- role: rider/driver
+<b>vehicles</b>(vehicle_id PK, <span class="r">driver_id FK->users</span>, make, model, plate)
+<b>trips</b>(trip_id PK, <span class="r">rider_id FK->users</span>, <span class="r">driver_id FK->users</span>,
+      <span class="r">vehicle_id FK</span>, start_loc, end_loc, requested_at,
+      started_at, ended_at, fare, status)
+<span class="j">ratings</span>(rating_id PK, <span class="r">trip_id FK</span>, <span class="r">rater_id FK->users</span>,
+        <span class="r">ratee_id FK->users</span>, stars, comment)</div>
+    <p><strong>Key details to say:</strong> store <code class="inline">fare</code> and the locations <em>on the trip</em> (a snapshot &mdash; surge pricing means today's rate isn't yesterday's). <code class="inline">status</code> models the lifecycle (requested &rarr; accepted &rarr; in&nbsp;progress &rarr; completed); for full history add a <code class="inline">trip_status_events</code> table.</p>
+    <p><strong>Scale gesture:</strong> "Live driver locations are high-write, low-history &mdash; I'd keep those in a fast store (Redis), not the main trips table. Trips feed a <code class="inline">fct_trip</code> star schema for analytics on revenue, utilization, etc."</p>
+  </div></details>
+</section>
+
+<section id="p-library">
+  <h2 class="sec-title">3 &middot; Design a Library system</h2>
+  <div class="prompt-card">
+    <div class="ph">&ldquo;Design a library&rdquo;</div>
+    <div class="scope">Members borrow books; a book can have multiple physical copies; loans have due dates and return dates. Model it.</div>
+  </div>
+  <details><summary>Hint &mdash; the copy-vs-title distinction is the whole point</summary><div class="body">
+    <p>The trap and the test: separate the <em>book title</em> (the abstract work &mdash; "Dune", one ISBN, one author) from the <em>physical copy</em> (the specific item on the shelf you can actually loan). One title has many copies (1:N). A loan is about a <em>copy</em>, not a title. Authors&harr;books can be M:N (a book has multiple authors, an author writes multiple books). A loan links a member and a copy with dates &mdash; that's the junction-with-attributes pattern.</p>
+  </div></details>
+  <details><summary>Reveal &mdash; the structure</summary><div class="body">
+    <div class="erd"><b>members</b>(member_id PK, name, email, joined_at)
+<b>books</b>(book_id PK, title, isbn, publisher)   <- the title/work
+<b>book_copies</b>(copy_id PK, <span class="r">book_id FK</span>, shelf_location, condition)  <- 1:N
+<b>authors</b>(author_id PK, name)
+<span class="j">book_authors</span>(book_id FK, author_id FK)   <- M:N
+<b>loans</b>(loan_id PK, <span class="r">copy_id FK</span>, <span class="r">member_id FK</span>,
+      borrowed_at, due_date, returned_at)   <- returned_at null = still out</div>
+    <p><strong>The detail that scores:</strong> loans reference <code class="inline">copy_id</code>, not <code class="inline">book_id</code> &mdash; you lend a physical copy, and the library needs to know <em>which</em> copy is out. A null <code class="inline">returned_at</code> means it's still on loan. Overdue = <code class="inline">returned_at IS NULL AND due_date &lt; today</code>.</p>
+    <p><strong>Follow-up &amp; answer:</strong> "How do you handle reservations / holds?" &rarr; a <code class="inline">reservations(member_id, book_id, requested_at, status)</code> table at the <em>title</em> level (you reserve any copy, not a specific one).</p>
+  </div></details>
+</section>
+
+<section id="p-ticket">
+  <h2 class="sec-title">4 &middot; Design an Event Ticketing system</h2>
+  <div class="prompt-card">
+    <div class="ph">&ldquo;Design Ticketmaster&rdquo;</div>
+    <div class="scope">Venues host events; users buy tickets for specific seats; an event can sell many tickets but each seat sells once. Model it.</div>
+  </div>
+  <details><summary>Hint &mdash; the uniqueness constraint is the test</summary><div class="body">
+    <p>Entities: venues, events, seats, users, tickets. A venue has many events (1:N). A venue has many seats (1:N). The crux: a ticket is a specific seat at a specific event sold to one user &mdash; and the same seat at the same event must <em>never</em> sell twice. Where does that uniqueness live? (A unique constraint on <code class="inline">(event_id, seat_id)</code> in the tickets table.) That constraint is exactly what they're probing &mdash; the favorites-unique-constraint pattern, but load-bearing here.</p>
+  </div></details>
+  <details><summary>Reveal &mdash; the structure</summary><div class="body">
+    <div class="erd"><b>venues</b>(venue_id PK, name, address)
+<b>seats</b>(seat_id PK, <span class="r">venue_id FK</span>, section, row, number)  <- physical seats
+<b>events</b>(event_id PK, <span class="r">venue_id FK</span>, name, event_datetime)
+<b>users</b>(user_id PK, name, email)
+<b>tickets</b>(ticket_id PK, <span class="r">event_id FK</span>, <span class="r">seat_id FK</span>,
+        <span class="r">user_id FK</span>, price, purchased_at)
+        <span class="r">UNIQUE(event_id, seat_id)</span>   <- a seat sells once per event</div>
+    <p><strong>The detail that scores:</strong> the <code class="inline">UNIQUE(event_id, seat_id)</code> constraint is the database <em>guaranteeing</em> no double-sold seat &mdash; you don't rely on application logic. Store <code class="inline">price</code> on the ticket (prices vary by event/tier and change over time).</p>
+    <p><strong>Follow-up &amp; answer:</strong> "Two people try to buy the same seat at once?" &rarr; the unique constraint makes one insert fail at the DB level; you'd wrap purchase in a transaction and handle the conflict. "General admission, no assigned seats?" &rarr; drop the seat link, track a sold-count against event capacity instead.</p>
+  </div></details>
+</section>
+
+<section id="checklist">
+  <h2 class="sec">Reference</h2>
+  <h2 class="sec-title">Pre-interview checklist</h2>
+  <div class="card">
+  <p style="margin:0 0 10px"><strong>Say these, every time:</strong></p>
+  <ul style="margin:0">
+    <li>Open by clarifying scope (operational vs analytics) + 2 questions.</li>
+    <li>Name entities aloud, give each a surrogate PK.</li>
+    <li>For every pair: "how many of A to how many of B?" &rarr; pick the pattern.</li>
+    <li>Every M:N gets a junction table; add a unique constraint where duplicates would be wrong.</li>
+    <li>Put pairing-facts (quantity, sort_order, price-at-time) on the junction.</li>
+    <li>Threaded/nested &rarr; self-referencing nullable parent FK; name "adjacency list."</li>
+    <li>Close with a scale/analytics sentence (index FKs, cache counts, star schema).</li>
+    <li>When they ask "what happens when&hellip;", match it to a pattern &mdash; don't improvise from scratch.</li>
+  </ul>
+  </div>
+  <div class="warn"><span class="lab">Remember</span>
+  Think out loud the whole time &mdash; the interviewer is grading your reasoning, not your silence. A clear wrong turn you catch and explain beats a correct answer delivered mutely. And there's no single right schema; "here are two options and here's when I'd pick each" is the strongest thing you can say.</div>
+</section>
+
+</main>
+</div>
+</body>
+</html>

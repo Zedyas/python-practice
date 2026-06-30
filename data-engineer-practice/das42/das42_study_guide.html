@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Data Engineer Interview Study Guide</title>
+<style>
+  :root {
+    --ink: #15293d;
+    --ink-soft: #3f5973;
+    --ink-faint: #6b8299;
+    --paper: #f4f9fd;
+    --card: #ffffff;
+    --line: #d4e4f0;
+    --line-soft: #e6f1f8;
+    --accent: #2196d6;
+    --accent-soft: #e3f3fc;
+    --blue: #1271c4;
+    --blue-soft: #e0eefb;
+    --amber: #8a5208;
+    --amber-soft: #faeed8;
+    --red: #c0392b;
+    --red-soft: #fbeceb;
+    --purple: #5b4bb8;
+    --purple-soft: #ecebfb;
+    --code-bg: #102438;
+    --code-ink: #dbeaf5;
+    --code-green: #8fd6b0;
+    --code-blue: #6bc4f0;
+    --code-amber: #f0c674;
+    --code-pink: #8fd0f5;
+    --code-faint: #5e7d96;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body:before { content: ""; position: fixed; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, #29b5e8, #2196d6, #1271c4); z-index: 100; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    line-height: 1.65;
+    font-size: 16px;
+  }
+  .wrap { max-width: 1180px; margin: 0 auto; display: flex; gap: 0; }
+
+  /* Sidebar nav */
+  nav {
+    width: 250px;
+    flex-shrink: 0;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+    padding: 28px 18px 40px 24px;
+    border-right: 1px solid var(--line);
+    background: var(--paper);
+  }
+  nav .brand { font-size: 13px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--accent); margin-bottom: 4px; }
+  nav .brand-sub { font-size: 12px; color: var(--ink-faint); margin-bottom: 22px; line-height: 1.4; }
+  nav a { display: block; color: var(--ink-soft); text-decoration: none; font-size: 13.5px; padding: 5px 10px; border-radius: 6px; margin-bottom: 1px; transition: background 0.12s, color 0.12s; }
+  nav a:hover { background: var(--accent-soft); color: var(--accent); }
+  nav a.group { font-weight: 700; color: var(--ink); margin-top: 16px; font-size: 11px; letter-spacing: 0.05em; text-transform: uppercase; padding-left: 10px; pointer-events: none; }
+  nav a.sub { padding-left: 20px; font-size: 12.5px; color: var(--ink-faint); }
+
+  /* Main */
+  main { flex: 1; min-width: 0; padding: 36px 48px 100px; }
+  header.hero { margin-bottom: 40px; padding-bottom: 28px; border-bottom: 2px solid var(--ink); }
+  header.hero h1 { font-size: 32px; margin: 0 0 8px; letter-spacing: -0.02em; line-height: 1.15; }
+  header.hero p { font-size: 15px; color: var(--ink-soft); margin: 0; max-width: 680px; }
+  .hero-meta { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 18px; }
+  .hero-meta span { font-size: 12px; padding: 4px 11px; border-radius: 20px; background: var(--card); border: 1px solid var(--line); color: var(--ink-soft); }
+
+  section { margin-bottom: 56px; scroll-margin-top: 20px; }
+  h2.sec { font-size: 13px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--accent); margin: 0 0 4px; }
+  h2.sec-title { font-size: 26px; margin: 0 0 6px; letter-spacing: -0.015em; }
+  .sec-intro { color: var(--ink-soft); font-size: 15px; margin: 0 0 26px; max-width: 720px; }
+
+  h3 { font-size: 19px; margin: 34px 0 10px; letter-spacing: -0.01em; }
+  h4 { font-size: 15.5px; margin: 22px 0 8px; color: var(--ink); }
+  p { margin: 0 0 14px; }
+  ul, ol { margin: 0 0 14px; padding-left: 22px; }
+  li { margin-bottom: 6px; }
+
+  /* Definition block */
+  .def {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--accent);
+    border-radius: 8px;
+    padding: 16px 20px;
+    margin: 16px 0;
+  }
+  .def .term { font-weight: 700; font-size: 16px; color: var(--ink); margin-bottom: 4px; display: flex; align-items: baseline; gap: 8px; }
+  .def .term .tag { font-size: 10.5px; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; padding: 2px 7px; border-radius: 4px; background: var(--accent-soft); color: var(--accent); }
+  .def p { margin: 0; font-size: 14.5px; color: var(--ink-soft); }
+  .def p + p { margin-top: 8px; }
+
+  /* Interview-answer callout */
+  .say {
+    background: var(--blue-soft);
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin: 14px 0;
+    font-size: 14.5px;
+    color: #123;
+  }
+  .say .lab { font-size: 11px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--blue); display: block; margin-bottom: 5px; }
+  .say em { color: var(--blue); font-style: normal; font-weight: 600; }
+
+  .warn {
+    background: var(--amber-soft);
+    border-radius: 8px;
+    padding: 14px 18px;
+    margin: 14px 0;
+    font-size: 14px;
+    color: #5a3a08;
+  }
+  .warn .lab { font-size: 11px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--amber); display: block; margin-bottom: 5px; }
+
+  /* Code */
+  pre {
+    background: var(--code-bg);
+    color: var(--code-ink);
+    border-radius: 8px;
+    padding: 16px 18px;
+    overflow-x: auto;
+    font-size: 13px;
+    line-height: 1.55;
+    margin: 14px 0;
+    font-family: "SF Mono", "JetBrains Mono", Menlo, Consolas, monospace;
+  }
+  pre .c { color: var(--code-faint); font-style: italic; }
+  pre .k { color: var(--code-pink); }
+  pre .f { color: var(--code-blue); }
+  pre .s { color: var(--code-green); }
+  pre .n { color: var(--code-amber); }
+  code.inline { background: var(--line-soft); padding: 1.5px 6px; border-radius: 4px; font-family: "SF Mono", Menlo, Consolas, monospace; font-size: 13px; color: var(--accent); }
+
+  /* Tables */
+  table { width: 100%; border-collapse: collapse; margin: 16px 0; font-size: 14px; }
+  th { text-align: left; padding: 9px 12px; background: var(--line-soft); font-weight: 700; font-size: 12.5px; letter-spacing: 0.02em; border-bottom: 2px solid var(--line); }
+  td { padding: 9px 12px; border-bottom: 1px solid var(--line-soft); vertical-align: top; color: var(--ink-soft); }
+  td strong { color: var(--ink); }
+  tr:last-child td { border-bottom: none; }
+
+  /* Flashcard grid */
+  .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 12px; margin: 16px 0; }
+  .fcard {
+    background: var(--card); border: 1px solid var(--line); border-radius: 8px;
+    padding: 14px 16px; cursor: pointer; transition: border-color 0.12s, transform 0.08s;
+    min-height: 84px; display: flex; flex-direction: column; justify-content: center;
+  }
+  .fcard:hover { border-color: var(--accent); }
+  .fcard:active { transform: scale(0.99); }
+  .fcard .q { font-weight: 700; font-size: 14px; color: var(--ink); }
+  .fcard .a { font-size: 13px; color: var(--ink-soft); margin-top: 8px; display: none; }
+  .fcard.open .a { display: block; }
+  .fcard .hint { font-size: 11px; color: var(--ink-faint); margin-top: 8px; }
+  .fcard.open .hint { display: none; }
+
+  .pill-row { display: flex; gap: 8px; flex-wrap: wrap; margin: 4px 0 18px; }
+  .pill { font-size: 12px; padding: 3px 10px; border-radius: 20px; font-weight: 600; }
+  .pill.crit { background: var(--red-soft); color: var(--red); }
+  .pill.core { background: var(--blue-soft); color: var(--blue); }
+  .pill.bonus { background: var(--purple-soft); color: var(--purple); }
+
+  .twocol { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 920px) {
+    nav { display: none; }
+    main { padding: 28px 22px 80px; }
+    .twocol { grid-template-columns: 1fr; }
+  }
+
+  .erd { background: var(--card); border: 1px solid var(--line); border-radius: 8px; padding: 18px; margin: 16px 0; font-family: "SF Mono", Menlo, monospace; font-size: 12.5px; line-height: 1.5; overflow-x: auto; color: var(--ink-soft); white-space: pre; }
+  .erd b { color: var(--accent); }
+
+  .checklist { list-style: none; padding: 0; }
+  .checklist li { padding-left: 28px; position: relative; margin-bottom: 9px; }
+  .checklist li:before { content: "→"; position: absolute; left: 6px; color: var(--accent); font-weight: 700; }
+
+  hr.soft { border: none; border-top: 1px solid var(--line); margin: 30px 0; }
+  .anchor-h3 { scroll-margin-top: 20px; }
+
+  .linkcard { display: flex; align-items: center; gap: 16px; background: var(--accent-soft); border: 1px solid var(--accent); border-radius: 10px; padding: 18px 22px; margin: 16px 0; cursor: pointer; transition: transform 0.08s; }
+  .linkcard:hover { transform: translateY(-1px); }
+  .linkcard:active { transform: scale(0.99); }
+  .linkcard-icon { font-size: 26px; color: var(--accent); flex-shrink: 0; }
+  .linkcard-title { font-weight: 700; font-size: 17px; color: var(--accent); }
+  .linkcard-sub { font-size: 14px; color: var(--ink-soft); margin-top: 3px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+<nav>
+  <div class="brand">&#10052; Interview Study Guide</div>
+  <div class="brand-sub">Data Engineer Consultant · pass-the-interview focus</div>
+
+  <a href="#how">How to use this</a>
+
+  <a class="group">Database design</a>
+  <a class="sub" href="#dd-core">Core vocabulary</a>
+  <a class="sub" href="#dd-norm">Normalization</a>
+  <a class="sub" href="#dd-rel">Relationships & keys</a>
+  <a class="sub" href="#dd-index">Indexes</a>
+  <a class="sub" href="#dd-walkthrough">Design walkthrough method</a>
+  <a class="sub" href="#dd-allrecipes">Worked: AllRecipes</a>
+  <a class="sub" href="#dd-store">Worked: online store</a>
+
+  <a class="group">Dimensional modeling</a>
+  <a class="sub" href="#dm-oltp">OLTP vs OLAP</a>
+  <a class="sub" href="#dm-star">Star schema & facts/dims</a>
+  <a class="sub" href="#dm-scd">Slowly changing dimensions</a>
+
+  <a class="group">Migration & pipelines</a>
+  <a class="sub" href="#mig-etl">ETL vs ELT</a>
+  <a class="sub" href="#mig-story">Migration walkthrough</a>
+  <a class="sub" href="#mig-validate">Validation strategies</a>
+  <a class="sub" href="#mig-dbt">dbt concepts</a>
+
+  <a class="group">Snowflake</a>
+  <a class="sub" href="#sf-arch">Architecture</a>
+  <a class="sub" href="#sf-perf">Performance</a>
+  <a class="sub" href="#sf-deep">Deep dive (separate guide)</a>
+
+  <a class="group">Hands-on practice</a>
+  <a class="sub" href="#proj-stack">Projects (separate guide)</a>
+
+  <a class="group">SQL drills</a>
+  <a class="sub" href="#sql-windows">Window functions</a>
+  <a class="sub" href="#sql-joins">Joins & dedup</a>
+  <a class="sub" href="#sql-opt">Query optimization</a>
+
+  <a class="group">Python</a>
+  <a class="sub" href="#py-core">OA prep (SQL + Python)</a>
+
+  <a class="group">Behavioral</a>
+  <a class="sub" href="#beh-star">STAR + consulting</a>
+
+  <a class="group">Review</a>
+  <a class="sub" href="#flash">Flashcards</a>
+  <a class="sub" href="#cheat">One-page cheat sheet</a>
+</nav>
+
+<main>
+<header class="hero">
+  <h1>Data Engineer Interview Study Guide <span style="color:var(--accent); font-size:26px;">&#10052;</span></h1>
+  <p>Everything you need to walk into the DAS42 technical round and confidently design a schema, narrate a migration, and defend every line of your resume. Definitions are written to be memorized; examples use trading/financial and healthcare data so they map to your background.</p>
+  <div class="hero-meta">
+    <span>Examples: trading + healthcare</span>
+    <span>Focus: pass the interview</span>
+    <span>Confirmed Q: "design a data model for an online store"</span>
+  </div>
+  <div style="display:flex; gap:10px; flex-wrap:wrap; margin-top:18px;">
+    <span style="font-size:12px; color:var(--ink-faint); align-self:center;">This is part 1 of 4:</span>
+    <span style="font-size:13px; padding:5px 12px; border-radius:20px; background:var(--accent); color:#fff; font-weight:600;">1 · Study guide (you're here)</span>
+    <a href="das42_design_practice.html" target="_blank" style="font-size:13px; padding:5px 12px; border-radius:20px; background:var(--card); border:1px solid var(--line); color:var(--ink-soft); text-decoration:none;">2 · Design practice</a>
+    <a href="das42_snowflake_guide.html" target="_blank" style="font-size:13px; padding:5px 12px; border-radius:20px; background:var(--card); border:1px solid var(--line); color:var(--ink-soft); text-decoration:none;">3 · Snowflake guide</a>
+    <a href="das42_projects_guide.html" target="_blank" style="font-size:13px; padding:5px 12px; border-radius:20px; background:var(--card); border:1px solid var(--line); color:var(--ink-soft); text-decoration:none;">4 · Projects guide</a>
+  </div>
+</header>
+
+<section id="how">
+  <h2 class="sec">Start here</h2>
+  <h2 class="sec-title">How to use this guide</h2>
+  <p class="sec-intro">The format is now confirmed from a referral. Four rounds, each testing something specific. This guide is organized so your prep effort matches what each round actually grades — not generic "data engineering."</p>
+
+  <h4>The confirmed four rounds</h4>
+  <table>
+    <tr><th>Round</th><th>What it is</th><th>How it's graded</th></tr>
+    <tr><td><strong>1 · Recruiter screen</strong></td><td>Call with Alex</td><td>Fit + "why consulting" + logistics. Low stakes.</td></tr>
+    <tr><td><strong>2 · OA</strong></td><td>SQL + Python, <strong>cameras on + screenshare, nothing on the side</strong></td><td>Proctored live coding. Fluency under pressure, not exotic material.</td></tr>
+    <tr><td><strong>3 · Interview 1</strong></td><td>Technical — a "design X" database question (referral got Reddit)</td><td>How you think live. The make-or-break round.</td></tr>
+    <tr><td><strong>4 · Interview 2</strong></td><td>Technical + behavioral, mostly your resume</td><td>"Know the technical terms on your resume and you're chilling." Conversational, not forensic.</td></tr>
+  </table>
+
+  <h4>Where to spend your effort (re-prioritized for this format)</h4>
+  <table>
+    <tr><th>Priority</th><th>Topic</th><th>Why</th></tr>
+    <tr><td><span class="pill crit">Critical</span></td><td>Database design — the decision tree &amp; live reps</td><td>Round 3 is make-or-break and tests live generation. <a href="das42_design_practice.html" style="color:var(--accent)">→ Design practice guide</a></td></tr>
+    <tr><td><span class="pill crit">Critical</span></td><td>OA fluency under proctoring</td><td>Your known weak spot. Proctored, no crutches — drill patterns till boring.</td></tr>
+    <tr><td><span class="pill core">Core</span></td><td>Migration walkthrough + dbt/Snowflake terms</td><td>Round 4 is term-fluency. Be able to talk naturally about everything you wrote.</td></tr>
+    <tr><td><span class="pill bonus">Bonus</span></td><td>"Why consulting" + dimensional modeling</td><td>One honest answer for Round 1; modeling theory mostly supports Round 3.</td></tr>
+  </table>
+  <div class="say"><span class="lab">The reframe for Round 4</span>
+  Interview 2 is conversational — the bar is "sounds like they've genuinely done this," not "can recite implementation details under cross-examination." Know what each term on your resume <em>means</em> and you're through. Don't over-prepare a forensic defense.</div>
+  <p>Read top to bottom once. Then the two things that actually move the needle: drill the <a href="das42_design_practice.html" style="color:var(--accent)">design decision tree</a> until the four patterns are reflexive, and rehearse your migration story out loud until it's automatic.</p>
+</section>
+
+<!-- ============ DATABASE DESIGN ============ -->
+<section id="dd-core">
+  <h2 class="sec">Database design · 25% of the interview</h2>
+  <h2 class="sec-title">Core vocabulary</h2>
+  <p class="sec-intro">These are the terms you weave into a design walkthrough to sound fluent. Memorize the one-line definition for each so you can drop it naturally.</p>
+
+  <div class="def"><div class="term">Entity <span class="tag">memorize</span></div>
+  <p>A real-world thing you store data about, represented as a table. Rows are instances; columns are attributes. In a trading system: <code class="inline">Trade</code>, <code class="inline">Account</code>, <code class="inline">Instrument</code>. In healthcare: <code class="inline">Patient</code>, <code class="inline">Encounter</code>, <code class="inline">Provider</code>.</p>
+  <p><strong>Worded example (trader activity):</strong> "A <code class="inline">Trade</code> is an entity — each row is one execution. A <code class="inline">Trader</code> is another entity — each row is one person placing trades."</p>
+  <p><strong>Worded example (fund data):</strong> "An <code class="inline">InvestmentFund</code> is an entity — each row is one fund. A <code class="inline">Holding</code> is an entity — each row is one position a fund holds in one security on one date."</p></div>
+
+  <div class="def"><div class="term">Attribute</div>
+  <p>A property of an entity, stored as a column. A <code class="inline">Trade</code> has attributes like <code class="inline">trade_id</code>, <code class="inline">price</code>, <code class="inline">quantity</code>, <code class="inline">executed_at</code>.</p>
+  <p><strong>Worded example (fund data):</strong> "The <code class="inline">InvestmentFund</code> entity has attributes <code class="inline">fund_id</code>, <code class="inline">fund_name</code>, <code class="inline">strategy</code> (e.g. equity, fixed-income), <code class="inline">inception_date</code>, and <code class="inline">aum</code> (assets under management). Each is a column describing the fund."</p></div>
+
+  <div class="def"><div class="term">Primary key (PK) <span class="tag">memorize</span></div>
+  <p>A column (or set of columns) that uniquely identifies each row. Never null, never duplicated. Best practice: a surrogate key — a system-generated meaningless integer/UUID (e.g. <code class="inline">trade_id</code>) — rather than a natural key that could change.</p>
+  <p><strong>Worded example (fund data):</strong> "<code class="inline">fund_id</code> is the primary key of <code class="inline">InvestmentFund</code> — one fund, one ID, forever. I'd use a surrogate <code class="inline">fund_id</code> rather than the fund's ticker, because a fund can be renamed or re-tickered but its identity shouldn't change."</p></div>
+
+  <div class="def"><div class="term">Foreign key (FK) <span class="tag">memorize</span></div>
+  <p>A column that references the primary key of another table, enforcing a relationship. <code class="inline">Trade.account_id</code> is an FK pointing to <code class="inline">Account.account_id</code>. This is referential integrity: you can't insert a trade for an account that doesn't exist.</p>
+  <p><strong>Worded example (fund data):</strong> "In the <code class="inline">Holding</code> table, <code class="inline">fund_id</code> is a foreign key back to <code class="inline">InvestmentFund</code>, and <code class="inline">security_id</code> is a foreign key to <code class="inline">Security</code>. Referential integrity means I can't record a holding for a fund that doesn't exist — the database rejects it."</p></div>
+
+  <div class="def"><div class="term">Cardinality</div>
+  <p>How many rows on one side relate to rows on the other. Three kinds: one-to-one (1:1), one-to-many (1:N), many-to-many (M:N). An <code class="inline">Account</code> has many <code class="inline">Trade</code>s (1:N). A <code class="inline">Trade</code> can have many <code class="inline">Instrument</code>s and an instrument appears in many trades (M:N).</p>
+  <p><strong>Worded example (fund data):</strong> "One <code class="inline">InvestmentFund</code> holds many securities, and one security is held by many funds — that's many-to-many. One fund has many daily <code class="inline">Holding</code> snapshots over time — that's one-to-many. One fund has exactly one current <code class="inline">strategy</code> classification — that's effectively one-to-one if I split it out."</p></div>
+
+  <div class="def"><div class="term">Schema</div>
+  <p>The overall structure: the tables, their columns and types, and the relationships (keys/constraints) between them. The "data model" they ask you to design is the schema.</p>
+  <p><strong>Worded example (fund data):</strong> "The fund-analytics schema is <code class="inline">InvestmentFund</code>, <code class="inline">Security</code>, <code class="inline">Holding</code>, and <code class="inline">PriceHistory</code>, plus the FK relationships linking holdings to funds and securities. That collection of tables and their links is the schema."</p></div>
+
+  <div class="say"><span class="lab">Say this in the interview</span>
+  I'd start by identifying the core <em>entities</em>, then their <em>attributes</em>, then the <em>relationships</em> between them — paying special attention to any many-to-many links, which I'll resolve with junction tables. Then I'll normalize, add keys and indexes, and finally think about how this OLTP schema would feed downstream analytics.</div>
+  <p>That sentence alone is a roadmap that signals competence. Say it first; it buys you time and structures everything after.</p>
+</section>
+
+<section id="dd-norm">
+  <h3 class="anchor-h3">Normalization</h3>
+  <div class="def"><div class="term">Normalization <span class="tag">memorize</span></div>
+  <p>The process of organizing tables to eliminate redundancy and prevent update anomalies, by ensuring each fact is stored in exactly one place. You normalize up to a "normal form."</p>
+  <p><strong>Worded example (fund data):</strong> "If I stored <code class="inline">fund_name</code> and <code class="inline">fund_strategy</code> on every single holding row, renaming a fund would mean updating thousands of holding rows — an update anomaly. Normalizing means the fund's name lives once in <code class="inline">InvestmentFund</code>, and holdings just reference it by <code class="inline">fund_id</code>."</p></div>
+
+  <table>
+    <tr><th>Form</th><th>Rule (memorize the gist)</th><th>Plain meaning</th></tr>
+    <tr><td><strong>1NF</strong></td><td>Atomic values, no repeating groups</td><td>Each cell holds one value. No comma-separated lists in a column.</td></tr>
+    <tr><td><strong>2NF</strong></td><td>1NF + no partial dependency on part of a composite key</td><td>Every non-key column depends on the <em>whole</em> primary key.</td></tr>
+    <tr><td><strong>3NF</strong></td><td>2NF + no transitive dependencies</td><td>Non-key columns depend on the key, the whole key, and nothing but the key.</td></tr>
+  </table>
+
+  <div class="say"><span class="lab">The line that wins points</span>
+  "I'd design to <em>3NF</em> for the transactional side — every non-key column depends on <em>the key, the whole key, and nothing but the key</em> — and then deliberately <em>denormalize</em> for the analytics layer where read performance matters more than write integrity."</div>
+
+  <h4>Example: an un-normalized table and its fix</h4>
+  <p>Imagine a flat trades table that repeats account and instrument details on every row:</p>
+<pre><span class="c">-- UN-NORMALIZED: account_name and ticker repeat on every trade</span>
+<span class="c">-- Update anomaly: rename an account -> must update thousands of rows</span>
+trades_flat(trade_id, account_name, account_tier, ticker,
+            instrument_name, price, quantity, executed_at)</pre>
+  <p>Normalized to 3NF, each fact lives once:</p>
+<pre><span class="k">CREATE TABLE</span> account (
+  account_id   <span class="f">BIGINT</span> <span class="k">PRIMARY KEY</span>,
+  account_name <span class="f">VARCHAR</span>,
+  account_tier <span class="f">VARCHAR</span>
+);
+<span class="k">CREATE TABLE</span> instrument (
+  instrument_id   <span class="f">BIGINT</span> <span class="k">PRIMARY KEY</span>,
+  ticker          <span class="f">VARCHAR</span> <span class="k">UNIQUE</span>,
+  instrument_name <span class="f">VARCHAR</span>
+);
+<span class="k">CREATE TABLE</span> trade (
+  trade_id      <span class="f">BIGINT</span> <span class="k">PRIMARY KEY</span>,
+  account_id    <span class="f">BIGINT</span> <span class="k">REFERENCES</span> account(account_id),   <span class="c">-- FK</span>
+  instrument_id <span class="f">BIGINT</span> <span class="k">REFERENCES</span> instrument(instrument_id), <span class="c">-- FK</span>
+  price         <span class="f">NUMERIC</span>(<span class="n">18</span>,<span class="n">4</span>),
+  quantity      <span class="f">INTEGER</span>,
+  executed_at   <span class="f">TIMESTAMP</span>
+);</pre>
+  <div class="warn"><span class="lab">Tradeoff to name out loud</span>
+  Normalization reduces redundancy and keeps writes safe, but it means more JOINs at read time. For analytics you often denormalize (pre-join) to make queries faster and simpler — that's the OLTP-vs-OLAP tension, and naming it is exactly the consulting instinct DAS42 wants.</div>
+</section>
+
+<section id="dd-rel">
+  <h3 class="anchor-h3">Relationships & the many-to-many fix</h3>
+  <div class="def"><div class="term">Junction table (a.k.a. associative / bridge table) <span class="tag">memorize</span></div>
+  <p>The standard way to model a many-to-many relationship: a third table holding two foreign keys, one to each side. It turns one M:N into two 1:N relationships.</p>
+  <p><strong>Worded example (fund data):</strong> "Funds and securities are many-to-many — a fund holds many securities, a security sits in many funds. I resolve it with a <code class="inline">fund_holding</code> junction table holding <code class="inline">fund_id</code> + <code class="inline">security_id</code> + the facts that describe that pairing: <code class="inline">shares_held</code>, <code class="inline">market_value</code>, <code class="inline">as_of_date</code>. Those facts belong on the junction because '500 shares' only means something for that specific fund-and-security pair."</p></div>
+
+  <p>Healthcare example — a patient can have many diagnoses and a diagnosis applies to many patients:</p>
+<pre><span class="k">CREATE TABLE</span> patient (
+  patient_id <span class="f">BIGINT</span> <span class="k">PRIMARY KEY</span>,
+  full_name  <span class="f">VARCHAR</span>
+);
+<span class="k">CREATE TABLE</span> diagnosis (
+  diagnosis_id <span class="f">BIGINT</span> <span class="k">PRIMARY KEY</span>,
+  icd10_code   <span class="f">VARCHAR</span>,
+  description  <span class="f">VARCHAR</span>
+);
+<span class="c">-- junction table resolves the many-to-many</span>
+<span class="k">CREATE TABLE</span> patient_diagnosis (
+  patient_id   <span class="f">BIGINT</span> <span class="k">REFERENCES</span> patient(patient_id),
+  diagnosis_id <span class="f">BIGINT</span> <span class="k">REFERENCES</span> diagnosis(diagnosis_id),
+  diagnosed_at <span class="f">DATE</span>,
+  <span class="k">PRIMARY KEY</span> (patient_id, diagnosis_id, diagnosed_at)  <span class="c">-- composite PK</span>
+);</pre>
+  <div class="say"><span class="lab">Pattern to recognize instantly</span>
+  Any time you hear "a ___ can have many ___ and vice versa" — recipes & ingredients, songs & playlists, orders & products, patients & diagnoses — the answer is a <em>junction table</em> with two FKs. Interviewers plant these on purpose to see if you spot them.</div>
+</section>
+
+<section id="dd-index">
+  <h3 class="anchor-h3">Indexes</h3>
+  <div class="def"><div class="term">Index <span class="tag">memorize</span></div>
+  <p>A separate data structure (usually a B-tree) that lets the database find rows by a column's value without scanning the whole table — like the index at the back of a book. Speeds up reads (WHERE, JOIN, ORDER BY) dramatically.</p>
+  <p><strong>Worded example (fund data):</strong> "If analysts constantly query holdings <code class="inline">WHERE fund_id = ? AND as_of_date = ?</code>, I'd index those columns so the database jumps straight to the relevant rows instead of scanning every holding ever recorded."</p></div>
+  <div class="def"><div class="term">The index tradeoff</div>
+  <p>Indexes make reads faster but writes slower (every INSERT/UPDATE must also update the index) and consume storage. So you index columns you filter or join on frequently, not every column.</p></div>
+
+  <h4>What to index, said simply</h4>
+  <ul>
+    <li>Primary keys (indexed automatically).</li>
+    <li>Foreign keys you JOIN on — e.g. <code class="inline">trade.account_id</code>.</li>
+    <li>Columns in frequent WHERE/ORDER BY — e.g. <code class="inline">trade.executed_at</code> for date-range queries.</li>
+  </ul>
+<pre><span class="k">CREATE INDEX</span> idx_trade_account  <span class="k">ON</span> trade(account_id);
+<span class="k">CREATE INDEX</span> idx_trade_exec_time <span class="k">ON</span> trade(executed_at);
+<span class="c">-- composite index: order matters, leftmost column usable alone</span>
+<span class="k">CREATE INDEX</span> idx_trade_acct_time <span class="k">ON</span> trade(account_id, executed_at);</pre>
+  <div class="warn"><span class="lab">Interview soundbite</span>
+  "I'd index the foreign keys and the timestamp we filter on, but I'd be careful not to over-index a write-heavy trade table, since every index adds write overhead."</div>
+</section>
+
+<section id="dd-walkthrough">
+  <h3 class="anchor-h3">The design walkthrough method (your script)</h3>
+  <p>Whatever they ask you to design, follow these six steps out loud, in order. This is the single most important thing to internalize — it turns a scary open-ended question into a checklist.</p>
+  <ol>
+    <li><strong>Clarify scope.</strong> Ask 2–3 questions. "Are we modeling the transactional storefront or the analytics behind it?" "What are the main things users do?" This shows consulting instinct and buys thinking time.</li>
+    <li><strong>List entities.</strong> Name the core nouns. Say them aloud as you write boxes.</li>
+    <li><strong>Add attributes & keys.</strong> Give each entity a surrogate PK and its key columns.</li>
+    <li><strong>Draw relationships.</strong> State cardinality for each ("an account has many trades"). Resolve every M:N with a junction table.</li>
+    <li><strong>Normalize & index.</strong> Note you're at 3NF; call out which columns you'd index and why.</li>
+    <li><strong>Bridge to analytics.</strong> Describe how this OLTP schema would feed a star schema for reporting. This is the differentiator at a data consultancy.</li>
+  </ol>
+  <div class="say"><span class="lab">Opening move, verbatim</span>
+  "Before I start drawing — am I designing the operational database that runs the app, or the warehouse model behind the analytics? I'll assume operational first and then show how it feeds analytics. A few clarifying questions: what are the main actions a user takes, and what's the most important thing the business needs to report on?"</div>
+</section>
+
+<section id="dd-allrecipes">
+  <h3 class="anchor-h3">Worked example: design AllRecipes</h3>
+  <p class="sec-intro">Rehearse this aloud. The structure is what matters, not memorizing exact columns.</p>
+  <p><strong>1. Scope.</strong> "It's a recipe-sharing site: users post recipes, recipes have ingredients and steps, other users rate and review them, and save favorites. I'll model the transactional side."</p>
+  <p><strong>2–4. Entities, keys, relationships:</strong></p>
+  <div class="erd"><b>user</b> (user_id PK, username, email, created_at)
+<b>recipe</b> (recipe_id PK, user_id FK, title, prep_minutes, cook_minutes, created_at)
+<b>ingredient</b> (ingredient_id PK, name, default_unit)
+<b>recipe_ingredient</b> (recipe_id FK, ingredient_id FK, quantity, unit)   <- junction (M:N)
+<b>step</b> (step_id PK, recipe_id FK, step_number, instruction)
+<b>review</b> (review_id PK, recipe_id FK, user_id FK, rating, body, created_at)
+<b>favorite</b> (user_id FK, recipe_id FK, saved_at)                         <- junction (M:N)</div>
+  <p><strong>Relationships, said aloud:</strong></p>
+  <ul>
+    <li>A user authors many recipes; a recipe has one author → <strong>1:N</strong> (<code class="inline">recipe.user_id</code>).</li>
+    <li>A recipe has many ingredients and an ingredient appears in many recipes → <strong>M:N</strong>, resolved by <code class="inline">recipe_ingredient</code>, which also carries quantity/unit (those belong on the relationship, not on the ingredient).</li>
+    <li>A recipe has many ordered steps → <strong>1:N</strong>, with a <code class="inline">step_number</code> to preserve order.</li>
+    <li>Users review recipes, users favorite recipes → two more relationships, with <code class="inline">favorite</code> as a junction.</li>
+  </ul>
+  <p><strong>5. Normalize & index:</strong> "This is 3NF — ingredient names live once in <code class="inline">ingredient</code>, not repeated per recipe. I'd index <code class="inline">recipe.user_id</code>, <code class="inline">review.recipe_id</code>, and <code class="inline">recipe_ingredient</code>'s FKs since those drive the common reads."</p>
+  <p><strong>6. Bridge to analytics:</strong> "For reporting — say, most-saved recipes by month — I'd build a star schema with a <code class="inline">fact_review</code> or <code class="inline">fact_favorite</code> table and dimensions for recipe, user, and date."</p>
+  <div class="warn"><span class="lab">The detail that impresses</span>
+  Putting <code class="inline">quantity</code> and <code class="inline">unit</code> on the <em>junction</em> table (not on <code class="inline">ingredient</code>) shows you understand that those facts describe the <em>relationship</em> between a recipe and an ingredient — "2 cups of flour" only means something for that pairing.</div>
+</section>
+
+<section id="dd-store">
+  <h3 class="anchor-h3">Worked example: design a data model for an online store (the confirmed question)</h3>
+  <p class="sec-intro">This is the version a real DAS42 candidate reported. Make it your primary rehearsal.</p>
+  <p><strong>1. Scope.</strong> "A retailer selling physical products to consumers. Core flows: browse products, place an order with multiple items, pay, ship. I'll model the operational database, then the analytics."</p>
+  <div class="erd"><b>customer</b> (customer_id PK, email, name, created_at)
+<b>address</b> (address_id PK, customer_id FK, line1, city, region, postal_code, type)
+<b>product</b> (product_id PK, sku, name, description, unit_price, category_id FK)
+<b>category</b> (category_id PK, name, parent_category_id FK)        <- self-reference for hierarchy
+<b>inventory</b> (product_id FK PK, quantity_on_hand, warehouse_id)
+<b>"order"</b> (order_id PK, customer_id FK, order_status, ordered_at, ship_address_id FK)
+<b>order_item</b> (order_id FK, product_id FK, quantity, unit_price_at_purchase)  <- junction (M:N)
+<b>payment</b> (payment_id PK, order_id FK, amount, method, status, paid_at)</div>
+  <p><strong>Key relationships and the things interviewers probe:</strong></p>
+  <ul>
+    <li>An order contains many products; a product appears in many orders → <strong>M:N</strong> via <code class="inline">order_item</code>.</li>
+    <li><strong>Critical detail:</strong> store <code class="inline">unit_price_at_purchase</code> on <code class="inline">order_item</code>, not just a reference to <code class="inline">product.unit_price</code>. Prices change; the order must remember what the customer actually paid. This is a classic "gotcha" they look for.</li>
+    <li><code class="inline">order_status</code> ("pending → paid → shipped → delivered") models the lifecycle; for full history you'd add an <code class="inline">order_status_history</code> table.</li>
+    <li>Category self-references via <code class="inline">parent_category_id</code> to allow nested categories.</li>
+  </ul>
+  <p><strong>5. Normalize & index:</strong> "3NF. Index <code class="inline">order.customer_id</code>, <code class="inline">order_item</code> FKs, and <code class="inline">product.sku</code>. The order table is write-heavy, so I'd keep its indexes lean."</p>
+  <p><strong>6. Bridge to analytics:</strong> "For revenue reporting I'd build <code class="inline">fact_order_item</code> (grain = one line item) with <code class="inline">dim_customer</code>, <code class="inline">dim_product</code>, <code class="inline">dim_date</code>. That answers 'revenue by category by month' with a simple star-schema query."</p>
+  <div class="say"><span class="lab">If they push: "what about scale?"</span>
+  "I'd partition the order/order_item tables by date, archive old orders to cold storage, and for the analytics side push everything into a columnar warehouse like Snowflake where the star schema lives."</div>
+</section>
+
+<!-- ============ DIMENSIONAL MODELING ============ -->
+<section id="dm-oltp">
+  <h2 class="sec">Dimensional modeling · the consulting differentiator</h2>
+  <h2 class="sec-title">OLTP vs OLAP</h2>
+  <p class="sec-intro">Knowing both worlds — and the bridge between them — is what separates an analyst from a data engineer. DAS42 lives in this space.</p>
+  <table>
+    <tr><th></th><th>OLTP (transactional)</th><th>OLAP (analytical)</th></tr>
+    <tr><td><strong>Purpose</strong></td><td>Run the application</td><td>Answer business questions</td></tr>
+    <tr><td><strong>Workload</strong></td><td>Many small reads/writes</td><td>Few large aggregating reads</td></tr>
+    <tr><td><strong>Design</strong></td><td>Normalized (3NF)</td><td>Denormalized (star schema)</td></tr>
+    <tr><td><strong>Example query</strong></td><td>Insert one trade</td><td>Total volume by desk by quarter</td></tr>
+    <tr><td><strong>Tech</strong></td><td>Postgres, SQL Server</td><td>Snowflake, BigQuery, Redshift</td></tr>
+  </table>
+  <div class="def"><div class="term">Data warehouse <span class="tag">memorize</span></div>
+  <p>A central analytical repository optimized for reading and aggregating large volumes of historical data from many sources. It's where OLAP lives. Snowflake, BigQuery, and Redshift are cloud data warehouses.</p></div>
+</section>
+
+<section id="dm-star">
+  <h3 class="anchor-h3">Star schema, facts & dimensions</h3>
+  <div class="def"><div class="term">Fact table <span class="tag">memorize</span></div>
+  <p>The center of a star schema. Holds measurable, numeric events (the "facts") plus foreign keys to dimensions. Each row is one event at a defined grain. Example: <code class="inline">fact_trade</code> with <code class="inline">price</code>, <code class="inline">quantity</code>, <code class="inline">commission</code> and FKs to date, account, instrument.</p>
+  <p><strong>Worded example (fund data):</strong> "<code class="inline">fact_holding</code> has one row per fund per security per day, with measures <code class="inline">market_value</code> and <code class="inline">shares_held</code>, plus FKs <code class="inline">fund_key</code>, <code class="inline">security_key</code>, <code class="inline">date_key</code>. The numbers I sum live here; the descriptions live in the dimensions."</p></div>
+  <div class="def"><div class="term">Dimension table <span class="tag">memorize</span></div>
+  <p>Descriptive context you slice and filter by — the "who, what, where, when." <code class="inline">dim_account</code>, <code class="inline">dim_instrument</code>, <code class="inline">dim_date</code>. Wide and denormalized on purpose.</p>
+  <p><strong>Worded example (fund data):</strong> "<code class="inline">dim_fund</code> holds <code class="inline">fund_name</code>, <code class="inline">strategy</code>, <code class="inline">manager</code>, <code class="inline">inception_date</code> — the descriptive context. So 'total market value by strategy by quarter' filters on <code class="inline">dim_fund.strategy</code> and <code class="inline">dim_date.quarter</code> while summing <code class="inline">fact_holding.market_value</code>."</p></div>
+  <div class="def"><div class="term">Grain <span class="tag">memorize</span></div>
+  <p>What one row of the fact table represents. "One row per trade" or "one row per order line item." Defining the grain first is the cardinal rule of dimensional modeling — say this and you sound like you've done it.</p>
+  <p><strong>Worded example (fund data):</strong> "I'd declare the grain up front: 'one row per fund, per security, per day.' That single sentence pins down everything — it tells you the FKs (fund, security, date) and prevents double-counting. If someone later asks for intraday data, I know the grain has to change."</p></div>
+
+  <div class="erd">                 <b>dim_date</b>
+                     |
+  <b>dim_account</b> --- <b>fact_trade</b> --- <b>dim_instrument</b>
+                     |
+                 <b>dim_desk</b>
+
+  fact_trade grain = one executed trade
+  measures: price, quantity, gross_value, commission
+  FKs: date_key, account_key, instrument_key, desk_key</div>
+
+<pre><span class="c">-- A star-schema query reads naturally: measures from fact, filters from dims</span>
+<span class="k">SELECT</span> d.year, d.quarter, i.asset_class,
+       <span class="f">SUM</span>(f.gross_value) <span class="k">AS</span> total_value
+<span class="k">FROM</span> fact_trade f
+<span class="k">JOIN</span> dim_date d       <span class="k">ON</span> f.date_key = d.date_key
+<span class="k">JOIN</span> dim_instrument i <span class="k">ON</span> f.instrument_key = i.instrument_key
+<span class="k">WHERE</span> d.year = <span class="n">2025</span>
+<span class="k">GROUP BY</span> d.year, d.quarter, i.asset_class
+<span class="k">ORDER BY</span> total_value <span class="k">DESC</span>;</pre>
+  <div class="warn"><span class="lab">Star vs snowflake schema</span>
+  A <strong>star schema</strong> keeps dimensions denormalized (one table each). A <strong>snowflake schema</strong> normalizes dimensions into sub-tables. Star is usually preferred for simplicity and query speed. (Yes — name-drop that the company you're interviewing at is named after this concept if it feels natural; it shows you get it.)</div>
+</section>
+
+<section id="dm-scd">
+  <h3 class="anchor-h3">Slowly changing dimensions (SCD)</h3>
+  <div class="def"><div class="term">Slowly changing dimension <span class="tag">memorize</span></div>
+  <p>How you handle dimension attributes that change over time (e.g. a customer moves, an account changes tier). The two you must know:</p>
+  <p><strong>Type 1</strong> — overwrite the old value. Simple, no history.<br>
+  <strong>Type 2</strong> — add a new row with effective/expiry dates and a "current" flag, preserving full history. This is the one interviewers care about.</p></div>
+<pre><span class="c">-- SCD Type 2: account tier history preserved</span>
+dim_account(account_key, account_id, tier,
+            valid_from, valid_to, is_current)
+<span class="c">-- when tier changes: expire old row (set valid_to, is_current=false),</span>
+<span class="c">-- insert new row with is_current=true</span></pre>
+</section>
+
+<!-- ============ MIGRATION & PIPELINES ============ -->
+<section id="mig-etl">
+  <h2 class="sec">Migration & pipelines · your resume's core</h2>
+  <h2 class="sec-title">ETL vs ELT</h2>
+  <div class="def"><div class="term">ETL <span class="tag">memorize</span></div>
+  <p><strong>Extract, Transform, Load.</strong> Pull data from sources, transform it (clean, join, reshape) in a staging engine, then load the finished result into the warehouse. Classic on-prem pattern.</p>
+  <p><strong>Worded example (fund data):</strong> "Old way: pull raw fund-holdings files from a vendor, run a separate process to clean and aggregate them into fund-level summaries, then load only the finished summary into the warehouse. The transform happens before the data lands."</p></div>
+  <div class="def"><div class="term">ELT <span class="tag">memorize</span></div>
+  <p><strong>Extract, Load, Transform.</strong> Load raw data into the warehouse first, then transform it in-place using the warehouse's compute. The modern cloud pattern — it's what dbt + Snowflake do, and what you did in your migration.</p>
+  <p><strong>Worded example (fund data):</strong> "Modern way: dump the raw vendor holdings file straight into the warehouse as-is, then use dbt to build cleaned and aggregated models on top. The raw data stays available, so if I find a bug in my aggregation logic I just rerun the transform — no re-extracting."</p></div>
+  <div class="say"><span class="lab">Why the shift matters (say this)</span>
+  "We moved toward <em>ELT</em> because cloud warehouses like Snowflake have cheap, elastic compute — so it's faster and simpler to load raw data and transform it in-warehouse with dbt than to run a separate transformation tier. It also keeps the raw data available for reprocessing."</div>
+</section>
+
+<section id="mig-story">
+  <h3 class="anchor-h3">Your migration walkthrough (the script)</h3>
+  <p class="sec-intro">You will be asked to walk through a project. Use this skeleton with your SQL-Server-to-Snowflake work. Aim for 10–15 minutes; practice hitting each beat.</p>
+  <ol>
+    <li><strong>Context / problem.</strong> "We had analytical datasets on on-prem SQL Server. It didn't scale for the analytics workload, and we wanted a modern cloud warehouse, so we migrated to Snowflake."</li>
+    <li><strong>Your role.</strong> Be specific and honest about what <em>you</em> built — the ETL/ELT pipelines, the dbt transformations, the validation. Interviewers ask "what did you specifically do?"</li>
+    <li><strong>Approach.</strong> "We extracted from SQL Server, landed raw data in Snowflake, then rebuilt the business logic as modular dbt models — an ELT pattern."</li>
+    <li><strong>Hardest part.</strong> Have one concrete challenge ready (data-type mismatches, reconciling row counts, a transformation that didn't match the legacy report). This is the most common follow-up.</li>
+    <li><strong>How you validated.</strong> Reconciliation, schema checks, business-rule tests (next section). This is gold at a consultancy.</li>
+    <li><strong>Outcome.</strong> Quantify if you can — faster queries, fewer incidents, reliable reporting.</li>
+  </ol>
+  <div class="warn"><span class="lab">Prepare the "what broke" answer</span>
+  Pick ONE real challenge and rehearse it as a mini-STAR: what went wrong, how you diagnosed it, what you did, what you learned. "A dbt model's totals didn't match the legacy SQL Server report; I traced it to a NULL-handling difference in a SUM, added a not-null test and a reconciliation check, and it caught two more cases before production." That single story answers half their follow-ups.</div>
+</section>
+
+<section id="mig-validate">
+  <h3 class="anchor-h3">Validation strategies (say these by name)</h3>
+  <div class="twocol">
+    <div class="def"><div class="term">Source-to-target reconciliation</div><p>Compare row counts and key aggregates (sums, distinct counts) between source and target to confirm nothing was lost or duplicated in transit.</p></div>
+    <div class="def"><div class="term">Schema validation</div><p>Confirm column names, data types, and nullability match the contract after migration. Catches silent type coercions.</p></div>
+    <div class="def"><div class="term">Business-rule testing</div><p>Assert domain rules hold: no negative quantities, every trade has a valid account, dates are in range.</p></div>
+    <div class="def"><div class="term">Reconciliation by aggregate</div><p>Beyond counts: compare SUM(amount), MIN/MAX dates, distinct counts per key to catch subtle drift.</p></div>
+  </div>
+<pre><span class="c">-- Reconciliation check: row counts + a key aggregate must match</span>
+<span class="k">SELECT</span> <span class="s">'source'</span> <span class="k">AS</span> side, <span class="f">COUNT</span>(*) <span class="k">AS</span> rows, <span class="f">SUM</span>(amount) <span class="k">AS</span> total
+<span class="k">FROM</span> source.trades
+<span class="k">UNION ALL</span>
+<span class="k">SELECT</span> <span class="s">'target'</span>, <span class="f">COUNT</span>(*), <span class="f">SUM</span>(amount)
+<span class="k">FROM</span> snowflake.trade;
+<span class="c">-- the two rows should be identical; any diff is a red flag</span></pre>
+</section>
+
+<section id="mig-dbt">
+  <h3 class="anchor-h3">dbt concepts (be ready to defend this)</h3>
+  <div class="def"><div class="term">dbt (data build tool) <span class="tag">memorize</span></div>
+  <p>A transformation framework for the "T" in ELT. You write modular SELECT statements as "models"; dbt handles dependencies, materialization, testing, and documentation. It brings software engineering practices (version control, testing, modularity) to SQL transformations.</p></div>
+  <table>
+    <tr><th>Term</th><th>What it is</th></tr>
+    <tr><td><strong>Model</strong></td><td>A single <code class="inline">.sql</code> file = one SELECT that becomes a table or view.</td></tr>
+    <tr><td><strong>Materialization</strong></td><td>How a model is built: <code class="inline">view</code>, <code class="inline">table</code>, <code class="inline">incremental</code> (only new rows), or <code class="inline">ephemeral</code>.</td></tr>
+    <tr><td><strong>ref()</strong></td><td><code class="inline">{{ ref('stg_trades') }}</code> — links models so dbt builds them in dependency order (a DAG).</td></tr>
+    <tr><td><strong>Test</strong></td><td>Built-in assertions: <code class="inline">not_null</code>, <code class="inline">unique</code>, <code class="inline">relationships</code> (FK integrity), <code class="inline">accepted_values</code>.</td></tr>
+    <tr><td><strong>Source</strong></td><td>Declared raw input tables; lets dbt track lineage from raw to final.</td></tr>
+    <tr><td><strong>Staging / mart layers</strong></td><td>Convention: <code class="inline">stg_</code> models clean raw sources; <code class="inline">mart</code>/<code class="inline">fct</code>/<code class="inline">dim</code> models hold business logic.</td></tr>
+  </table>
+<pre><span class="c">-- models/staging/stg_trades.sql  (a dbt model)</span>
+<span class="k">SELECT</span>
+  trade_id,
+  account_id,
+  <span class="f">CAST</span>(price <span class="k">AS</span> <span class="f">NUMERIC</span>(<span class="n">18</span>,<span class="n">4</span>)) <span class="k">AS</span> price,
+  quantity,
+  executed_at
+<span class="k">FROM</span> {{ source(<span class="s">'raw'</span>, <span class="s">'trades'</span>) }}
+<span class="k">WHERE</span> executed_at <span class="k">IS NOT NULL</span></pre>
+<pre><span class="c"># schema.yml  — tests that run on every build</span>
+models:
+  - name: stg_trades
+    columns:
+      - name: trade_id
+        tests: [unique, not_null]
+      - name: account_id
+        tests:
+          - relationships:
+              to: ref('stg_accounts')
+              field: account_id</pre>
+  <div class="say"><span class="lab">If asked "what challenges did you face with dbt?"</span>
+  Have a real one ready: managing model dependencies as the DAG grew, getting incremental models to handle late-arriving data correctly, or standardizing tests across the team. Concrete beats generic.</div>
+</section>
+
+<!-- ============ SNOWFLAKE ============ -->
+<section id="sf-arch">
+  <h2 class="sec">Snowflake · named explicitly in candidate reports</h2>
+  <h2 class="sec-title">Architecture basics</h2>
+  <div class="def"><div class="term">Separation of storage and compute <span class="tag">memorize</span></div>
+  <p>Snowflake's defining feature. Storage (your data) and compute (the engines that query it) scale independently. You can spin up multiple compute clusters against the same data without copying it.</p></div>
+  <div class="def"><div class="term">Virtual warehouse</div>
+  <p>A compute cluster (named T-shirt sizes: XS, S, M…). You size it for the workload and can run several in parallel. Pay only while it runs; auto-suspend when idle.</p></div>
+  <div class="def"><div class="term">Micro-partitions</div>
+  <p>Snowflake automatically stores table data in compressed columnar chunks (~50–500MB) with per-column metadata (min/max). This metadata lets it skip irrelevant partitions at query time.</p></div>
+  <div class="def"><div class="term">Pruning</div>
+  <p>Skipping micro-partitions that can't contain matching rows, using the metadata. This is why filtering on a well-clustered column is fast — Snowflake reads only the relevant partitions.</p></div>
+  <table>
+    <tr><th>Layer</th><th>What it does</th></tr>
+    <tr><td><strong>Storage</strong></td><td>Columnar, compressed micro-partitions in cloud object storage.</td></tr>
+    <tr><td><strong>Compute</strong></td><td>Virtual warehouses that execute queries, scaled independently.</td></tr>
+    <tr><td><strong>Cloud services</strong></td><td>Metadata, query optimization, security, transaction management.</td></tr>
+  </table>
+</section>
+
+<section id="sf-perf">
+  <h3 class="anchor-h3">Snowflake performance levers</h3>
+  <ul>
+    <li><strong>Clustering keys</strong> — for very large tables, define a clustering key so related data sits in the same micro-partitions, improving pruning.</li>
+    <li><strong>Warehouse sizing</strong> — bigger warehouse = more compute for heavy queries; scale up for performance, scale out (multi-cluster) for concurrency.</li>
+    <li><strong>Result caching</strong> — identical queries return cached results instantly within the retention window.</li>
+    <li><strong>Avoid SELECT *</strong> — columnar storage means selecting only needed columns reads far less data.</li>
+  </ul>
+  <div class="warn"><span class="lab">Soundbite</span>
+  "Because Snowflake is columnar with micro-partition pruning, the biggest wins come from filtering on clustered columns and selecting only the columns you need — that minimizes the data scanned, which is what you pay for in both time and credits."</div>
+</section>
+
+<section id="sf-deep">
+  <h3 class="anchor-h3">Snowflake deep dive &mdash; in its own guide</h3>
+  <p class="sec-intro">Because your resume claims a SQL Server &rarr; Snowflake migration, the interviewer will probe past the basics. The full Snowflake guide covers architecture, loading, Time Travel, cloning, cost, and the analytics/DE concepts you should be competent in &mdash; with word and code examples.</p>
+  <div class="linkcard" onclick="window.open('das42_snowflake_guide.html','_blank')">
+    <div class="linkcard-icon">&#10052;</div>
+    <div>
+      <div class="linkcard-title">Open the Snowflake guide &rarr;</div>
+      <div class="linkcard-sub">Architecture, ELT loading, Time Travel, cloning, warehouses, performance &mdash; at DE competence level.</div>
+    </div>
+  </div>
+</section>
+
+<!-- ============ SQL ============ -->
+<section id="sql-windows">
+  <h2 class="sec">SQL · 20% + the OA gate</h2>
+  <h2 class="sec-title">Window functions (the most-tested topic)</h2>
+  <div class="def"><div class="term">Window function <span class="tag">memorize</span></div>
+  <p>A function that computes across a set of rows related to the current row (the "window") <em>without collapsing them</em> like GROUP BY does. You keep every row but add a computed column. Syntax: <code class="inline">func() OVER (PARTITION BY ... ORDER BY ...)</code>.</p>
+  <p><strong>Worded example (fund data):</strong> "To compute each fund's day-over-day change in market value, I partition by <code class="inline">fund_id</code>, order by <code class="inline">as_of_date</code>, and use <code class="inline">LAG()</code> to grab the prior day's value — every daily row stays, but now each one knows yesterday's number too."</p></div>
+  <table>
+    <tr><th>Function</th><th>Returns</th></tr>
+    <tr><td><code class="inline">ROW_NUMBER()</code></td><td>Sequential number per partition (1,2,3…), no ties.</td></tr>
+    <tr><td><code class="inline">RANK()</code></td><td>Rank with gaps after ties (1,2,2,4).</td></tr>
+    <tr><td><code class="inline">DENSE_RANK()</code></td><td>Rank without gaps (1,2,2,3).</td></tr>
+    <tr><td><code class="inline">LAG()/LEAD()</code></td><td>Value from the previous/next row — great for deltas.</td></tr>
+    <tr><td><code class="inline">SUM() OVER</code></td><td>Running total / windowed aggregate.</td></tr>
+  </table>
+<pre><span class="c">-- Daily price change per instrument using LAG</span>
+<span class="k">SELECT</span>
+  instrument_id,
+  trade_date,
+  close_price,
+  close_price - <span class="f">LAG</span>(close_price) <span class="k">OVER</span> (
+      <span class="k">PARTITION BY</span> instrument_id <span class="k">ORDER BY</span> trade_date
+  ) <span class="k">AS</span> daily_change
+<span class="k">FROM</span> daily_prices;</pre>
+<pre><span class="c">-- Top trade per account by value (classic "top-N-per-group")</span>
+<span class="k">WITH</span> ranked <span class="k">AS</span> (
+  <span class="k">SELECT</span> *,
+    <span class="f">ROW_NUMBER</span>() <span class="k">OVER</span> (
+      <span class="k">PARTITION BY</span> account_id <span class="k">ORDER BY</span> gross_value <span class="k">DESC</span>
+    ) <span class="k">AS</span> rn
+  <span class="k">FROM</span> trade
+)
+<span class="k">SELECT</span> account_id, trade_id, gross_value
+<span class="k">FROM</span> ranked
+<span class="k">WHERE</span> rn = <span class="n">1</span>;</pre>
+  <div class="say"><span class="lab">Know the difference cold</span>
+  "<em>GROUP BY</em> collapses rows into one per group; a <em>window function</em> keeps every row and adds a computed column over a partition. Use window functions for running totals, rankings, and row-to-row comparisons like period-over-period change."</div>
+</section>
+
+<section id="sql-joins">
+  <h3 class="anchor-h3">Joins & deduplication</h3>
+  <table>
+    <tr><th>Join</th><th>Returns</th></tr>
+    <tr><td><strong>INNER</strong></td><td>Only matching rows in both tables.</td></tr>
+    <tr><td><strong>LEFT</strong></td><td>All left rows + matches; NULLs where no match.</td></tr>
+    <tr><td><strong>FULL OUTER</strong></td><td>All rows from both, matched where possible.</td></tr>
+    <tr><td><strong>SELF</strong></td><td>A table joined to itself (e.g. category → parent_category).</td></tr>
+  </table>
+<pre><span class="c">-- Deduplicate: keep the latest record per patient</span>
+<span class="k">WITH</span> ranked <span class="k">AS</span> (
+  <span class="k">SELECT</span> *,
+    <span class="f">ROW_NUMBER</span>() <span class="k">OVER</span> (
+      <span class="k">PARTITION BY</span> patient_id <span class="k">ORDER BY</span> updated_at <span class="k">DESC</span>
+    ) <span class="k">AS</span> rn
+  <span class="k">FROM</span> patient_records
+)
+<span class="k">SELECT</span> * <span class="k">FROM</span> ranked <span class="k">WHERE</span> rn = <span class="n">1</span>;</pre>
+<pre><span class="c">-- Find accounts with no trades (anti-join via LEFT + IS NULL)</span>
+<span class="k">SELECT</span> a.account_id
+<span class="k">FROM</span> account a
+<span class="k">LEFT JOIN</span> trade t <span class="k">ON</span> a.account_id = t.account_id
+<span class="k">WHERE</span> t.account_id <span class="k">IS NULL</span>;</pre>
+</section>
+
+<section id="sql-opt">
+  <h3 class="anchor-h3">Query optimization (have a story)</h3>
+  <ul>
+    <li><strong>Filter early</strong> — push WHERE conditions down so you process fewer rows.</li>
+    <li><strong>Index the join/filter columns</strong> — covered above.</li>
+    <li><strong>Avoid SELECT *</strong> — especially in columnar warehouses.</li>
+    <li><strong>Read the query plan</strong> — <code class="inline">EXPLAIN</code> shows full table scans vs index use; look for the expensive step.</li>
+    <li><strong>Avoid functions on indexed columns in WHERE</strong> — <code class="inline">WHERE YEAR(dt)=2025</code> can't use an index; use <code class="inline">dt &gt;= '2025-01-01' AND dt &lt; '2026-01-01'</code>.</li>
+  </ul>
+  <div class="warn"><span class="lab">Optimization story template</span>
+  "A reporting query was doing a full scan on a large trade table. I checked the plan with EXPLAIN, saw it wasn't using the date filter efficiently, rewrote a function-wrapped WHERE into a sargable range predicate, and added a composite index on (account_id, executed_at). Runtime dropped from minutes to seconds."</div>
+</section>
+
+<!-- ============ PYTHON ============ -->
+<section id="py-core">
+  <h2 class="sec">OA · SQL + Python · proctored &amp; critical</h2>
+  <h2 class="sec-title">Passing the proctored assessment</h2>
+  <p class="sec-intro">Cameras on, screenshare, nothing on the side — so you must be fluent with zero reference material, under time pressure, while observed. The material isn't exotic; the challenge is fluency under those conditions. The fix isn't learning more — it's making the patterns so automatic that nerves have nothing to grab onto.</p>
+
+  <div class="say"><span class="lab">Strategy for the proctored format</span>
+  Practice the way you'll be tested: one screen, no second monitor, no docs open, a timer running, in the actual tool (HackerRank/CoderPad). Narrate your approach out loud as you code — it slows the panic-spiral and some rounds expect it. The goal is <em>boring</em>: drill the finite pattern set below until these feel routine, because routine survives a camera.</p></div>
+
+  <div class="warn"><span class="lab">When you blank, name the shape first</span>
+  Both failure modes — forgetting syntax, freezing on DSA — are helped by the same move: before writing anything, say the shape out loud. "This is a top-N-per-group, so window function in a CTE." "This is count-per-key, so a dict." Naming the pattern unlocks the syntax and stops the freeze. The patterns are a short list; recognizing which one you're in is 80% of the battle.</p></div>
+
+  <h4>SQL — the recurring OA shapes</h4>
+  <ul>
+    <li><strong>Join + aggregate:</strong> GROUP BY with SUM/COUNT/AVG, often after a join.</li>
+    <li><strong>Top-N-per-group:</strong> <code class="inline">ROW_NUMBER() OVER (PARTITION BY g ORDER BY x DESC)</code> in a CTE, then <code class="inline">WHERE rn &lt;= N</code>.</li>
+    <li><strong>Running total / period-over-period:</strong> <code class="inline">SUM() OVER (... ORDER BY ...)</code> or <code class="inline">LAG()</code>.</li>
+    <li><strong>Dedup:</strong> <code class="inline">ROW_NUMBER() ... = 1</code> to keep one row per key.</li>
+    <li><strong>Self-join / anti-join:</strong> LEFT JOIN + <code class="inline">IS NULL</code> to find non-matches.</li>
+  </ul>
+  <p>All five are in the <a href="#sql-windows" style="color:var(--accent)">SQL section above</a> with full examples — drill those until the syntax comes without thinking.</p>
+
+  <h4>Python — the recurring OA shapes</h4>
+  <h4>Dict / Counter aggregation (counting, grouping)</h4>
+<pre><span class="c"># count or sum per key — the most common OA shape</span>
+<span class="k">from</span> collections <span class="k">import</span> defaultdict, Counter
+totals = defaultdict(int)
+<span class="k">for</span> t <span class="k">in</span> trades:
+    totals[t[<span class="s">"ticker"</span>]] += t[<span class="s">"quantity"</span>]
+<span class="c"># quick frequency count:</span>
+counts = Counter(words)            <span class="c"># {'a': 3, 'b': 1, ...}</span>
+top3 = counts.most_common(<span class="n">3</span>)</pre>
+  <h4>String parsing / cleaning</h4>
+<pre>parts = line.strip().split(<span class="s">","</span>)        <span class="c"># split a CSV-ish row</span>
+clean = [p.strip().lower() <span class="k">for</span> p <span class="k">in</span> parts <span class="k">if</span> p]
+<span class="c"># JSON: import json; data = json.loads(raw_string)</span></pre>
+  <h4>Dedup preserving order · pairs / lookups</h4>
+<pre>unique = list(dict.fromkeys(items))   <span class="c"># dedup, keeps order</span>
+<span class="c"># find if any two numbers sum to target — hash set, O(n)</span>
+seen = <span class="f">set</span>()
+<span class="k">for</span> n <span class="k">in</span> nums:
+    <span class="k">if</span> target - n <span class="k">in</span> seen: <span class="k">return</span> <span class="k">True</span>
+    seen.add(n)</pre>
+  <h4>Pandas (if the OA is data-flavored)</h4>
+<pre><span class="k">import</span> pandas <span class="k">as</span> pd
+out = (df.groupby(<span class="s">"account_id"</span>)[<span class="s">"gross_value"</span>]
+         .sum().sort_values(ascending=<span class="k">False</span>).reset_index())
+merged = df.merge(accounts, on=<span class="s">"account_id"</span>, how=<span class="s">"inner"</span>)</pre>
+  <div class="warn"><span class="lab">Scope it with your referral first</span>
+  Before over-drilling, confirm the OA's depth: Is it HackerRank or CoderPad? Is Python DSA-style (algorithms, complexity) or data wrangling (parsing, aggregation)? Does it expect classes/OOP? Does SQL go up through window functions and CTEs? The answers decide whether you grind LeetCode-style problems or data-manipulation problems — don't waste effort on the wrong set.</p></div>
+</section>
+
+<!-- ============ BEHAVIORAL ============ -->
+<section id="beh-star">
+  <h2 class="sec">Behavioral · 5% · but your weak spot</h2>
+  <h2 class="sec-title">STAR + the consulting angle</h2>
+  <div class="def"><div class="term">STAR <span class="tag">memorize</span></div>
+  <p><strong>Situation, Task, Action, Result.</strong> The structure for every behavioral answer. Spend most of your time on <em>Action</em> (what <em>you</em> did) and always land a concrete <em>Result</em>.</p></div>
+  <p>Prepare these stories in advance, each ~2 minutes:</p>
+  <ul class="checklist">
+    <li><strong>A technical challenge</strong> — the migration bug you traced and fixed.</li>
+    <li><strong>Working across teams</strong> — translating a stakeholder's request into a data model.</li>
+    <li><strong>Handling ambiguity</strong> — a vague requirement you scoped yourself.</li>
+    <li><strong>A mistake & what you learned</strong> — shows growth, not perfection.</li>
+  </ul>
+  <div class="warn"><span class="lab">Your single biggest gap: client-facing framing</span>
+  Your background is in-house; DAS42 is client-facing consulting. Prepare one clear answer to: <em>"How would you explain a technical tradeoff to a non-technical client?"</em> Lead with translating jargon into business impact: "I'd frame the normalization-vs-speed tradeoff not as 3NF vs denormalization, but as 'do you want the data always perfectly consistent, or do you want these reports to load in two seconds?' — then let the business priority drive the technical choice."</div>
+  <p>Also have a crisp answer for <strong>"why consulting / why DAS42?"</strong> — pick a real reason: variety of problems across clients, faster skill growth, you enjoy translating between technical and business sides.</p>
+  <p>And bring <strong>questions to ask them</strong>: "What does the first 90 days look like?" "What do your most successful engineers do differently?" "What industries are most of your migration clients in?"</p>
+</section>
+
+<!-- ============ HANDS-ON PROJECTS (moved to separate file) ============ -->
+<section id="proj-stack">
+  <h2 class="sec">Hands-on practice</h2>
+  <h2 class="sec-title">Build the muscle memory</h2>
+  <p class="sec-intro">Reading about pipelines doesn't make them stick — building them does. The full hands-on track lives in its own guide: a local free stack (DuckDB + dbt + Airflow), two step-by-step projects, two rough-edges projects, and a final Snowflake re-do.</p>
+  <div class="linkcard" onclick="window.open('das42_projects_guide.html','_blank')">
+    <div class="linkcard-icon">&#9654;</div>
+    <div>
+      <div class="linkcard-title">Open the Projects guide &rarr;</div>
+      <div class="linkcard-sub">5 build-it-yourself projects, all local and free, mapped to the DAS42 stack.</div>
+    </div>
+  </div>
+</section>
+
+
+<section id="flash">
+  <h2 class="sec">Active recall</h2>
+  <h2 class="sec-title">Flashcards — tap to flip</h2>
+  <p class="sec-intro">Drill these until the answers are automatic. Tap a card to reveal.</p>
+  <div class="cards" id="flashcards"></div>
+</section>
+
+<!-- ============ CHEAT SHEET ============ -->
+<section id="cheat">
+  <h2 class="sec">Night-before review</h2>
+  <h2 class="sec-title">One-page cheat sheet</h2>
+  <div class="def" style="border-left-color: var(--red);">
+    <div class="term">The 6-step design script</div>
+    <p>1) Clarify scope · 2) List entities · 3) Attributes + keys · 4) Relationships (resolve M:N with junction tables) · 5) Normalize to 3NF + index FKs/filters · 6) Bridge to a star schema for analytics.</p>
+  </div>
+  <div class="def" style="border-left-color: var(--blue);">
+    <div class="term">One-liners to have ready</div>
+    <p><strong>3NF:</strong> every non-key column depends on the key, the whole key, and nothing but the key. <br>
+    <strong>M:N →</strong> junction table with two FKs. <br>
+    <strong>Index tradeoff:</strong> faster reads, slower writes — index FKs and filtered columns. <br>
+    <strong>OLTP vs OLAP:</strong> normalized transactional vs denormalized analytical. <br>
+    <strong>Star schema:</strong> fact (measures + FKs) surrounded by dimensions (context); define the grain first. <br>
+    <strong>ELT:</strong> load raw to the warehouse, transform in-place with dbt. <br>
+    <strong>Snowflake:</strong> storage/compute separated; micro-partitions + pruning. <br>
+    <strong>Window fn:</strong> compute over a partition without collapsing rows.</p>
+  </div>
+  <div class="def" style="border-left-color: var(--purple);">
+    <div class="term">Migration story beats</div>
+    <p>Problem (on-prem SQL Server didn't scale) → your role (built ELT pipelines + dbt models + validation) → ELT approach → one concrete challenge & fix → validation (reconciliation, schema, business-rule tests) → outcome (faster, more reliable).</p>
+  </div>
+  <div class="def" style="border-left-color: var(--amber);">
+    <div class="term">Don't forget</div>
+    <p>Round 3 is collaborative — think out loud, ask clarifying questions. Store price-at-purchase on order lines. Put quantity/unit on the recipe-ingredient junction. Have your "why consulting" answer and 2–3 questions for them. Anchor salary to the $95–125k band.</p>
+  </div>
+</section>
+
+</main>
+</div>
+
+<script>
+const flashData = [
+  ["What is 3NF?", "Every non-key column depends on the key, the whole key, and nothing but the key. No transitive dependencies."],
+  ["How do you model a many-to-many relationship?", "A junction (bridge) table holding two foreign keys, one to each side. Turns one M:N into two 1:N."],
+  ["Primary key vs foreign key?", "PK uniquely identifies a row in its own table. FK references another table's PK, enforcing a relationship."],
+  ["Index tradeoff?", "Faster reads, slower writes (each write updates the index) + extra storage. Index FKs and filtered/sorted columns."],
+  ["OLTP vs OLAP?", "OLTP = normalized, many small transactions, runs the app. OLAP = denormalized star schema, big aggregations, analytics."],
+  ["What is a fact table?", "Center of a star schema: numeric measurable events + FKs to dimensions. One row = one event at a defined grain."],
+  ["What is a dimension table?", "Descriptive context (who/what/where/when) you filter and slice by. Wide and denormalized on purpose."],
+  ["What is grain?", "What one row of the fact table represents, e.g. 'one row per order line item'. Define it first."],
+  ["ETL vs ELT?", "ETL transforms before loading (on-prem). ELT loads raw to the warehouse then transforms in-place (cloud / dbt + Snowflake)."],
+  ["What is dbt?", "A transformation framework for the T in ELT. Modular SELECT models, with dependency management, testing, and docs."],
+  ["What is a dbt model?", "A single .sql file (one SELECT) that dbt materializes as a view, table, or incrementally."],
+  ["Snowflake's defining feature?", "Separation of storage and compute — they scale independently against the same data."],
+  ["What are micro-partitions & pruning?", "Snowflake stores data in compressed columnar chunks with min/max metadata; pruning skips chunks that can't match a filter."],
+  ["ROW_NUMBER vs RANK vs DENSE_RANK?", "ROW_NUMBER: 1,2,3 no ties. RANK: gaps after ties (1,2,2,4). DENSE_RANK: no gaps (1,2,2,3)."],
+  ["GROUP BY vs window function?", "GROUP BY collapses rows to one per group. Window keeps all rows and adds a computed column over a partition."],
+  ["How to get top-N per group in SQL?", "ROW_NUMBER() OVER (PARTITION BY grp ORDER BY metric DESC) in a CTE, then filter WHERE rn <= N."],
+  ["SCD Type 1 vs Type 2?", "Type 1 overwrites (no history). Type 2 adds a new row with valid_from/valid_to + is_current flag (keeps history)."],
+  ["Source-to-target reconciliation?", "Compare row counts and key aggregates (sums, distinct counts) between source and target to confirm nothing lost or duplicated."],
+  ["Star vs snowflake schema?", "Star = denormalized dimensions (one table each). Snowflake = normalized dimensions into sub-tables. Star is simpler/faster."],
+  ["A sargable WHERE clause?", "One that can use an index: use dt >= '2025-01-01' AND dt < '2026-01-01' instead of WHERE YEAR(dt)=2025."],
+  ["What is Snowflake Time Travel?", "Querying or restoring data as it existed at a past point (1 day Standard, up to 90 Enterprise). Recover bad loads or compare states."],
+  ["What is zero-copy cloning?", "Instant copy of a table/db that shares storage until modified (copy-on-write). Free and instant — great for safe dev/test copies."],
+  ["How do you bulk-load data into Snowflake?", "Put files in a stage (internal or external like S3), then COPY INTO the target table. Loading is separate from transformation (ELT)."],
+  ["Scale up vs scale out in Snowflake?", "Scale up = bigger warehouse for one heavy query. Scale out = multi-cluster for many concurrent users. Auto-suspend stops the cost meter."],
+  ["Why store quantity/unit on the recipe-ingredient junction?", "Those facts describe the relationship, not the ingredient. '2 cups of flour' only means something for that specific recipe-ingredient pair."],
+  ["Why store price-at-purchase on the order line?", "Prices change over time; the order must record what the customer actually paid, not the current product price."],
+  ["First move in any design question?", "Clarify scope with 2-3 questions (operational vs analytical? main user actions? key reporting need?) before drawing."],
+];
+const fc = document.getElementById("flashcards");
+flashData.forEach(([q,a]) => {
+  const d = document.createElement("div");
+  d.className = "fcard";
+  d.innerHTML = '<div class="q">'+q+'</div><div class="a">'+a+'</div><div class="hint">tap to reveal</div>';
+  d.addEventListener("click", () => d.classList.toggle("open"));
+  fc.appendChild(d);
+});
+</script>
+</body>
+</html>
